@@ -4,9 +4,12 @@ on:
   push:
     branches:
       - main
-    # Only trigger when changes are made inside the Frontend directory
+    # Only trigger when changes are made inside the Frontend directory or this workflow file itself
     paths:
       - 'Frontend/**'
+      - '.github/workflows/deploy-frontend.yml'
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
 
 jobs:
   deploy:

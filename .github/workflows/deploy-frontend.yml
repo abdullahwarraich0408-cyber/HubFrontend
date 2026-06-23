@@ -6,6 +6,10 @@ on:
     # Only trigger when changes are made inside the Frontend directory or this workflow file itself
     paths:
       - 'Frontend/**'
+      - 'AdminPanel/**'
+      - 'DoctorPanel/**'
+      - 'LabPanel/**'
+      - 'VendorPanel/**'
       - '.github/workflows/deploy-frontend.yml'
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -26,9 +30,7 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT }}
           script: |
-            # Delete the existing project directory
             rm -rf ${{ secrets.VPS_PROJECT_PATH }}
-            # Create a clean directory
             mkdir -p ${{ secrets.VPS_PROJECT_PATH }}
 
       - name: Copy project files to VPS
@@ -41,7 +43,7 @@ jobs:
           source: "."
           target: "${{ secrets.VPS_PROJECT_PATH }}"
 
-      - name: Build and Restart on VPS
+      - name: Build and Restart all Panels
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -49,19 +51,41 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT }}
           script: |
-            # Navigate to the copied Frontend directory
-            cd ${{ secrets.VPS_PROJECT_PATH }}/Frontend
+            # Define all the panels and their respective ports
+            declare -A PANELS
+            PANELS=(
+              ["Frontend"]="3000"
+              ["AdminPanel"]="3001"
+              ["DoctorPanel"]="3002"
+              ["LabPanel"]="3003"
+              ["VendorPanel"]="3004"
+            )
+
+            for PANEL in "${!PANELS[@]}"; do
+              PORT=${PANELS[$PANEL]}
+              APP_NAME=$(echo "$PANEL" | tr '[:upper:]' '[:lower:]')
+              
+              echo "========================================"
+              echo "Deploying $PANEL on port $PORT..."
+              echo "========================================"
+              
+              # Navigate to the panel directory
+              cd ${{ secrets.VPS_PROJECT_PATH }}/$PANEL
+              
+              # Install dependencies
+              npm install
+              
+              # Build the Next.js frontend
+              npm run build
+              
+              # Restart the PM2 process or start it if it doesn't exist
+              pm2 describe $APP_NAME > /dev/null
+              if [ $? -eq 0 ]; then
+                pm2 restart $APP_NAME
+              else
+                pm2 start npm --name "$APP_NAME" -- run start -- -p $PORT
+              fi
+            done
             
-            # Install dependencies
-            npm install
-            
-            # Build the Next.js frontend
-            npm run build
-            
-            # Restart the PM2 process (or start if it doesn't exist)
-            pm2 describe frontend-app > /dev/null
-            if [ $? -eq 0 ]; then
-              pm2 restart frontend-app
-            else
-              pm2 start npm --name "frontend-app" -- run start
-            fi
+            # Save the PM2 list so it persists on server reboots
+            pm2 save

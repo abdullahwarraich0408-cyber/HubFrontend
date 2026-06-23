@@ -35,6 +35,7 @@ jobs:
           npm install
           npm run build
 
+          
       - name: Install and Build AdminPanel
         working-directory: ./AdminPanel
         run: |

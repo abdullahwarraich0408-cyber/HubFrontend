@@ -31,30 +31,35 @@ jobs:
       - name: Install and Build Frontend
         working-directory: ./Frontend
         run: |
+          export NODE_OPTIONS=""
           npm install
           npm run build
 
       - name: Install and Build AdminPanel
         working-directory: ./AdminPanel
         run: |
+          export NODE_OPTIONS=""
           npm install
           npm run build
 
       - name: Install and Build DoctorPanel
         working-directory: ./DoctorPanel
         run: |
+          export NODE_OPTIONS=""
           npm install
           npm run build
 
       - name: Install and Build LabPanel
         working-directory: ./LabPanel
         run: |
+          export NODE_OPTIONS=""
           npm install
           npm run build
 
       - name: Install and Build VendorPanel
         working-directory: ./VendorPanel
         run: |
+          export NODE_OPTIONS=""
           npm install
           npm run build
 

@@ -1,0 +1,1 @@
+export { PrescriptionUploadPage } from "./PrescriptionUploadPageImpl";

@@ -1,0 +1,89 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          envs: GITHUB_TOKEN
+          script: |
+            set -euo pipefail
+
+            APP_PARENT="$HOME/apps"
+            APP_DIR="$APP_PARENT/myapp"
+            : "${GITHUB_TOKEN:?Missing GITHUB_TOKEN}"
+            REPO_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/asrar5/ProjectNow.git"
+
+            mkdir -p "$HOME/.ssh"
+            chmod 700 "$HOME/.ssh"
+            touch "$HOME/.ssh/known_hosts"
+            chmod 600 "$HOME/.ssh/known_hosts"
+            ssh-keyscan -H github.com >> "$HOME/.ssh/known_hosts" 2>/dev/null
+
+            mkdir -p "$APP_PARENT"
+
+            if [ ! -d "$APP_DIR/.git" ]; then
+              git clone --depth 1 "$REPO_URL" "$APP_DIR"
+            fi
+
+            cd "$APP_DIR"
+            git remote set-url origin "$REPO_URL"
+
+            if ! command -v node >/dev/null 2>&1; then
+              export NVM_DIR="$HOME/.nvm"
+              if [ ! -s "$NVM_DIR/nvm.sh" ]; then
+                curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+              fi
+              . "$NVM_DIR/nvm.sh"
+              nvm install 20
+              nvm use 20
+            fi
+
+            if ! command -v pm2 >/dev/null 2>&1; then
+              npm i -g pm2
+            fi
+
+            git fetch origin
+            git reset --hard origin/main
+
+            # Safely attempt to create a 2GB swap file if running on a low-memory VPS
+            sudo -n true 2>/dev/null && if ! sudo swapon --show | grep -q "swap"; then
+              echo "Creating swap file to prevent out of memory errors..."
+              sudo fallocate -l 2G /swapfile || sudo dd if=/dev/zero of=/swapfile bs=1M count=2048
+              sudo chmod 600 /swapfile
+              sudo mkswap /swapfile || true
+              sudo swapon /swapfile || true
+            fi
+
+            printf '%s\n' \
+              'NEXT_PUBLIC_API_URL=https://medmarket.asrar.dev/api' \
+              'BACKEND_URL=https://medmarket.asrar.dev' \
+              'NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_51Tjx1hHDv74QT0tzLgcvgRCDJMO3Q7ET4CorOEDMyVW9C8PKVHSsNrIWDSpVnAgyb8jb4J2u20SG3o3B6NOmWrQF00oQU7hLGZ' \
+              > .env.local
+
+            echo "Clearing Next.js cache for a fresh build..."
+            rm -rf .next
+            
+            npm cache clean --force
+            NODE_OPTIONS="--max-old-space-size=512" npm install --no-audit --no-fund
+            NODE_OPTIONS="--max-old-space-size=1024" npm run build
+
+            pm2 restart myapp --update-env || pm2 start npm --name myapp -- start
+            pm2 save

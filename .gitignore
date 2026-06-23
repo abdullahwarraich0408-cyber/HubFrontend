@@ -59,7 +59,7 @@ uploads/
 tmp/
 temp/
 storage/
-data/
+/data/
 public/uploads/
 public/storage/
 

@@ -16,8 +16,9 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      NODE_OPTIONS: ""
 
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

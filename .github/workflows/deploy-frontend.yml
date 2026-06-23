@@ -50,6 +50,11 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT }}
           script: |
+            # Load Node.js and PM2 paths for non-interactive SSH
+            export PATH=$PATH:/usr/local/bin:/usr/bin:~/.npm-global/bin
+            source ~/.bashrc 2>/dev/null || true
+            source ~/.profile 2>/dev/null || true
+            
             # Define all the panels and their respective ports
             declare -A PANELS
             PANELS=(

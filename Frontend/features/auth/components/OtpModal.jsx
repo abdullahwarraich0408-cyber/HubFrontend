@@ -9,9 +9,10 @@ import {
   DEV_TEST_OTP,
   DEV_TEST_PHONE,
   formatFirebaseAuthError,
+  isTestAuthEnabled,
 } from "@/lib/auth/firebaseErrors";
 
-const isDev = process.env.NODE_ENV === "development";
+const showTestAuth = isTestAuthEnabled();
 
 export function OtpModal({ open, onClose, onSuccess, phone: initialPhone = "" }) {
   const { startPhoneLogin, completePhoneLogin } = useAuth();
@@ -82,9 +83,9 @@ export function OtpModal({ open, onClose, onSuccess, phone: initialPhone = "" })
           </pre>
         ) : null}
 
-        {isDev && step === "phone" ? (
+        {showTestAuth && step === "phone" ? (
           <div className="text-xs text-[var(--color-neutral-600)] bg-[var(--color-neutral-50)] border border-[var(--color-neutral-200)] rounded-lg px-3 py-2 mb-3 space-y-2">
-            <p className="font-semibold text-[var(--color-ink-headline)]">Dev testing (no SMS, free)</p>
+            <p className="font-semibold text-[var(--color-ink-headline)]">Test login (no SMS)</p>
             <p>
               Dev login (no Firebase SMS): use{" "}
               <code className="text-[11px]">{DEV_TEST_PHONE}</code> → OTP{" "}

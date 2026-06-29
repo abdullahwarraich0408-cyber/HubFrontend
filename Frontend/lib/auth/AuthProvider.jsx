@@ -14,10 +14,11 @@ import {
   setPendingAuthAction,
 } from "@/lib/auth/tokenStore";
 import {
-  isDevAuthEnabled,
+  isTestAuthEnabled,
   isDevTestOtp,
   isDevTestPhone,
 } from "@/lib/auth/firebaseErrors";
+import { normalizePhoneNumber } from "@/lib/auth/phoneUtils";
 import {
   isFirebaseConfigured,
   sendWebPhoneOtp,
@@ -102,8 +103,9 @@ export function AuthProvider({ children }) {
   );
 
   const startPhoneLogin = useCallback(async (phone) => {
-    if (isDevAuthEnabled() && isDevTestPhone(phone)) {
-      return { dev: true, phone: phone.replace(/[\s-]/g, "") };
+    const normalized = phone.replace(/[\s-]/g, "");
+    if (isTestAuthEnabled() && isDevTestPhone(normalized)) {
+      return { dev: true, phone: normalizePhoneNumber(normalized) || normalized };
     }
     if (!isFirebaseConfigured()) {
       throw new Error("Firebase is not configured. Add NEXT_PUBLIC_FIREBASE_* env vars.");

@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3000",
-    "dev:webpack": "next dev --webpack",
+    "dev": "next dev --webpack -p 3000",
+    "dev:turbo": "next dev -p 3000",
+    "dev:webpack": "next dev --webpack -p 3000",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
@@ -23,6 +24,7 @@
     "@tiptap/starter-kit": "^3.26.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
+    "firebase": "^12.15.0",
     "framer-motion": "^12.40.0",
     "next": "16.2.7",
     "react": "19.2.4",

@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
-import { SignInModal } from "@/features/auth/components/SignInModal";
+import { OtpModal } from "@/features/auth/components/OtpModal";
 import { AUTH_SIGN_IN_EVENT } from "@/lib/authModalEvents";
 
 const AuthModalContext = createContext(null);
@@ -32,15 +32,26 @@ export function AuthModalProvider({ children }) {
     return () => window.removeEventListener(AUTH_SIGN_IN_EVENT, handleOpenSignIn);
   }, [openSignIn]);
 
+  const handleSuccess = () => {
+    closeSignIn();
+    if (redirectTo && redirectTo !== "/" && typeof window !== "undefined") {
+      window.location.href = redirectTo;
+    }
+  };
+
   return (
     <AuthModalContext.Provider value={{ openSignIn, closeSignIn, signInOpen }}>
       {children}
-      <SignInModal
+      <OtpModal
         open={signInOpen}
         onClose={closeSignIn}
-        redirectTo={redirectTo}
-        expired={expired}
+        onSuccess={handleSuccess}
       />
+      {expired && signInOpen ? (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[140] text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 shadow">
+          Session expired — sign in again to continue.
+        </div>
+      ) : null}
     </AuthModalContext.Provider>
   );
 }

@@ -1,5 +1,6 @@
 import { getPartnerToken } from "../partnerAuth";
 import { AUTH_SIGN_IN_EVENT } from "../authModalEvents";
+import { getMemoryAccessToken } from "../auth/tokenStore";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
 
@@ -53,6 +54,8 @@ function resolveAuthToken(path, options) {
   }
 
   if (options.auth === "customer") {
+    const memoryToken = getMemoryAccessToken();
+    if (memoryToken) return memoryToken;
     const token = localStorage.getItem("token");
     return token && token !== "cookie-auth-active" ? token : null;
   }
@@ -79,7 +82,7 @@ function resolveAuthToken(path, options) {
     if (partnerToken) return partnerToken;
   }
 
-  const token = localStorage.getItem("token");
+  const token = getMemoryAccessToken() || localStorage.getItem("token");
   return token && token !== "cookie-auth-active" ? token : null;
 }
 

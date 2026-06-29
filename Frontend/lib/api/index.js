@@ -55,8 +55,16 @@ export const labPortalApi = {
 export const authApi = {
   register: (data) => api.post("/auth/register", data),
   login: (data) => api.post("/auth/login", data),
+  firebaseLogin: (data) => api.post("/auth/firebase", data),
+  googleLogin: (data) => api.post("/auth/google", data),
+  appleLogin: (data) => api.post("/auth/apple", data),
+  refresh: (data) => api.post("/auth/refresh", data),
+  devLogin: (data) => api.post("/auth/dev-login", data),
+  me: () => api.get("/auth/me"),
+  updateProfile: (data) => api.put("/auth/profile", data),
   logout: () => api.post("/auth/logout"),
-  refresh: () => api.post("/auth/refresh"),
+  logoutAll: () => api.post("/auth/logout-all"),
+  deleteAccount: () => api.delete("/auth/account"),
   forgotPassword: (email) => api.post("/auth/forgot-password", { email }),
   resetPassword: (token, password) =>
     api.post(`/auth/reset-password/${token}`, { password }),

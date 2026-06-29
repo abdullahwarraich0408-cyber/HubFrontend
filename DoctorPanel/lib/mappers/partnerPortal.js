@@ -20,7 +20,7 @@ export function mapDoctorProfileFromApi(doctor) {
 
   return {
     id: doctor.id,
-    name: doctor.name,
+    name: doctor.name || "",
     email: doctor.email || "",
     phone: doctor.phone || "",
     specialty: doctor.specialty || "",

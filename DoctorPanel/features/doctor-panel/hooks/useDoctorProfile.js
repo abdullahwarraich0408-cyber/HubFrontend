@@ -6,18 +6,20 @@ import { DEFAULT_DOCTOR_PROFILE } from "../data/doctorData";
 export function useDoctorProfile() {
   const { data: profile, isLoading, isError } = useDoctorPortalProfile();
 
-  const resolved = profile || DEFAULT_DOCTOR_PROFILE;
+  const resolved = { ...DEFAULT_DOCTOR_PROFILE, ...(profile || {}) };
+  const displayName = resolved.name?.trim() || "Doctor";
 
-  const initials = resolved.name
+  const initials = displayName
     .replace(/^Dr\.\s*/i, "")
     .split(" ")
+    .filter(Boolean)
     .map((part) => part[0])
     .join("")
     .slice(0, 2)
-    .toUpperCase();
+    .toUpperCase() || "DR";
 
   return {
-    profile: resolved,
+    profile: { ...resolved, name: displayName },
     isLoaded: !isLoading,
     isError,
     initials,

@@ -15,9 +15,9 @@ build/
 dist/
 
 # Environment & secrets
-.env
-.env.*
-!.env.example
+# .env
+# .env.*
+# !.env.example
 
 # Vercel / deployment
 .vercel

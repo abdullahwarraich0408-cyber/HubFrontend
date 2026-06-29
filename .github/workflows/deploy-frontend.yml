@@ -18,6 +18,15 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NODE_OPTIONS: ""
+      NEXT_PUBLIC_API_URL: https://medmarket.asrar.dev/api
+      BACKEND_URL: https://medmarket.asrar.dev
+      NEXT_PUBLIC_ENABLE_TEST_AUTH: "true"
+      NEXT_PUBLIC_FIREBASE_API_KEY: AIzaSyCh_rJUG6PHgRl9TbFwoThqTxC3EZSp1G0
+      NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: medcare-a5507.firebaseapp.com
+      NEXT_PUBLIC_FIREBASE_PROJECT_ID: medcare-a5507
+      NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: medcare-a5507.firebasestorage.app
+      NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "546088011555"
+      NEXT_PUBLIC_FIREBASE_APP_ID: 1:546088011555:web:0cdb888476b859916f2e96
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

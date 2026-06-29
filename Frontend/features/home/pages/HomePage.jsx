@@ -82,7 +82,7 @@ const FEATURED_DOCTORS = [
   { id: "1", name: "Dr. Ayesha Khan", specialty: "Cardiologist", rating: 4.9, reviews: 420, consultations: "2.5k", fee: 1500, image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=400" },
   { id: "2", name: "Dr. Hassan Ali", specialty: "General Physician", rating: 4.8, reviews: 189, consultations: "1.8k", fee: 1200, image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=400" },
   { id: "3", name: "Dr. Sara Ahmed", specialty: "Dermatologist", rating: 4.9, reviews: 312, consultations: "3.2k", fee: 2000, image: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&q=80&w=400" },
-  { id: "4", name: "Dr. Omar Farooq", specialty: "Pediatrician", rating: 4.7, reviews: 156, consultations: "980", fee: 1800, image: "https://images.unsplash.com/photo-1622253692010-333f9da7381a?auto=format&fit=crop&q=80&w=400" },
+  { id: "4", name: "Dr. Omar Farooq", specialty: "Pediatrician", rating: 4.7, reviews: 156, consultations: "980", fee: 1800, image: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=400" },
 ];
 
 const LAB_PACKAGES = [

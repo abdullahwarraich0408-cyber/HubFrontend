@@ -1,0 +1,122 @@
+name: Deploy Frontend to VPS
+on:
+  push:
+    branches:
+      - main
+    # Only trigger when changes are made inside the Frontend directory or this workflow file itself
+    paths:
+      - 'Frontend/**'
+      - 'AdminPanel/**'
+      - 'DoctorPanel/**'
+      - 'LabPanel/**'
+      - 'VendorPanel/**'
+      - '.github/workflows/deploy-frontend.yml'
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      NODE_OPTIONS: ""
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js on GitHub Runner
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+      - name: Install and Build Frontend
+        working-directory: ./Frontend
+        run: |
+          export NODE_OPTIONS=""
+          npm install
+          npm run build
+
+          
+      - name: Install and Build AdminPanel
+        working-directory: ./AdminPanel
+        run: |
+          export NODE_OPTIONS=""
+          npm install
+          npm run build
+
+      - name: Install and Build DoctorPanel
+        working-directory: ./DoctorPanel
+        run: |
+          export NODE_OPTIONS=""
+          npm install
+          npm run build
+
+      - name: Install and Build LabPanel
+        working-directory: ./LabPanel
+        run: |
+          export NODE_OPTIONS=""
+          npm install
+          npm run build
+
+      - name: Install and Build VendorPanel
+        working-directory: ./VendorPanel
+        run: |
+          export NODE_OPTIONS=""
+          npm install
+          npm run build
+
+      - name: Remove old project from VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            rm -rf ${{ secrets.VPS_PROJECT_PATH }}
+            mkdir -p ${{ secrets.VPS_PROJECT_PATH }}
+
+      - name: Copy Built Project to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          source: "."
+          target: "${{ secrets.VPS_PROJECT_PATH }}"
+
+      - name: Restart PM2 on VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            export PATH=$PATH:/usr/local/bin:/usr/bin:~/.npm-global/bin
+            source ~/.bashrc 2>/dev/null || true
+            source ~/.profile 2>/dev/null || true
+            
+            declare -A PANELS
+            PANELS=(
+              ["Frontend"]="3000"
+              ["AdminPanel"]="3001"
+              ["DoctorPanel"]="3002"
+              ["LabPanel"]="3003"
+              ["VendorPanel"]="3004"
+            )
+
+            for PANEL in "${!PANELS[@]}"; do
+              PORT=${PANELS[$PANEL]}
+              APP_NAME=$(echo "$PANEL" | tr '[:upper:]' '[:lower:]')
+              
+              echo "Starting $PANEL on port $PORT..."
+              cd ${{ secrets.VPS_PROJECT_PATH }}/$PANEL
+              
+              pm2 describe $APP_NAME > /dev/null
+              if [ $? -eq 0 ]; then
+                pm2 restart $APP_NAME
+              else
+                pm2 start npm --name "$APP_NAME" -- run start -- -p $PORT
+              fi
+            done
+            
+            pm2 save

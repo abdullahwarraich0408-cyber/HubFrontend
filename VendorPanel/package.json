@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --webpack -p 3002",
-    "dev:turbo": "next dev -p 3002",
-    "dev:webpack": "next dev --webpack -p 3002",
+    "dev": "next dev --webpack -p 3001 --turbopack",
+    "dev:turbo": "next dev -p 3001 --turbopack",
+    "dev:webpack": "next dev --webpack -p 3001 --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"

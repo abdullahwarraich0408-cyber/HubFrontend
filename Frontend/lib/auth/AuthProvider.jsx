@@ -62,28 +62,18 @@ export function AuthProvider({ children }) {
   }, []);
 
   const refreshSession = useCallback(async () => {
-    const storedUser = loadStoredUser();
-    const authed = hasAuthSession();
-
-    if (authed) {
-      try {
-        const data = await authApi.refresh({
-          deviceId: getDeviceId(),
-          platform: "web",
-        });
-        const { user: refreshedUser, tokens } = mapSession(data);
-        applySession(refreshedUser ?? storedUser, tokens);
-        return;
-      } catch {
-        clearAuthStorage();
-        setUser(null);
-        setIsAuthenticated(false);
-        return;
-      }
+    try {
+      const data = await authApi.refresh({
+        deviceId: getDeviceId(),
+        platform: "web",
+      });
+      const { user: refreshedUser, tokens } = mapSession(data);
+      applySession(refreshedUser, tokens);
+    } catch {
+      clearAuthStorage();
+      setUser(null);
+      setIsAuthenticated(false);
     }
-
-    setUser(storedUser);
-    setIsAuthenticated(authed && Boolean(storedUser));
   }, [applySession]);
 
   useEffect(() => {

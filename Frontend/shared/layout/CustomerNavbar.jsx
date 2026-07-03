@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useEffect } from "react";
 import { useUserProfile } from "@/lib/hooks/useApi";
 import { useAuthModal } from "@/features/auth/context/AuthModalContext";
+import { hasAuthSession } from "@/lib/auth/tokenStore";
 
 export function CustomerNavbar() {
   const pathname = usePathname();
@@ -24,8 +25,7 @@ export function CustomerNavbar() {
   const [currentLocation, setCurrentLocation] = useState("Karachi");
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
 
-  // Check token safely for SSR
-  const hasToken = typeof window !== 'undefined' ? !!localStorage.getItem('token') : false;
+  const hasToken = typeof window !== "undefined" ? hasAuthSession() : false;
 
   // Fetch profile to check if user is an admin
   const { data: profile, isLoading: isProfileLoading } = useUserProfile({
@@ -94,15 +94,14 @@ export function CustomerNavbar() {
       window.location.href = "/admin";
     }
 
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    setIsLoggedIn(!!token);
+    setIsLoggedIn(hasAuthSession());
 
     const updateCartCount = async () => {
-      const activeToken = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-      setIsLoggedIn(!!activeToken);
+      const loggedIn = hasAuthSession();
+      setIsLoggedIn(loggedIn);
 
       try {
-        if (activeToken) {
+        if (loggedIn) {
           try {
             const data = await api.cart.get();
             const items = data.cart?.items || data.items || [];

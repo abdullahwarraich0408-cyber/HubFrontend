@@ -27,6 +27,12 @@ function AuthHydrator({ children }) {
   }, [dispatch]);
 
   useEffect(() => {
+    const syncAuth = () => dispatch(hydrateAuth());
+    window.addEventListener("auth-updated", syncAuth);
+    return () => window.removeEventListener("auth-updated", syncAuth);
+  }, [dispatch]);
+
+  useEffect(() => {
     if (!initialized || typeof window === "undefined") return;
 
     const token = localStorage.getItem("token");

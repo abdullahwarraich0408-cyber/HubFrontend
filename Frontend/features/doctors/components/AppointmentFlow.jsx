@@ -4,8 +4,9 @@ import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useSelector } from "react-redux";
 import { toast } from "sonner";
+import { useAuth } from "@/lib/auth/AuthProvider";
+import { hasAuthSession } from "@/lib/auth/tokenStore";
 import {
   Check,
   CreditCard,
@@ -88,7 +89,7 @@ export function AppointmentFlow({
   const router = useRouter();
   const searchParams = useSearchParams();
   const practiceLocationParam = searchParams.get("practice_location_id");
-  const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const { isAuthenticated, user } = useAuth();
   const bookAppointment = useBookDoctorAppointment();
 
   const allOptions = useMemo(
@@ -122,11 +123,7 @@ export function AppointmentFlow({
     [selectedDate, selectedSlot]
   );
 
-  const hasCustomerSession = () => {
-    const customerToken =
-      typeof window !== "undefined" ? localStorage.getItem("token") : null;
-    return isAuthenticated && customerToken && customerToken !== "cookie-auth-active";
-  };
+  const hasCustomerSession = () => isAuthenticated || hasAuthSession();
 
   const handleSlotContinue = () => {
     if (!selectedSlot) {

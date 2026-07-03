@@ -53,6 +53,12 @@ export function AuthProvider({ children }) {
   const applySession = useCallback((sessionUser, tokens) => {
     if (tokens?.accessToken) {
       setMemoryAccessToken(tokens.accessToken);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("token", tokens.accessToken);
+      }
+    }
+    if (tokens?.refreshToken && typeof window !== "undefined") {
+      localStorage.setItem("refreshToken", tokens.refreshToken);
     }
     persistUser(sessionUser);
     setUser(sessionUser);

@@ -5,6 +5,7 @@ import {
   getAuth,
   RecaptchaVerifier,
   signInWithPhoneNumber,
+  signInWithCustomToken,
   GoogleAuthProvider,
   signInWithPopup,
   signInWithCredential,
@@ -84,4 +85,18 @@ export async function signInWithAppleWeb(idToken, nonce) {
 
 export function resetRecaptcha() {
   recaptchaVerifier = null;
+}
+
+/**
+ * Sign into Firebase using a custom token issued by the backend.
+ * Call this after dev-login so firebase.auth().currentUser is populated
+ * and any Firebase-based auth guards don't redirect back to login.
+ */
+export async function signInWithFirebaseCustomToken(customToken) {
+  const auth = getFirebaseAuth();
+  if (!auth) {
+    // Firebase not configured (e.g. env vars missing) — skip silently
+    return null;
+  }
+  return signInWithCustomToken(auth, customToken);
 }

@@ -23,17 +23,15 @@ import {
   isFirebaseConfigured,
   sendWebPhoneOtp,
   signInWithGooglePopup,
+  signInWithFirebaseCustomToken,
   verifyWebPhoneOtp,
 } from "@/lib/firebase";
 
 const AuthContext = createContext(null);
 
 async function exchangeFirebaseToken(idToken) {
-  return authApi.firebaseLogin({
-    idToken,
-    deviceId: getDeviceId(),
-    platform: "web",
-  });
+  // Send the Firebase ID token to the backend to receive JWT tokens
+  return authApi.phoneLogin({ idToken, deviceId: getDeviceId(), platform: "web" });
 }
 
 function mapSession(data) {
@@ -41,8 +39,9 @@ function mapSession(data) {
     accessToken: data.accessToken,
     refreshToken: data.refreshToken,
   };
-  return { user: data.user, tokens };
+  return { user: data.user, tokens, firebaseCustomToken: data.firebaseCustomToken ?? null };
 }
+
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -69,28 +68,18 @@ export function AuthProvider({ children }) {
   }, []);
 
   const refreshSession = useCallback(async () => {
-    const storedUser = loadStoredUser();
-    const authed = hasAuthSession();
-
-    if (authed) {
-      try {
-        const data = await authApi.refresh({
-          deviceId: getDeviceId(),
-          platform: "web",
-        });
-        const { user: refreshedUser, tokens } = mapSession(data);
-        applySession(refreshedUser ?? storedUser, tokens);
-        return;
-      } catch {
-        clearAuthStorage();
-        setUser(null);
-        setIsAuthenticated(false);
-        return;
-      }
+    try {
+      const data = await authApi.refresh({
+        deviceId: getDeviceId(),
+        platform: "web",
+      });
+      const { user: refreshedUser, tokens } = mapSession(data);
+      applySession(refreshedUser, tokens);
+    } catch {
+      clearAuthStorage();
+      setUser(null);
+      setIsAuthenticated(false);
     }
-
-    setUser(storedUser);
-    setIsAuthenticated(authed && Boolean(storedUser));
   }, [applySession]);
 
   useEffect(() => {
@@ -131,8 +120,18 @@ export function AuthProvider({ children }) {
           deviceId: getDeviceId(),
           platform: "web",
         });
-        const { user: sessionUser, tokens } = mapSession(data);
+        const { user: sessionUser, tokens, firebaseCustomToken } = mapSession(data);
         applySession(sessionUser, tokens);
+        // Hydrate Firebase auth so any Firebase-based guard doesn't see currentUser===null
+        // and redirect back to login (the loop bug).
+        if (firebaseCustomToken) {
+          try {
+            await signInWithFirebaseCustomToken(firebaseCustomToken);
+          } catch (e) {
+            // Non-fatal — JWT session is already set; log for debugging only
+            console.warn("[auth] signInWithCustomToken failed (non-fatal):", e?.message);
+          }
+        }
         return sessionUser;
       }
       const idToken = await verifyWebPhoneOtp(confirmation, code);

@@ -47,7 +47,7 @@ export default function AddProductPage() {
         category: data.get("category") || undefined,
         image_url: imageUrl || undefined,
       });
-      toast.success("Product created");
+      toast.success("Product submitted for admin review.");
       router.push(partnerRoutes.vendor.products);
     } catch (err) {
       toast.error(err.message || "Failed to create product");
@@ -61,7 +61,7 @@ export default function AddProductPage() {
           <ArrowLeft size={16} className="mr-2" /> Back to Products
         </Link>
         <h1 className="text-[28px] font-heading font-extrabold text-ink-headline tracking-tight">Add New Product</h1>
-        <p className="text-[14px] text-neutral-500 mt-1">This product will be listed under your pharmacy only.</p>
+        <p className="text-[14px] text-neutral-500 mt-1">This product will stay in review until the admin approves it for the marketplace.</p>
       </div>
 
       <div className="bg-white rounded-[16px] border border-neutral-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)] p-8">

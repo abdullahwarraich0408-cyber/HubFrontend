@@ -91,7 +91,13 @@ export default function AdminVendorsPage() {
 
     // Filter by status
     if (statusFilter !== "all") {
-      result = result.filter(v => (v.status || "pending").toLowerCase() === statusFilter.toLowerCase());
+      result = result.filter((vendor) => {
+        const status = (vendor.status || "pending").toLowerCase();
+        if (statusFilter === "pending") {
+          return ["pending", "pending_review"].includes(status);
+        }
+        return status === statusFilter.toLowerCase();
+      });
     }
 
     // Sort
@@ -131,7 +137,7 @@ export default function AdminVendorsPage() {
         longitude: formData.longitude,
         service_radius_km: formData.service_radius_km,
       });
-      toast.success("Vendor successfully onboarded!");
+      toast.success("Vendor created and moved to verification review.");
       setShowAddModal(false);
       setFormData({
         business_name: "",
@@ -256,6 +262,7 @@ export default function AdminVendorsPage() {
       case "suspended":
       case "rejected":
         return <span className="px-2.5 py-1 text-xs font-bold rounded-md bg-[#DC2626]/10 text-[#DC2626] capitalize border border-[#DC2626]/20">Rejected</span>;
+      case "pending_review":
       case "under review":
         return <span className="px-2.5 py-1 text-xs font-bold rounded-md bg-[#2563EB]/10 text-[#2563EB] capitalize border border-[#2563EB]/20">Under Review</span>;
       default:
@@ -334,7 +341,7 @@ export default function AdminVendorsPage() {
                 className="appearance-none h-[40px] pl-4 pr-10 rounded-lg border border-[#0C1A2E]/10 bg-white text-sm font-medium text-[#0C1A2E] outline-none focus:border-[#0B6E72] focus:ring-1 focus:ring-[#0B6E72] cursor-pointer"
               >
                 <option value="all">All Statuses</option>
-                <option value="pending">Pending</option>
+                <option value="pending">Pending / Review</option>
                 <option value="approved">Approved</option>
                 <option value="rejected">Rejected</option>
               </select>

@@ -1,11 +1,10 @@
 "use client";
- 
-import { useMemo, useState, useEffect } from "react";
+
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Plus, MagnifyingGlass, Pill, UploadSimple, X, DownloadSimple, Warning, CheckCircle, PencilSimple, Trash } from "@phosphor-icons/react";
 import { Button } from "@/shared/components/Button";
 import { Input } from "@/shared/components/Input";
-import { Badge } from "@/shared/components/Badge";
 import { partnerRoutes } from "@/lib/constants/partnerRoutes";
 import { useMyVendorProducts, useBulkImportProducts, useUpdateVendorProduct, useDeleteVendorProduct, useUploadImage } from "@/lib/hooks/useApi";
 import { toast } from "sonner";
@@ -23,14 +22,6 @@ export default function MyProductsPage() {
   const updateProductMutation = useUpdateVendorProduct();
   const deleteProductMutation = useDeleteVendorProduct();
   const uploadImageMutation = useUploadImage();
-
-  useEffect(() => {
-    if (editingProduct) {
-      setEditImageUrl(editingProduct.image_url || "");
-    } else {
-      setEditImageUrl("");
-    }
-  }, [editingProduct]);
 
   // Bulk Import State
   const [showImportModal, setShowImportModal] = useState(false);
@@ -219,7 +210,7 @@ export default function MyProductsPage() {
     setImporting(true);
     try {
       const result = await bulkImportMutation.mutateAsync(fileToUpload);
-      toast.success(`${result.count || parsedProducts.length} products imported successfully!`);
+      toast.success(`${result.count || parsedProducts.length} products imported and submitted for review.`);
       setShowImportModal(false);
       setParsedProducts([]);
       setFileToUpload(null);
@@ -261,7 +252,7 @@ export default function MyProductsPage() {
         image_url: editImageUrl || "",
       });
       toast.success("Product updated successfully!");
-      setEditingProduct(null);
+      closeEditModal();
     } catch (err) {
       toast.error(err.message || "Failed to update product");
     }
@@ -282,12 +273,33 @@ export default function MyProductsPage() {
     return <div className="text-sm text-neutral-500">Loading your products...</div>;
   }
 
+  const openEditModal = (product) => {
+    setEditingProduct(product);
+    setEditImageUrl(product.image_url || "");
+  };
+
+  const closeEditModal = () => {
+    setEditingProduct(null);
+    setEditImageUrl("");
+  };
+
+  const renderReviewStatus = (status) => {
+    const normalized = (status || "pending_review").toLowerCase();
+    if (normalized === "approved") {
+      return <span className="px-2.5 py-1 text-xs font-bold rounded-md bg-[#0F9D58]/10 text-[#0F9D58] border border-[#0F9D58]/20">Approved</span>;
+    }
+    if (normalized === "rejected") {
+      return <span className="px-2.5 py-1 text-xs font-bold rounded-md bg-[#DC2626]/10 text-[#DC2626] border border-[#DC2626]/20">Rejected</span>;
+    }
+    return <span className="px-2.5 py-1 text-xs font-bold rounded-md bg-[#D97706]/10 text-[#D97706] border border-[#D97706]/20">Pending Review</span>;
+  };
+
   return (
     <div className="animate-in fade-in zoom-in-95 duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-[28px] font-heading font-extrabold text-ink-headline tracking-tight">My Products</h1>
-          <p className="text-[14px] text-neutral-500 mt-1">Manage your pharmacy inventory and listings.</p>
+          <p className="text-[14px] text-neutral-500 mt-1">Manage your pharmacy inventory, review status, and listing readiness.</p>
         </div>
         <div className="flex items-center gap-3">
           <Button 
@@ -352,6 +364,9 @@ export default function MyProductsPage() {
                         <div>
                           <div className="text-[14px] font-bold text-ink-900">{product.name}</div>
                           <div className="text-[12px] text-neutral-500">{product.formula || "Medicine"}</div>
+                          {product.review_note ? (
+                            <div className="text-[12px] text-red-600 mt-1">Admin note: {product.review_note}</div>
+                          ) : null}
                         </div>
                       </div>
                     </td>
@@ -359,14 +374,17 @@ export default function MyProductsPage() {
                     <td className="p-4 text-[14px] font-bold text-ink-900">PKR {Number(product.price).toLocaleString()}</td>
                     <td className="p-4 text-[13px] font-bold text-neutral-700">{product.stock} units</td>
                     <td className="p-4">
-                      <Badge variant={product.stock <= 10 ? "warning" : "success"}>
-                        {product.stock <= 10 ? "Low Stock" : "Active"}
-                      </Badge>
+                      <div className="flex flex-col gap-2">
+                        {renderReviewStatus(product.approval_status)}
+                        <span className={`text-xs font-semibold ${product.stock <= 10 ? "text-[#D97706]" : "text-neutral-500"}`}>
+                          {product.stock <= 10 ? "Low stock" : "Inventory healthy"}
+                        </span>
+                      </div>
                     </td>
                     <td className="p-4 pr-6 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button
-                          onClick={() => setEditingProduct(product)}
+                          onClick={() => openEditModal(product)}
                           className="p-1.5 rounded-md hover:bg-neutral-100 text-neutral-600 hover:text-brand-primary transition-colors"
                           title="Edit Product"
                         >
@@ -567,7 +585,7 @@ export default function MyProductsPage() {
               </div>
               <button 
                 type="button"
-                onClick={() => setEditingProduct(null)} 
+                onClick={closeEditModal} 
                 className="text-neutral-400 hover:text-neutral-600 transition-colors"
               >
                 <X size={20} weight="bold" />
@@ -634,7 +652,7 @@ export default function MyProductsPage() {
               <Button 
                 type="button"
                 variant="secondary"
-                onClick={() => setEditingProduct(null)}
+                onClick={closeEditModal}
                 className="h-[40px]"
                 disabled={updateProductMutation.isPending}
               >

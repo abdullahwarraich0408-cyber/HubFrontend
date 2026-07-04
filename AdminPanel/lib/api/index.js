@@ -65,6 +65,7 @@ export const productsApi = {
     return api.get(query ? `/products?${query}` : "/products");
   },
   getAdminAll: () => api.get("/admin/products"),
+  review: (id, data) => api.patch(`/admin/products/${id}/review`, data),
   getById: (id) => api.get(`/products/${id}`),
   getReviews: (id) => api.get(`/products/${id}/reviews`),
   create: (data) => api.post("/products", data),

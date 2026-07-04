@@ -56,6 +56,16 @@ export function useAdminProducts() {
   });
 }
 
+export function useReviewAdminProduct() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...data }) => productsApi.review(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-products"] });
+    },
+  });
+}
+
 export function useProduct(id) {
   return useQuery({
     queryKey: ["products", id],
@@ -162,6 +172,7 @@ export function useUpdateVendorStatus() {
     mutationFn: ({ id, status, note }) => vendorsApi.updateStatus(id, status, note),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-vendors"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-pending-vendors"] });
       queryClient.invalidateQueries({ queryKey: ["vendors"] });
     },
   });
@@ -1002,7 +1013,10 @@ export function useAdminCreateVendor() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data) => adminGeneralApi.createVendor(data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-vendors"] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-vendors"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-pending-vendors"] });
+    },
   });
 }
 

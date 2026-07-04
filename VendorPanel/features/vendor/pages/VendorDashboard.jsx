@@ -8,6 +8,7 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Medal,
+  Clock,
   DownloadSimple,
   Plus,
   DotsThree,
@@ -31,7 +32,7 @@ import {
 import { Badge } from "@/shared/components/Badge";
 import Link from "next/link";
 import { partnerRoutes } from "@/lib/constants/partnerRoutes";
-import { useVendorProfile, useVendorDashboardStats } from "@/lib/hooks/useApi";
+import { useVendorProfile, useVendorDashboardStats, useVendorEarningsSummary } from "@/lib/hooks/useApi";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -49,6 +50,7 @@ const itemVariants = {
 export function VendorDashboard() {
   const { data: vendorProfile } = useVendorProfile();
   const { data: stats, isLoading } = useVendorDashboardStats();
+  const { data: earnings } = useVendorEarningsSummary();
 
   const today = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -92,8 +94,13 @@ export function VendorDashboard() {
               className="bg-transparent border-none outline-none text-sm text-[var(--color-neutral-700)] placeholder:text-[var(--color-neutral-500)]"
             />
           </div>
-          <button className="p-2 rounded-[var(--radius-md)] border border-[var(--color-neutral-200)] bg-white hover:bg-[var(--color-neutral-100)] transition-colors">
+          <button className="relative p-2 rounded-[var(--radius-md)] border border-[var(--color-neutral-200)] bg-white hover:bg-[var(--color-neutral-100)] transition-colors">
             <Bell size={20} className="text-[var(--color-neutral-600)]" />
+            {(stats?.unreadNotifications || 0) > 0 ? (
+              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[var(--color-status-danger)] text-white text-[10px] font-bold flex items-center justify-center">
+                {stats.unreadNotifications}
+              </span>
+            ) : null}
           </button>
           <Link href={partnerRoutes.vendor.productsNew}>
             <button className="flex items-center gap-2 px-4 py-2.5 bg-[var(--color-brand-primary)] text-white text-sm font-semibold rounded-[var(--radius-md)] hover:bg-[var(--color-brand-dark)] transition-colors shadow-[var(--shadow-card)]">
@@ -108,7 +115,7 @@ export function VendorDashboard() {
         <div className="text-sm text-neutral-500">Loading your dashboard...</div>
       ) : (
         <>
-          <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             <KPICard
               title="Total Revenue"
               value={`PKR ${(stats?.totalRevenue || 0).toLocaleString()}`}
@@ -140,6 +147,30 @@ export function VendorDashboard() {
               positive={!stats?.lowStock}
               icon={Warning}
               color="var(--color-status-danger)"
+            />
+            <KPICard
+              title="Rx Acceptance"
+              value={`${stats?.performance?.prescriptionAcceptanceRate || 0}%`}
+              trend="prescriptions"
+              positive={(stats?.performance?.prescriptionAcceptanceRate || 0) >= 70}
+              icon={Medal}
+              color="var(--color-rating)"
+            />
+            <KPICard
+              title="Avg Response"
+              value={`${stats?.performance?.averageResponseMinutes || 0} min`}
+              trend="offers"
+              positive={(stats?.performance?.averageResponseMinutes || 0) <= 10}
+              icon={Clock}
+              color="var(--color-status-info)"
+            />
+            <KPICard
+              title="Net Earnings"
+              value={`PKR ${(earnings?.totals?.net || 0).toLocaleString()}`}
+              trend="after fees"
+              positive
+              icon={CurrencyDollar}
+              color="var(--color-status-success)"
             />
           </motion.div>
 

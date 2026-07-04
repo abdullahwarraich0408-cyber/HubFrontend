@@ -102,6 +102,7 @@ export const vendorsApi = {
   getMyProducts: () => api.get("/vendors/products/mine"),
   getDashboardStats: () => api.get("/vendors/dashboard/stats"),
   register: (data) => api.post("/vendors/register", data),
+  getOnboardingStatus: (id) => api.get(`/vendors/onboarding-status/${id}`),
   updateStatus: (id, status, note) => api.patch(`/admin/vendors/${id}/status`, { status, note }),
   updateCredentials: (id, data) =>
     api.patch(`/admin/vendors/${id}/credentials`, data),
@@ -205,6 +206,11 @@ export const prescriptionOrdersApi = {
 };
 
 export const uploadApi = {
+  uploadPublicDocument: (file) => {
+    const formData = new FormData();
+    formData.append("document", file);
+    return api.post("/upload/public-document", formData);
+  },
   uploadDocument: (file) => {
     const formData = new FormData();
     formData.append("document", file);

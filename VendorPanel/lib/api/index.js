@@ -85,9 +85,21 @@ export const vendorsApi = {
   getReviews: (id) => api.get(`/vendors/${id}/reviews`),
   getProfile: () => api.get("/vendors/profile"),
   updateProfile: (data) => api.patch("/vendors/profile", data),
+  getAvailability: () => api.get("/vendors/profile/availability"),
+  updateAvailability: (data) => api.patch("/vendors/profile/availability", data),
+  getOperatingHours: () => api.get("/vendors/operating-hours"),
+  updateOperatingHours: (hours) => api.put("/vendors/operating-hours", { hours }),
+  getServiceAreas: () => api.get("/vendors/service-areas"),
+  updateServiceAreas: (areas) => api.put("/vendors/service-areas", { areas }),
   getMyProducts: () => api.get("/vendors/products/mine"),
   getDashboardStats: () => api.get("/vendors/dashboard/stats"),
   register: (data) => api.post("/vendors/register", data),
+  getOnboardingStatus: (id) => api.get(`/vendors/onboarding-status/${id}`),
+  getEarningsSummary: () => api.get("/vendors/earnings/summary"),
+  getSettlements: () => api.get("/vendors/settlements"),
+  getAnalyticsOverview: () => api.get("/vendors/analytics/overview"),
+  getAnalyticsPerformance: () => api.get("/vendors/analytics/performance"),
+  getAuditLogs: () => api.get("/vendors/audit-logs"),
   updateStatus: (id, status, note) => api.patch(`/admin/vendors/${id}/status`, { status, note }),
   updateCredentials: (id, data) =>
     api.patch(`/admin/vendors/${id}/credentials`, data),
@@ -199,6 +211,12 @@ export const paymentsApi = {
   checkout: (data) => api.post("/payments/checkout", data),
   verifyStripeSession: (sessionId) =>
     api.get(`/payments/stripe/verify?session_id=${encodeURIComponent(sessionId)}`),
+};
+
+export const notificationsApi = {
+  getVendorNotifications: () => api.get("/notifications/vendor"),
+  markVendorNotificationRead: (id) => api.patch(`/notifications/vendor/${id}/read`),
+  createTestNotification: () => api.post("/notifications/test", {}),
 };
 
 export const reviewsApi = {

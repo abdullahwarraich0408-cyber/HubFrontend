@@ -1006,6 +1006,61 @@ export function useAdminCreateVendor() {
   });
 }
 
+export function usePendingVendors(options = {}) {
+  return useQuery({
+    queryKey: ["admin-pending-vendors"],
+    queryFn: async () => {
+      const data = await adminGeneralApi.getPendingVendors();
+      return data.vendors || [];
+    },
+    ...options,
+  });
+}
+
+export function useReviewVendorDocument() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ vendorId, documentId, data }) =>
+      adminGeneralApi.reviewVendorDocument(vendorId, documentId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-vendors"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-pending-vendors"] });
+    },
+  });
+}
+
+export function useAdminSettlements(options = {}) {
+  return useQuery({
+    queryKey: ["admin-settlements"],
+    queryFn: async () => {
+      const data = await adminGeneralApi.getSettlements();
+      return data.settlements || [];
+    },
+    ...options,
+  });
+}
+
+export function useReleaseSettlement() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, reference }) => adminGeneralApi.releaseSettlement(id, reference),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-settlements"] });
+    },
+  });
+}
+
+export function useVendorPerformance(options = {}) {
+  return useQuery({
+    queryKey: ["admin-vendor-performance"],
+    queryFn: async () => {
+      const data = await adminGeneralApi.getVendorPerformance();
+      return data.performance || [];
+    },
+    ...options,
+  });
+}
+
 export function useAuditLogs(options = {}) {
   return useQuery({
     queryKey: ["admin-audit-logs"],

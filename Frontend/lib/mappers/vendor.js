@@ -27,6 +27,13 @@ export function mapVendorToPharmacy(vendor, index = 0) {
 
   const name = vendor.business_name || vendor.name || "Pharmacy";
   const slug = vendor.slug || slugifyVendorName(name) || vendor.id;
+  const isOperational =
+    vendor.availability?.isAvailable ??
+    (vendor.status === "approved" || vendor.status === "active");
+  const isOpen =
+    vendor.availability?.openAllowed ??
+    vendor.is_open ??
+    isOperational;
 
   return {
     id: vendor.id,
@@ -39,11 +46,11 @@ export function mapVendorToPharmacy(vendor, index = 0) {
     reviews: vendor.reviews_count ?? 0,
     deliveryTime: vendor.delivery_time || "30–45 min",
     deliveryMin: vendor.delivery_min ?? 30,
-    status: vendor.status === "approved" ? "open" : "closed",
-    verified: vendor.status === "approved",
+    status: isOpen ? "open" : "closed",
+    verified: isOperational,
     distanceKm: vendor.distance_km ?? (index + 1) * 1.2,
     distance: formatDistanceKm(vendor.distance_km ?? vendor.distance) || `${(index + 1) * 1.2} km`,
-    tags: vendor.tags || ["Verified"],
+    tags: vendor.tags || [isOperational ? "Verified" : "Pending"],
     bgImage: vendor.bg_image || vendor.image_url || DEFAULT_VENDOR_IMAGE,
     initials: name
       .split(" ")
@@ -60,7 +67,7 @@ export function mapVendorToPharmacy(vendor, index = 0) {
     services: vendor.services || { medicines: true, doctors: false, labTests: false },
     pricing: vendor.pricing || "mid",
     compare: vendor.compare || { delivery: 8, pricing: 8, availability: 8 },
-    about: vendor.about || `${name} is a verified PharmaHub partner.`,
+    about: vendor.about || `${name} is a ${isOperational ? "verified" : "reviewed"} PharmaHub partner.`,
     address: vendor.address || "Karachi, Pakistan",
     phone: vendor.phone || "",
   };

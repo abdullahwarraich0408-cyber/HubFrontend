@@ -1,12 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { FirstAidKit, MapPin, Bell, User, ShoppingCart, List, CaretDown, MagnifyingGlass, X, Package, Spinner } from "@phosphor-icons/react";
 import { cartApi } from "@/lib/api/index";
 import { toast } from "sonner";
-import { useEffect } from "react";
 import { useUserProfile } from "@/lib/hooks/useApi";
 import { useAuthModal } from "@/features/auth/context/AuthModalContext";
 import { useAuth } from "@/lib/auth/AuthProvider";
@@ -24,10 +23,9 @@ export function CustomerNavbar() {
   const [cartCount, setCartCount] = useState(0);
   const [currentLocation, setCurrentLocation] = useState("Karachi");
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
-  const [hasMounted, setHasMounted] = useState(false);
 
   const hasToken = isAuthenticated;
-  const authUiReady = hasMounted && !authLoading;
+  const authUiReady = !authLoading;
 
   // Fetch profile to check if user is an admin
   const { data: profile, isLoading: isProfileLoading } = useUserProfile({
@@ -83,10 +81,6 @@ export function CustomerNavbar() {
       toast.error("Failed to sign out. Please try again.");
     }
   };
-
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
 
   useEffect(() => {
     // If an admin accidentally lands on the customer UI, force them to the admin dashboard
@@ -242,6 +236,13 @@ export function CustomerNavbar() {
             >
               <Package size={18} />
               <span>Orders</span>
+            </Link>
+
+            <Link
+              href="/partner-with-us"
+              className="flex items-center gap-1.5 px-3 py-2 text-[13px] font-medium text-neutral-600 hover:text-brand-primary hover:bg-brand-light rounded-md transition-all"
+            >
+              Partner With Us
             </Link>
 
             {/* Notifications */}

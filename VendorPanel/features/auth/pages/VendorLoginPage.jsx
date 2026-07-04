@@ -169,8 +169,11 @@ export function VendorLoginPage() {
           <div className="mt-8 text-center md:text-left flex items-center justify-between">
             <p className="text-[14px] text-[var(--color-neutral-600)]">
               Not a vendor yet?{" "}
-              <Link href="/" className="text-[var(--color-brand-primary)] font-semibold hover:underline decoration-2 underline-offset-4">
-                Contact us
+              <Link
+                href={`${process.env.NEXT_PUBLIC_STOREFRONT_URL || "http://localhost:3000"}/partner-with-us`}
+                className="text-[var(--color-brand-primary)] font-semibold hover:underline decoration-2 underline-offset-4"
+              >
+                Register your pharmacy
               </Link>
             </p>
           </div>

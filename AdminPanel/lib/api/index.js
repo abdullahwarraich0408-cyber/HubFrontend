@@ -88,6 +88,7 @@ export const vendorsApi = {
   getMyProducts: () => api.get("/vendors/products/mine"),
   getDashboardStats: () => api.get("/vendors/dashboard/stats"),
   register: (data) => api.post("/vendors/register", data),
+  getOnboardingStatus: (id) => api.get(`/vendors/onboarding-status/${id}`),
   updateStatus: (id, status, note) => api.patch(`/admin/vendors/${id}/status`, { status, note }),
   updateCredentials: (id, data) =>
     api.patch(`/admin/vendors/${id}/credentials`, data),
@@ -277,6 +278,16 @@ export const adminGeneralApi = {
   deleteHospital: (id) => api.delete(`/admin/hospitals/${id}`),
   
   createVendor: (data) => api.post("/admin/vendors", data),
+  getPendingVendors: () => api.get("/admin/vendors/pending"),
+  reviewVendorDocument: (vendorId, documentId, data) =>
+    api.post(`/admin/vendors/${vendorId}/documents/${documentId}/review`, data),
+  getVendorAvailability: (vendorId) => api.get(`/admin/vendors/${vendorId}/availability`),
+  getVendorAuditLogs: (vendorId) => api.get(`/admin/vendors/${vendorId}/audit-logs`),
+  updateVendorCommission: (vendorId, commission_rate) =>
+    api.post(`/admin/vendors/${vendorId}/commission`, { commission_rate }),
+  getVendorPerformance: () => api.get("/admin/vendors/performance"),
+  getSettlements: () => api.get("/admin/settlements"),
+  releaseSettlement: (id, reference) => api.post(`/admin/settlements/${id}/release`, { reference }),
   
   getAuditLogs: () => api.get("/admin/audit-logs"),
   

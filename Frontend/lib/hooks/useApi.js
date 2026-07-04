@@ -161,6 +161,18 @@ export function useCreateVendor() {
   });
 }
 
+export function useVendorOnboardingStatus(id, options = {}) {
+  return useQuery({
+    queryKey: ["vendor-onboarding-status", id],
+    enabled: Boolean(id),
+    queryFn: async () => {
+      const data = await vendorsApi.getOnboardingStatus(id);
+      return data.vendor || data;
+    },
+    ...options,
+  });
+}
+
 export function useUpdateVendorStatus() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -197,6 +209,12 @@ export function useDeleteVendor() {
 export function useUploadDocument() {
   return useMutation({
     mutationFn: (file) => uploadApi.uploadDocument(file).then(res => res.data || res),
+  });
+}
+
+export function useUploadPublicDocument() {
+  return useMutation({
+    mutationFn: (file) => uploadApi.uploadPublicDocument(file).then((res) => res.data || res),
   });
 }
 

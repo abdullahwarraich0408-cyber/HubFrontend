@@ -5,10 +5,19 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
 const PARTNER_PATH_PREFIXES = [
   "/partners/",
   "/vendors/profile",
+  "/vendors/profile/availability",
   "/vendors/products/mine",
   "/vendors/dashboard/stats",
+  "/vendors/operating-hours",
+  "/vendors/service-areas",
+  "/vendors/earnings/",
+  "/vendors/settlements",
+  "/vendors/analytics/",
+  "/vendors/audit-logs",
   "/orders/vendor",
   "/prescription-orders/",
+  "/notifications/",
+  "/payouts/",
   "/vendor/",
 ];
 

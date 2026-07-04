@@ -2,10 +2,12 @@
 
 import { TrendUp, DownloadSimple, CalendarCheck, CurrencyDollar, Pill, Clock } from "@phosphor-icons/react";
 import { Button } from "@/shared/components/Button";
-import { useVendorDashboardStats } from "@/lib/hooks/useApi";
+import { useVendorDashboardStats, useVendorEarningsSummary, useVendorAnalyticsPerformance } from "@/lib/hooks/useApi";
 
 export default function VendorReportsPage() {
   const { data: stats, isLoading } = useVendorDashboardStats();
+  const { data: earnings } = useVendorEarningsSummary();
+  const { data: performance } = useVendorAnalyticsPerformance();
 
   const handleExport = () => {
     if (!stats) return;
@@ -50,6 +52,12 @@ export default function VendorReportsPage() {
         <StatCard icon={Pill} label="Active Products" value={stats.activeProducts} />
         <StatCard icon={CurrencyDollar} label="Revenue (PKR)" value={stats.totalRevenue.toLocaleString()} />
         <StatCard icon={Clock} label="Low Stock" value={stats.lowStock} />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <StatCard icon={CurrencyDollar} label="Net Earnings" value={(earnings?.totals?.net || 0).toLocaleString()} />
+        <StatCard icon={TrendUp} label="Rx Acceptance %" value={performance?.performance?.prescriptionAcceptanceRate || 0} />
+        <StatCard icon={Clock} label="Avg Response (min)" value={performance?.performance?.averageResponseMinutes || 0} />
       </div>
 
       <div className="bg-white rounded-[16px] border border-neutral-200 shadow-sm overflow-hidden">

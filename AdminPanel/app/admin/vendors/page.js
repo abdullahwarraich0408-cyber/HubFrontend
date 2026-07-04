@@ -6,7 +6,7 @@ import {
   Copy, Eye, CheckCircle, XCircle, PencilSimple, DownloadSimple, 
   CaretLeft, CaretRight, ArrowsDownUp, CaretDown, FileText, Trash, SignIn, MapPin, Spinner
 } from "@phosphor-icons/react";
-import { useAdminVendors, useAdminCreateVendor, useUpdateVendorStatus, useUpdateVendorCredentials, useDeleteVendor, useImpersonate } from "@/lib/hooks/useApi";
+import { useAdminVendors, useAdminCreateVendor, useUpdateVendorStatus, useUpdateVendorCredentials, useDeleteVendor, useImpersonate, useReviewVendorDocument } from "@/lib/hooks/useApi";
 import { detectDeliveryAddress, SUPPORTED_CITIES } from "@/lib/location";
 import { toast } from "sonner";
 
@@ -17,6 +17,7 @@ export default function AdminVendorsPage() {
   const updateCredentialsMutation = useUpdateVendorCredentials();
   const deleteVendorMutation = useDeleteVendor();
   const impersonateMutation = useImpersonate();
+  const reviewVendorDocumentMutation = useReviewVendorDocument();
 
   // Filters & Sorting
   const [search, setSearch] = useState("");
@@ -461,7 +462,7 @@ export default function AdminVendorsPage() {
                       {vendor.license_number || "—"}
                     </td>
                     <td className="p-4 text-sm text-[#0C1A2E]/70 font-medium">
-                      {new Date(vendor.created_at || Date.now()).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                      {vendor.created_at ? new Date(vendor.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : "—"}
                     </td>
                     <td className="p-4">
                       {renderStatusBadge(vendor.status)}
@@ -591,7 +592,7 @@ export default function AdminVendorsPage() {
                 <div className="text-right">
                   <div className="text-xs font-bold text-[#0C1A2E]/50 uppercase tracking-wider mb-1">Applied On</div>
                   <div className="text-sm font-semibold text-[#0C1A2E]">
-                    {new Date(viewVendor.created_at || Date.now()).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                    {viewVendor.created_at ? new Date(viewVendor.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : "—"}
                   </div>
                 </div>
               </div>
@@ -683,40 +684,57 @@ export default function AdminVendorsPage() {
               {/* Documents */}
               <div>
                 <h3 className="text-sm font-bold text-[#0C1A2E] uppercase tracking-wider border-b border-[#0C1A2E]/10 pb-2 mb-4">Verification Documents</h3>
-                {(viewVendor.trade_license_url || viewVendor.pharmacist_certificate_url) ? (
+                {(viewVendor.documents || []).length > 0 ? (
                   <div className="space-y-3">
-                    {viewVendor.trade_license_url && (
-                      <div className="flex items-center justify-between p-3 rounded-lg border border-[#0C1A2E]/10 bg-white">
+                    {viewVendor.documents.map((document) => (
+                      <div key={document.id} className="flex items-center justify-between p-3 rounded-lg border border-[#0C1A2E]/10 bg-white">
                         <div className="flex items-center gap-2">
                           <FileText size={20} className="text-[#0B6E72]" />
-                          <span className="text-sm font-medium text-[#0C1A2E]">Trade License</span>
+                          <div>
+                            <div className="text-sm font-medium text-[#0C1A2E] capitalize">{document.type.replaceAll("_", " ")}</div>
+                            <div className="text-xs text-[#0C1A2E]/50">Status: {document.status}</div>
+                          </div>
                         </div>
-                        <a 
-                          href={viewVendor.trade_license_url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-xs font-semibold text-[#0B6E72] hover:underline px-3 py-1.5 bg-[#E6F4F5] rounded"
-                        >
-                          View Document
-                        </a>
-                      </div>
-                    )}
-                    {viewVendor.pharmacist_certificate_url && (
-                      <div className="flex items-center justify-between p-3 rounded-lg border border-[#0C1A2E]/10 bg-white">
                         <div className="flex items-center gap-2">
-                          <FileText size={20} className="text-[#0B6E72]" />
-                          <span className="text-sm font-medium text-[#0C1A2E]">Pharmacist Certificate</span>
+                          <a 
+                            href={document.file_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-xs font-semibold text-[#0B6E72] hover:underline px-3 py-1.5 bg-[#E6F4F5] rounded"
+                          >
+                            View
+                          </a>
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              await reviewVendorDocumentMutation.mutateAsync({
+                                vendorId: viewVendor.id,
+                                documentId: document.id,
+                                data: { status: "verified", notes: internalNote },
+                              });
+                              toast.success("Document verified");
+                            }}
+                            className="text-xs font-semibold text-white px-3 py-1.5 bg-[#0B6E72] rounded"
+                          >
+                            Verify
+                          </button>
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              await reviewVendorDocumentMutation.mutateAsync({
+                                vendorId: viewVendor.id,
+                                documentId: document.id,
+                                data: { status: "rejected", notes: internalNote || "Rejected by admin" },
+                              });
+                              toast.success("Document rejected");
+                            }}
+                            className="text-xs font-semibold text-white px-3 py-1.5 bg-[#DC2626] rounded"
+                          >
+                            Reject
+                          </button>
                         </div>
-                        <a 
-                          href={viewVendor.pharmacist_certificate_url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-xs font-semibold text-[#0B6E72] hover:underline px-3 py-1.5 bg-[#E6F4F5] rounded"
-                        >
-                          View Document
-                        </a>
                       </div>
-                    )}
+                    ))}
                   </div>
                 ) : (
                   <div className="p-4 rounded-xl border border-dashed border-[#0C1A2E]/20 bg-[#F6F8FA]/50 flex flex-col items-center justify-center text-center gap-2">

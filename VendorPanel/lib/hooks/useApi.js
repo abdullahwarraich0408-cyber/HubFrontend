@@ -17,6 +17,7 @@ import {
   uploadApi,
   inventoryApi,
   adminGeneralApi,
+  notificationsApi,
 } from "@/lib/api/index";
 import { mapProductsToMedicines, mapProductToMedicine, mapProductsToStoreProducts } from "@/lib/mappers/product";
 import { mapVendorsToPharmacies, mapVendorToPharmacy } from "@/lib/mappers/vendor";
@@ -212,6 +213,39 @@ export function useVendorProfile(options = {}) {
   });
 }
 
+export function useVendorAvailability(options = {}) {
+  return useQuery({
+    queryKey: ["vendor-availability"],
+    queryFn: async () => {
+      const data = await vendorsApi.getAvailability();
+      return data.availability || data;
+    },
+    ...options,
+  });
+}
+
+export function useVendorOperatingHours(options = {}) {
+  return useQuery({
+    queryKey: ["vendor-operating-hours"],
+    queryFn: async () => {
+      const data = await vendorsApi.getOperatingHours();
+      return data.hours || [];
+    },
+    ...options,
+  });
+}
+
+export function useVendorServiceAreas(options = {}) {
+  return useQuery({
+    queryKey: ["vendor-service-areas"],
+    queryFn: async () => {
+      const data = await vendorsApi.getServiceAreas();
+      return data.areas || [];
+    },
+    ...options,
+  });
+}
+
 export function useVendorOrders(options = {}) {
   return useQuery({
     queryKey: ["vendor-orders"],
@@ -319,6 +353,119 @@ export function useUpdateVendorProfile() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["vendor-profile"] });
       queryClient.invalidateQueries({ queryKey: ["vendor-dashboard-stats"] });
+    },
+  });
+}
+
+export function useUpdateVendorAvailability() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data) => vendorsApi.updateAvailability(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["vendor-availability"] });
+      queryClient.invalidateQueries({ queryKey: ["vendor-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["vendor-dashboard-stats"] });
+    },
+  });
+}
+
+export function useUpdateVendorOperatingHours() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (hours) => vendorsApi.updateOperatingHours(hours),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["vendor-operating-hours"] });
+      queryClient.invalidateQueries({ queryKey: ["vendor-availability"] });
+      queryClient.invalidateQueries({ queryKey: ["vendor-profile"] });
+    },
+  });
+}
+
+export function useUpdateVendorServiceAreas() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (areas) => vendorsApi.updateServiceAreas(areas),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["vendor-service-areas"] });
+      queryClient.invalidateQueries({ queryKey: ["vendor-availability"] });
+      queryClient.invalidateQueries({ queryKey: ["vendor-profile"] });
+    },
+  });
+}
+
+export function useVendorEarningsSummary(options = {}) {
+  return useQuery({
+    queryKey: ["vendor-earnings-summary"],
+    queryFn: async () => {
+      const data = await vendorsApi.getEarningsSummary();
+      return data.summary || data;
+    },
+    ...options,
+  });
+}
+
+export function useVendorSettlements(options = {}) {
+  return useQuery({
+    queryKey: ["vendor-settlements"],
+    queryFn: async () => {
+      const data = await vendorsApi.getSettlements();
+      return data.settlements || [];
+    },
+    ...options,
+  });
+}
+
+export function useVendorAnalyticsOverview(options = {}) {
+  return useQuery({
+    queryKey: ["vendor-analytics-overview"],
+    queryFn: async () => {
+      const data = await vendorsApi.getAnalyticsOverview();
+      return data.overview || data;
+    },
+    ...options,
+  });
+}
+
+export function useVendorAnalyticsPerformance(options = {}) {
+  return useQuery({
+    queryKey: ["vendor-analytics-performance"],
+    queryFn: async () => {
+      const data = await vendorsApi.getAnalyticsPerformance();
+      return data.performance || data;
+    },
+    ...options,
+  });
+}
+
+export function useVendorAuditLogs(options = {}) {
+  return useQuery({
+    queryKey: ["vendor-audit-logs"],
+    queryFn: async () => {
+      const data = await vendorsApi.getAuditLogs();
+      return data.logs || [];
+    },
+    ...options,
+  });
+}
+
+export function useVendorNotifications(options = {}) {
+  return useQuery({
+    queryKey: ["vendor-notifications"],
+    queryFn: async () => {
+      const data = await notificationsApi.getVendorNotifications();
+      return data.notifications || [];
+    },
+    refetchInterval: 10000,
+    ...options,
+  });
+}
+
+export function useMarkVendorNotificationRead() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => notificationsApi.markVendorNotificationRead(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["vendor-notifications"] });
     },
   });
 }

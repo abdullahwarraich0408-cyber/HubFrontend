@@ -1,6 +1,6 @@
 "use client";
 
-import { useAdminOrders, useAdminCustomers, useAdminVendors } from "@/lib/hooks/useApi";
+import { useAdminOrders, useAdminCustomers, useAdminVendors, useVendorPerformance } from "@/lib/hooks/useApi";
 import { ChartLineUp, Users, Storefront, Package } from "@phosphor-icons/react";
 import {
   BarChart,
@@ -16,8 +16,9 @@ export default function AdminAnalyticsPage() {
   const { data: orders = [], isLoading: ordersLoading } = useAdminOrders();
   const { data: customers = [], isLoading: customersLoading } = useAdminCustomers();
   const { data: vendors = [], isLoading: vendorsLoading } = useAdminVendors();
+  const { data: performance = [], isLoading: performanceLoading } = useVendorPerformance();
 
-  const isLoading = ordersLoading || customersLoading || vendorsLoading;
+  const isLoading = ordersLoading || customersLoading || vendorsLoading || performanceLoading;
 
   // Chart Data Preparation
   const chartData = orders.reduce((acc, order) => {
@@ -111,6 +112,35 @@ export default function AdminAnalyticsPage() {
               </BarChart>
             </ResponsiveContainer>
           )}
+        </div>
+      </div>
+
+      <div className="mt-8 bg-white rounded-[16px] border border-neutral-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)] p-6">
+        <div className="mb-6">
+          <h3 className="text-[18px] font-bold text-ink-headline">Vendor Performance</h3>
+          <p className="text-[14px] text-neutral-500 mt-1">Prescription responsiveness and unread operational load per pharmacy.</p>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-neutral-50 border-b border-neutral-200 text-xs font-bold text-neutral-500 uppercase tracking-wider">
+                <th className="p-4">Vendor</th>
+                <th className="p-4">Rx Acceptance</th>
+                <th className="p-4">Avg Response</th>
+                <th className="p-4">Unread Alerts</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-neutral-100">
+              {performance.map((vendor) => (
+                <tr key={vendor.id} className="hover:bg-neutral-50 transition-colors">
+                  <td className="p-4 text-sm font-semibold text-ink-headline">{vendor.business_name}</td>
+                  <td className="p-4 text-sm text-neutral-600">{vendor.performance?.prescriptionAcceptanceRate || 0}%</td>
+                  <td className="p-4 text-sm text-neutral-600">{vendor.performance?.averageResponseMinutes || 0} min</td>
+                  <td className="p-4 text-sm text-neutral-600">{vendor.unreadNotifications || 0}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

@@ -1,10 +1,12 @@
 "use client";
 
-import { useAdminOrders } from "@/lib/hooks/useApi";
+import { useAdminOrders, useAdminSettlements, useReleaseSettlement } from "@/lib/hooks/useApi";
 import { Receipt, CurrencyDollar, ArrowUpRight } from "@phosphor-icons/react";
 
 export default function AdminFinancePage() {
   const { data: orders = [], isLoading } = useAdminOrders();
+  const { data: settlements = [], isLoading: settlementsLoading } = useAdminSettlements();
+  const releaseSettlement = useReleaseSettlement();
 
   const totalRevenue = orders.reduce((sum, order) => sum + (Number(order.total_amount) || 0), 0);
   const completedOrders = orders.filter(o => o.status === 'completed' || o.status === 'delivered');
@@ -81,6 +83,59 @@ export default function AdminFinancePage() {
                     </td>
                     <td className="p-4 text-sm font-medium text-neutral-600">
                       {new Date(order.created_at).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="mt-8 bg-white rounded-[16px] border border-neutral-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col overflow-hidden">
+        <div className="p-6 border-b border-neutral-200">
+          <h3 className="text-[18px] font-bold text-ink-headline">Vendor Settlements</h3>
+        </div>
+        <div className="overflow-x-auto min-h-[280px]">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-neutral-50 border-b border-neutral-200 text-xs font-bold text-neutral-500 uppercase tracking-wider">
+                <th className="p-4 pl-6">Vendor</th>
+                <th className="p-4">Period</th>
+                <th className="p-4">Net Amount</th>
+                <th className="p-4">Status</th>
+                <th className="p-4 pr-6 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-neutral-100">
+              {settlementsLoading ? (
+                <tr><td colSpan="5" className="p-8 text-center text-neutral-400 font-medium">Loading settlements...</td></tr>
+              ) : settlements.length === 0 ? (
+                <tr><td colSpan="5" className="p-8 text-center text-neutral-400 font-medium">No settlements found.</td></tr>
+              ) : (
+                settlements.map((settlement) => (
+                  <tr key={settlement.id} className="hover:bg-neutral-50 transition-colors">
+                    <td className="p-4 pl-6 text-sm font-medium text-neutral-700">
+                      {settlement.vendor?.business_name || "Unknown Vendor"}
+                    </td>
+                    <td className="p-4 text-sm text-neutral-600">
+                      {new Date(settlement.period_start).toLocaleDateString()} - {new Date(settlement.period_end).toLocaleDateString()}
+                    </td>
+                    <td className="p-4 text-sm font-bold text-[#0B6E72]">
+                      PKR {Number(settlement.net_amount || 0).toLocaleString()}
+                    </td>
+                    <td className="p-4 text-sm capitalize text-neutral-600">{settlement.status}</td>
+                    <td className="p-4 pr-6 text-right">
+                      {settlement.status !== "released" ? (
+                        <button
+                          onClick={() => releaseSettlement.mutate({ id: settlement.id })}
+                          className="px-3 py-2 rounded-lg bg-[#0B6E72] text-white text-xs font-semibold"
+                        >
+                          Release
+                        </button>
+                      ) : (
+                        <span className="text-xs text-neutral-500">Released</span>
+                      )}
                     </td>
                   </tr>
                 ))

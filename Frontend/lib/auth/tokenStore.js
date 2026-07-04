@@ -49,6 +49,12 @@ export function hasAuthSession() {
   return Boolean(user || memoryAccessToken);
 }
 
+export function clearLegacyTokenStorage() {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem("token");
+  localStorage.removeItem("refreshToken");
+}
+
 export function getDeviceId() {
   if (typeof window === "undefined") return "web-anonymous";
   let deviceId = localStorage.getItem("pharmahub_device_id");

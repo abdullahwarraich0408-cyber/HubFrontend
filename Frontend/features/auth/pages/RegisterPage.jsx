@@ -3,11 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useDispatch } from "react-redux";
 import { Envelope, Lock, User, Phone, GoogleLogo, AppleLogo, Pill, ShieldCheck, CheckCircle, ArrowRight } from "@phosphor-icons/react";
 import { Button } from "@/shared/components/Button";
 import { Input } from "@/shared/components/Input";
-import { register } from "@/app/store/authSlice";
+import { cartApi } from "@/lib/api/index";
+import { useAuth } from "@/lib/auth/AuthProvider";
 import { toast } from "sonner";
 import { useAuthModal } from "@/features/auth/context/AuthModalContext";
 
@@ -22,7 +22,7 @@ export function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const dispatch = useDispatch();
+  const { registerWithEmail } = useAuth();
   const redirectTo = searchParams.get("redirect") || "/";
   const { openSignIn } = useAuthModal();
 
@@ -39,7 +39,12 @@ export function RegisterPage() {
 
     setLoading(true);
     try {
-      await dispatch(register(formData)).unwrap();
+      await registerWithEmail(formData);
+      const guestCart = JSON.parse(localStorage.getItem("guest_cart") || "[]");
+      if (guestCart.length > 0) {
+        await cartApi.merge(guestCart);
+        localStorage.removeItem("guest_cart");
+      }
       toast.success("Account created successfully!");
       router.push(redirectTo);
       router.refresh();

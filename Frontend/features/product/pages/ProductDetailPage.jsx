@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useSelector } from "react-redux";
 import { toast } from "sonner";
 import {
   CaretRight,
@@ -27,7 +26,8 @@ import {
   MOCK_REVIEWS,
 } from "@/features/medicines/data/mockMedicines";
 import { useProduct, useProducts, useProductReviews } from "@/lib/hooks/useApi";
-import { api } from "@/lib/api";
+import { cartApi } from "@/lib/api/index";
+import { hasAuthSession } from "@/lib/auth/tokenStore";
 
 const DETAIL_TABS = [
   { id: "product", label: "Product" },
@@ -93,9 +93,8 @@ export function ProductDetailPage() {
   const handleAddToCart = async () => {
     setIsAdding(true);
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-      if (token) {
-        await api.cart.add(product.id, quantity);
+      if (typeof window !== "undefined" && hasAuthSession()) {
+        await cartApi.addItem(product.id, quantity);
       } else {
         const guestCart = JSON.parse(localStorage.getItem('guest_cart') || '[]');
         const existingIdx = guestCart.findIndex(item => item.id === product.id);

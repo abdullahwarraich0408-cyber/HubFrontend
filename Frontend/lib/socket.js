@@ -2,6 +2,7 @@
 
 import { io } from "socket.io-client";
 import { getPartnerToken } from "./partnerAuth";
+import { getMemoryAccessToken } from "./auth/tokenStore";
 
 let socket = null;
 let activeToken = null;
@@ -31,15 +32,13 @@ export function resolveSocketToken(authMode) {
   }
 
   if (authMode === "customer") {
-    const token = localStorage.getItem("token");
-    return token && token !== "cookie-auth-active" ? token : null;
+    return getMemoryAccessToken();
   }
 
   const partnerToken = getPartnerToken();
   if (partnerToken) return partnerToken;
 
-  const customerToken = localStorage.getItem("token");
-  return customerToken && customerToken !== "cookie-auth-active" ? customerToken : null;
+  return getMemoryAccessToken();
 }
 
 export function getSocket(authMode) {

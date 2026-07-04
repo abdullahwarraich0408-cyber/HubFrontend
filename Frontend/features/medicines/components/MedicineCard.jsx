@@ -3,24 +3,21 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useSelector } from "react-redux";
 import { toast } from "sonner";
 import { Clock, Scales, ShoppingCart, Storefront } from "@phosphor-icons/react";
 import { Button } from "@/shared/components/Button";
 import { useAddToCart } from "@/lib/hooks/useApi";
+import { hasAuthSession } from "@/lib/auth/tokenStore";
 
 export function MedicineCard({ medicine }) {
   const router = useRouter();
-  const { isAuthenticated } = useSelector((state) => state.auth);
   const addToCart = useAddToCart();
   const outOfStock = medicine.stock === 0;
 
   const handleAddToCart = (e) => {
     e.preventDefault(); // Prevent navigating to product detail
     
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-
-    if (token) {
+    if (typeof window !== "undefined" && hasAuthSession()) {
       addToCart.mutate(
         { productId: medicine.id, quantity: 1 },
         {

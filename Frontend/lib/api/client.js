@@ -1,6 +1,12 @@
 import { getPartnerToken } from "../partnerAuth";
 import { AUTH_SIGN_IN_EVENT } from "../authModalEvents";
-import { getMemoryAccessToken } from "../auth/tokenStore";
+import {
+  clearAuthStorage,
+  getDeviceId,
+  getMemoryAccessToken,
+  persistUser,
+  setMemoryAccessToken,
+} from "../auth/tokenStore";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
 
@@ -54,10 +60,7 @@ function resolveAuthToken(path, options) {
   }
 
   if (options.auth === "customer") {
-    const memoryToken = getMemoryAccessToken();
-    if (memoryToken) return memoryToken;
-    const token = localStorage.getItem("token");
-    return token && token !== "cookie-auth-active" ? token : null;
+    return getMemoryAccessToken();
   }
 
   if (isPartnerPath(path, options)) {
@@ -71,8 +74,8 @@ function resolveAuthToken(path, options) {
     const partnerRole = localStorage.getItem("partnerRole");
     if (partnerToken && partnerRole === "doctor") return partnerToken;
 
-    const customerToken = localStorage.getItem("token");
-    if (customerToken && customerToken !== "cookie-auth-active") return customerToken;
+    const customerToken = getMemoryAccessToken();
+    if (customerToken) return customerToken;
 
     return partnerToken || null;
   }
@@ -82,8 +85,7 @@ function resolveAuthToken(path, options) {
     if (partnerToken) return partnerToken;
   }
 
-  const token = getMemoryAccessToken() || localStorage.getItem("token");
-  return token && token !== "cookie-auth-active" ? token : null;
+  return getMemoryAccessToken();
 }
 
 export class ApiError extends Error {
@@ -101,6 +103,53 @@ async function parseResponse(response) {
     return response.json();
   }
   return null;
+}
+
+let customerRefreshPromise = null;
+
+async function refreshCustomerSession() {
+  if (customerRefreshPromise) {
+    return customerRefreshPromise;
+  }
+
+  customerRefreshPromise = (async () => {
+    const refreshResponse = await fetch(`${API_BASE}/auth/refresh`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        deviceId: getDeviceId(),
+        platform: "web",
+      }),
+    });
+
+    const payload = await parseResponse(refreshResponse).catch(() => null);
+    const data = payload?.data ?? payload ?? {};
+    const tokens = data.tokens ?? data;
+    const accessToken = tokens?.accessToken ?? data?.accessToken ?? data?.token ?? null;
+
+    if (!refreshResponse.ok || !accessToken) {
+      throw new ApiError(
+        payload?.message || "Your session has expired. Please log in again.",
+        refreshResponse.status,
+        payload
+      );
+    }
+
+    setMemoryAccessToken(accessToken);
+    if (data.user) {
+      persistUser(data.user);
+    }
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("auth-updated"));
+    }
+
+    return accessToken;
+  })().finally(() => {
+    customerRefreshPromise = null;
+  });
+
+  return customerRefreshPromise;
 }
 
 export async function apiClient(path, options = {}) {
@@ -137,58 +186,72 @@ export async function apiClient(path, options = {}) {
   const payload = await parseResponse(response);
 
   if (!response.ok) {
-    if (response.status === 401 && typeof window !== 'undefined') {
+    if (response.status === 401 && typeof window !== "undefined" && path !== "/auth/refresh") {
       const pathname = window.location.pathname;
-      const isPartner = isPartnerPortalPath(pathname);
-      const refreshToken = isPartner ? localStorage.getItem('partnerRefreshToken') : localStorage.getItem('refreshToken');
-      
-      if (refreshToken) {
-        try {
-          const refreshRes = await fetch(`${API_BASE}/auth/refresh`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ refreshToken })
-          });
-          if (refreshRes.ok) {
-            const data = await refreshRes.json();
-            const newAuth = data.data || data;
-            if (isPartner) {
-              localStorage.setItem('partnerToken', newAuth.token);
-              if (newAuth.refreshToken) localStorage.setItem('partnerRefreshToken', newAuth.refreshToken);
-            } else {
-              localStorage.setItem('token', newAuth.token);
-              if (newAuth.refreshToken) localStorage.setItem('refreshToken', newAuth.refreshToken);
+      const isPartnerRequest =
+        auth === "partner" || (auth !== "customer" && isPartnerPortalPath(pathname));
+
+      if (isPartnerRequest) {
+        const refreshToken = localStorage.getItem("partnerRefreshToken");
+        if (refreshToken) {
+          try {
+            const refreshRes = await fetch(`${API_BASE}/auth/refresh`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ refreshToken }),
+            });
+            if (refreshRes.ok) {
+              const data = await refreshRes.json();
+              const newAuth = data.data || data;
+              const partnerToken =
+                newAuth?.token ?? newAuth?.accessToken ?? newAuth?.tokens?.accessToken ?? null;
+              if (partnerToken) {
+                localStorage.setItem("partnerToken", partnerToken);
+                if (newAuth.refreshToken) localStorage.setItem("partnerRefreshToken", newAuth.refreshToken);
+                if (newAuth.tokens?.refreshToken) {
+                  localStorage.setItem("partnerRefreshToken", newAuth.tokens.refreshToken);
+                }
+                config.headers.Authorization = `Bearer ${partnerToken}`;
+                const retryResponse = await fetch(`${API_BASE}${path}`, config);
+                const retryPayload = await parseResponse(retryResponse).catch(() => null);
+                if (retryResponse.ok) {
+                  if (retryResponse.status === 204) return null;
+                  return retryPayload?.data ?? retryPayload;
+                }
+              }
             }
-            config.headers.Authorization = `Bearer ${newAuth.token}`;
-            const retryResponse = await fetch(`${API_BASE}${path}`, config);
-            const retryPayload = await parseResponse(retryResponse).catch(() => null);
-            if (retryResponse.ok) {
-              if (retryResponse.status === 204) return null;
-              return retryPayload?.data ?? retryPayload;
-            }
+          } catch {
+            // Fall through to partner sign-out
           }
-        } catch (e) {
-          // Fall through to clear tokens if refresh fails
+        }
+
+        if (localStorage.getItem("partnerToken")) {
+          localStorage.removeItem("partnerToken");
+          localStorage.removeItem("partnerRefreshToken");
+          localStorage.removeItem("partnerRole");
+          localStorage.removeItem("partnerData");
+        }
+      } else {
+        try {
+          const nextAccessToken = await refreshCustomerSession();
+          config.headers.Authorization = `Bearer ${nextAccessToken}`;
+          const retryResponse = await fetch(`${API_BASE}${path}`, config);
+          const retryPayload = await parseResponse(retryResponse).catch(() => null);
+          if (retryResponse.ok) {
+            if (retryResponse.status === 204) return null;
+            return retryPayload?.data ?? retryPayload;
+          }
+        } catch {
+          clearAuthStorage();
+          window.dispatchEvent(new Event("auth-updated"));
         }
       }
 
-      const hadPartnerSession = Boolean(localStorage.getItem('partnerToken'));
-      const hadCustomerSession = Boolean(localStorage.getItem('token'));
-
-      if (hadCustomerSession) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
-      }
-      if (hadPartnerSession && isPartner) {
-        localStorage.removeItem('partnerToken');
-        localStorage.removeItem('partnerRefreshToken');
-        localStorage.removeItem('partnerRole');
-        localStorage.removeItem('partnerData');
-      }
-
-      const currentPath = window.location.pathname;
-      if (!currentPath.includes("/login") && !currentPath.includes("/sign-in")) {
-        openExpiredSignInModal(currentPath);
+      if (!isPartnerRequest) {
+        const currentPath = window.location.pathname;
+        if (!currentPath.includes("/login") && !currentPath.includes("/sign-in")) {
+          openExpiredSignInModal(currentPath);
+        }
       }
     }
     let message =

@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
-import { Provider, useDispatch, useSelector } from "react-redux";
+import { Provider, useDispatch } from "react-redux";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { store } from "../store";
-import { hydrateAuth, fetchProfile } from "../store/authSlice";
+import { hydrateAuth } from "../store/authSlice";
 import { AuthProvider } from "@/lib/auth/AuthProvider";
 import { AuthModalProvider } from "@/features/auth/context/AuthModalContext";
 
@@ -20,7 +20,6 @@ const queryClient = new QueryClient({
 
 function AuthHydrator({ children }) {
   const dispatch = useDispatch();
-  const initialized = useSelector((state) => state.auth.initialized);
 
   useEffect(() => {
     dispatch(hydrateAuth());
@@ -31,16 +30,6 @@ function AuthHydrator({ children }) {
     window.addEventListener("auth-updated", syncAuth);
     return () => window.removeEventListener("auth-updated", syncAuth);
   }, [dispatch]);
-
-  useEffect(() => {
-    if (!initialized || typeof window === "undefined") return;
-
-    const token = localStorage.getItem("token");
-    const user = localStorage.getItem("pharmahub_user");
-    if (token && !user) {
-      dispatch(fetchProfile());
-    }
-  }, [dispatch, initialized]);
 
   return children;
 }

@@ -48,7 +48,7 @@ import {
   usePrescriptionOrders,
   useAllOrders,
 } from "@/lib/hooks/useApi";
-import { api } from "@/lib/api/client";
+import { useAuth } from "@/lib/auth/AuthProvider";
 import { useAuthModal } from "@/features/auth/context/AuthModalContext";
 
 const NAV_ITEMS = [
@@ -70,17 +70,16 @@ const EMPTY_PAYMENT = { type: "card", label: "", expiry: "", isDefault: false };
 export function ProfilePage() {
   const router = useRouter();
   const { openSignIn } = useAuthModal();
+  const { isAuthenticated, isLoading: authLoading, logout } = useAuth();
   const [activeSection, setActiveSection] = useState("dashboard");
   const [modal, setModal] = useState(null);
   const [form, setForm] = useState({});
 
-  const hasToken = typeof window !== "undefined" ? !!localStorage.getItem("token") : false;
-
-  const { data: profile, isLoading } = useUserProfile({ enabled: hasToken });
-  const { data: addresses = [] } = useAddresses({ enabled: hasToken });
-  const { data: uploadedPrescriptions = [] } = usePrescriptions({ enabled: hasToken });
-  const { data: prescriptionOrders = [] } = usePrescriptionOrders({ enabled: hasToken });
-  const { data: allOrders = [] } = useAllOrders({ enabled: hasToken });
+  const { data: profile, isLoading } = useUserProfile({ enabled: isAuthenticated });
+  const { data: addresses = [] } = useAddresses({ enabled: isAuthenticated });
+  const { data: uploadedPrescriptions = [] } = usePrescriptions({ enabled: isAuthenticated });
+  const { data: prescriptionOrders = [] } = usePrescriptionOrders({ enabled: isAuthenticated });
+  const { data: allOrders = [] } = useAllOrders({ enabled: isAuthenticated });
 
   const updateProfile = useUpdateProfile();
   const updateProfileData = useUpdateProfileData();
@@ -108,8 +107,8 @@ export function ProfilePage() {
   }, [allOrders, prescriptionOrders, profileData.familyMembers.length]);
 
   useEffect(() => {
-    if (!hasToken) openSignIn({ redirect: "/profile" });
-  }, [hasToken, openSignIn]);
+    if (!authLoading && !isAuthenticated) openSignIn({ redirect: "/profile" });
+  }, [authLoading, isAuthenticated, openSignIn]);
 
   const persistProfileData = async (nextData) => {
     await updateProfileData.mutateAsync(nextData);
@@ -129,14 +128,7 @@ export function ProfilePage() {
   };
 
   const handleLogout = async () => {
-    try {
-      await api.post("/auth/logout");
-    } catch {
-      // continue logout locally
-    }
-    localStorage.removeItem("token");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("user");
+    await logout();
     router.push("/");
   };
 
@@ -305,7 +297,11 @@ export function ProfilePage() {
     }
   };
 
-  if (!hasToken) {
+  if (authLoading) {
+    return <div className="min-h-[60vh] flex items-center justify-center">Loading profile...</div>;
+  }
+
+  if (!isAuthenticated) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center text-[var(--color-neutral-500)]">
         Sign in to manage your profile

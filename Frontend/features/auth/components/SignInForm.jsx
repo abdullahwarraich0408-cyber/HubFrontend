@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useDispatch } from "react-redux";
 import {
   Envelope,
   Lock,
@@ -16,8 +15,8 @@ import {
 } from "@phosphor-icons/react";
 import { Button } from "@/shared/components/Button";
 import { Input } from "@/shared/components/Input";
-import { api } from "@/lib/api";
-import { login } from "@/app/store/authSlice";
+import { cartApi } from "@/lib/api/index";
+import { useAuth } from "@/lib/auth/AuthProvider";
 import { toast } from "sonner";
 
 export function SignInForm({
@@ -31,7 +30,7 @@ export function SignInForm({
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const dispatch = useDispatch();
+  const { loginWithEmail } = useAuth();
   const isModal = variant === "modal";
 
   const handleSubmit = async (e) => {
@@ -39,11 +38,11 @@ export function SignInForm({
     setLoading(true);
 
     try {
-      await dispatch(login({ email, password })).unwrap();
+      await loginWithEmail(email, password);
 
       const guestCart = JSON.parse(localStorage.getItem("guest_cart") || "[]");
       if (guestCart.length > 0) {
-        await api.cart.merge(guestCart);
+        await cartApi.merge(guestCart);
         localStorage.removeItem("guest_cart");
       }
 

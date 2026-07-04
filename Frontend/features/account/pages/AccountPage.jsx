@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { 
   User, 
   Package, 
@@ -24,34 +24,42 @@ import {
 } from "@/lib/hooks/useApi";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { api } from "@/lib/api/client";
+import { useAuth } from "@/lib/auth/AuthProvider";
+import { useAuthModal } from "@/features/auth/context/AuthModalContext";
 
 export function AccountPage() {
   const router = useRouter();
+  const { openSignIn } = useAuthModal();
+  const { isAuthenticated, isLoading: authLoading, logout } = useAuth();
   const [activeTab, setActiveTab] = useState("orders");
   const [orderFilter, setOrderFilter] = useState("all");
 
-  const { data: profile } = useUserProfile();
-  const { data: orders = [] } = useOrders();
-  const { data: addresses = [] } = useAddresses();
+  const { data: profile } = useUserProfile({ enabled: isAuthenticated });
+  const { data: orders = [] } = useOrders({ enabled: isAuthenticated });
+  const { data: addresses = [] } = useAddresses({ enabled: isAuthenticated });
   
   const updateProfileMutation = useUpdateProfile();
   const createAddressMutation = useCreateAddress();
   const deleteAddressMutation = useDeleteAddress();
 
-  const handleLogout = async () => {
-    try {
-      await api.post("/auth/logout");
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      router.push("/auth/signin");
-    } catch (err) {
-      console.error(err);
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      router.push("/auth/signin");
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      openSignIn({ redirect: "/account" });
     }
+  }, [authLoading, isAuthenticated, openSignIn]);
+
+  const handleLogout = async () => {
+    await logout();
+    router.push("/");
   };
+
+  if (authLoading) {
+    return null;
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   const handleProfileUpdate = (e) => {
     e.preventDefault();
@@ -222,7 +230,7 @@ export function AccountPage() {
                   <div className="text-center py-12">
                     <Package size={48} weight="duotone" className="text-[var(--color-neutral-300)] mx-auto mb-4" />
                     <h3 className="text-[18px] font-bold text-[var(--color-ink-headline)] mb-2">No orders found</h3>
-                    <p className="text-[14px] text-[var(--color-neutral-500)]">You don't have any {orderFilter !== 'all' ? orderFilter : ''} orders yet.</p>
+                    <p className="text-[14px] text-[var(--color-neutral-500)]">You don&apos;t have any {orderFilter !== 'all' ? orderFilter : ''} orders yet.</p>
                   </div>
                 )}
               </div>

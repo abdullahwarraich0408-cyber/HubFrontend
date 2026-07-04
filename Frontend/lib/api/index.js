@@ -56,7 +56,7 @@ export const authApi = {
   register: (data) => api.post("/auth/register", data),
   login: (data) => api.post("/auth/login", data),
   // Real phone-OTP: send Firebase idToken → get JWT back
-  phoneLogin: (data) => api.post("/auth/phone-login", data),
+  phoneLogin: (data) => api.post("/auth/firebase", data),
   // Legacy / Google / Apple Firebase exchange
   firebaseLogin: (data) => api.post("/auth/firebase", data),
   googleLogin: (data) => api.post("/auth/google", data),

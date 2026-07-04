@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/shared/components/Badge";
-import { api } from "@/lib/api";
+import { cartApi } from "@/lib/api/index";
+import { hasAuthSession } from "@/lib/auth/tokenStore";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { 
@@ -33,12 +34,12 @@ export function CartPage() {
 
   useEffect(() => {
     const fetchCart = async () => {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-      setIsAuthenticated(!!token);
+      const loggedIn = typeof window !== "undefined" ? hasAuthSession() : false;
+      setIsAuthenticated(loggedIn);
 
       try {
-        if (token) {
-          const data = await api.cart.get();
+        if (loggedIn) {
+          const data = await cartApi.get();
           setCartItems(data.cart?.items || data.items || []);
         } else {
           const guestCart = JSON.parse(localStorage.getItem('guest_cart') || '[]');
@@ -81,7 +82,7 @@ export function CartPage() {
     setIsUpdating(true);
     try {
       if (isAuthenticated) {
-        await api.cart.update(id, newQuantity);
+        await cartApi.updateItem(id, newQuantity);
       } else {
         const guestCart = [...cartItems];
         const idx = guestCart.findIndex(i => i.id === id);
@@ -104,7 +105,7 @@ export function CartPage() {
   const handleRemoveItem = async (id) => {
     try {
       if (isAuthenticated) {
-        await api.cart.remove(id);
+        await cartApi.removeItem(id);
       } else {
         const guestCart = cartItems.filter(i => i.id !== id);
         localStorage.setItem('guest_cart', JSON.stringify(guestCart));

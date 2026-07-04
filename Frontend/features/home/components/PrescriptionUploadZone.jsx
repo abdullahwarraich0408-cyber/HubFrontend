@@ -8,6 +8,7 @@ import { Button } from "@/shared/components/Button";
 import { Input } from "@/shared/components/Input";
 import { useCreatePrescriptionOrder } from "@/lib/hooks/useApi";
 import { openSignInModal } from "@/lib/authModalEvents";
+import { useAuth } from "@/lib/auth/AuthProvider";
 import { detectDeliveryAddress } from "@/lib/location";
 
 const ACCEPTED_TYPES = ["application/pdf", "image/jpeg", "image/jpg", "image/png"];
@@ -17,11 +18,6 @@ const DEFAULT_MEDICINES = [
   { name: "Augmentin 625mg", quantity: 1, unit_price: 380 },
 ];
 
-function isLoggedIn() {
-  if (typeof window === "undefined") return false;
-  return Boolean(localStorage.getItem("token"));
-}
-
 function validateFile(file) {
   if (!ACCEPTED_TYPES.includes(file.type)) return "Please upload a PDF, JPG, or PNG file.";
   if (file.size > MAX_FILE_SIZE) return "File size must be 5MB or less.";
@@ -30,6 +26,7 @@ function validateFile(file) {
 
 export function PrescriptionUploadZone({ className = "" }) {
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
   const inputRef = useRef(null);
   const [file, setFile] = useState(null);
   const [deliveryType, setDeliveryType] = useState("standard");
@@ -64,7 +61,11 @@ export function PrescriptionUploadZone({ className = "" }) {
   }, []);
 
   useEffect(() => {
-    detectZone(false);
+    const timeoutId = window.setTimeout(() => {
+      detectZone(false);
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, [detectZone]);
 
   const openFilePicker = useCallback(() => {
@@ -82,7 +83,7 @@ export function PrescriptionUploadZone({ className = "" }) {
   }, []);
 
   const handleUpload = useCallback(async () => {
-    if (!isLoggedIn()) {
+    if (!isAuthenticated) {
       toast.error("Please sign in to upload a prescription");
       openSignInModal({ redirect: "/" });
       return;
@@ -109,7 +110,7 @@ export function PrescriptionUploadZone({ className = "" }) {
     } catch (err) {
       toast.error(err.message || "Failed to upload prescription. Please try again.");
     }
-  }, [address, createOrder, deliveryType, file, openFilePicker, router]);
+  }, [address, createOrder, deliveryType, file, isAuthenticated, openFilePicker, router]);
 
   return (
     <div className={className}>

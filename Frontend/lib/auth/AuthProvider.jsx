@@ -4,11 +4,10 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { authApi } from "@/lib/api/index";
 import {
   clearAuthStorage,
+  clearLegacyTokenStorage,
   consumePendingAuthAction,
   getDeviceId,
   getPendingAuthAction,
-  hasAuthSession,
-  loadStoredUser,
   persistUser,
   setMemoryAccessToken,
   setPendingAuthAction,
@@ -52,13 +51,8 @@ export function AuthProvider({ children }) {
   const applySession = useCallback((sessionUser, tokens) => {
     if (tokens?.accessToken) {
       setMemoryAccessToken(tokens.accessToken);
-      if (typeof window !== "undefined") {
-        localStorage.setItem("token", tokens.accessToken);
-      }
     }
-    if (tokens?.refreshToken && typeof window !== "undefined") {
-      localStorage.setItem("refreshToken", tokens.refreshToken);
-    }
+    clearLegacyTokenStorage();
     persistUser(sessionUser);
     setUser(sessionUser);
     setIsAuthenticated(Boolean(sessionUser));
@@ -79,11 +73,29 @@ export function AuthProvider({ children }) {
       clearAuthStorage();
       setUser(null);
       setIsAuthenticated(false);
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("auth-updated"));
+      }
     }
   }, [applySession]);
 
   useEffect(() => {
-    refreshSession().finally(() => setIsLoading(false));
+    let active = true;
+
+    async function bootstrapSession() {
+      try {
+        await refreshSession();
+      } finally {
+        if (active) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    bootstrapSession();
+    return () => {
+      active = false;
+    };
   }, [refreshSession]);
 
   const completeFirebaseLogin = useCallback(
@@ -147,7 +159,29 @@ export function AuthProvider({ children }) {
 
   const loginWithEmail = useCallback(
     async (email, password) => {
-      const data = await authApi.login({ email, password });
+      const data = await authApi.login({
+        email,
+        password,
+        deviceId: getDeviceId(),
+        platform: "web",
+      });
+      const { user: sessionUser, tokens } = mapSession(data);
+      applySession(sessionUser, tokens);
+      return sessionUser;
+    },
+    [applySession]
+  );
+
+  const registerWithEmail = useCallback(
+    async ({ name, email, password, phone }) => {
+      const data = await authApi.register({
+        name,
+        email,
+        password,
+        ...(phone ? { phone } : {}),
+        deviceId: getDeviceId(),
+        platform: "web",
+      });
       const { user: sessionUser, tokens } = mapSession(data);
       applySession(sessionUser, tokens);
       return sessionUser;
@@ -200,6 +234,7 @@ export function AuthProvider({ children }) {
       completePhoneLogin,
       loginWithGoogle,
       loginWithEmail,
+      registerWithEmail,
       logout,
       logoutAllDevices,
       requireAuth,
@@ -219,6 +254,7 @@ export function AuthProvider({ children }) {
       completePhoneLogin,
       loginWithGoogle,
       loginWithEmail,
+      registerWithEmail,
       logout,
       logoutAllDevices,
       requireAuth,

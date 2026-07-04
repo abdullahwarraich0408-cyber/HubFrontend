@@ -4,16 +4,17 @@ import Link from "next/link";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { FirstAidKit, MapPin, Bell, User, ShoppingCart, List, CaretDown, MagnifyingGlass, X, Package, Spinner } from "@phosphor-icons/react";
-import { api } from "@/lib/api";
+import { cartApi } from "@/lib/api/index";
 import { toast } from "sonner";
 import { useEffect } from "react";
 import { useUserProfile } from "@/lib/hooks/useApi";
 import { useAuthModal } from "@/features/auth/context/AuthModalContext";
-import { hasAuthSession } from "@/lib/auth/tokenStore";
+import { useAuth } from "@/lib/auth/AuthProvider";
 
 export function CustomerNavbar() {
   const pathname = usePathname();
   const { openSignIn } = useAuthModal();
+  const { isAuthenticated, isLoading: authLoading, logout } = useAuth();
   const isTrackingRoute =
     pathname.startsWith("/orders") ||
     pathname.startsWith("/prescription") ||
@@ -21,24 +22,20 @@ export function CustomerNavbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentLocation, setCurrentLocation] = useState("Karachi");
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
 
-  const hasToken = typeof window !== "undefined" ? hasAuthSession() : false;
+  const hasToken = isAuthenticated;
+  const authUiReady = hasMounted && !authLoading;
 
   // Fetch profile to check if user is an admin
   const { data: profile, isLoading: isProfileLoading } = useUserProfile({
     retry: false,
     enabled: hasToken,
   });
-
-  useEffect(() => {
-    // If an admin accidentally lands on the customer UI, force them to the admin dashboard
-    if (!isProfileLoading && profile?.role === 'admin') {
-      window.location.href = "/admin";
-    }
-  }, [profile, isProfileLoading]);
+  const profileRole = profile?.role;
+  const profileId = profile?.id ?? null;
 
   const fetchLocation = () => {
     if (!navigator.geolocation) {
@@ -71,8 +68,7 @@ export function CustomerNavbar() {
 
   const handleLogout = async () => {
     try {
-      await api.auth.logout();
-      setIsLoggedIn(false);
+      await logout();
       setCartCount(0);
       
       // Notify components like Cart
@@ -89,21 +85,22 @@ export function CustomerNavbar() {
   };
 
   useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  useEffect(() => {
     // If an admin accidentally lands on the customer UI, force them to the admin dashboard
-    if (!isProfileLoading && profile?.role === 'admin') {
+    if (!isProfileLoading && profileRole === 'admin') {
       window.location.href = "/admin";
     }
 
-    setIsLoggedIn(hasAuthSession());
-
     const updateCartCount = async () => {
-      const loggedIn = hasAuthSession();
-      setIsLoggedIn(loggedIn);
+      const loggedIn = isAuthenticated;
 
       try {
         if (loggedIn) {
           try {
-            const data = await api.cart.get();
+            const data = await cartApi.get();
             const items = data.cart?.items || data.items || [];
             const count = items.reduce((acc, item) => acc + item.quantity, 0);
             setCartCount(count);
@@ -142,7 +139,9 @@ export function CustomerNavbar() {
       }
     };
 
-    updateCartCount();
+    if (!authLoading) {
+      updateCartCount();
+    }
 
     if (typeof window !== 'undefined') {
       window.addEventListener('cart-updated', updateCartCount);
@@ -154,7 +153,7 @@ export function CustomerNavbar() {
         window.removeEventListener('auth-updated', updateCartCount);
       }
     };
-  }, [pathname, isProfileLoading, profile ? profile.id : null]);
+  }, [authLoading, isAuthenticated, pathname, isProfileLoading, profileId, profileRole]);
 
   return (
     <>
@@ -252,7 +251,13 @@ export function CustomerNavbar() {
             </button>
 
             {/* Profile / Login */}
-            {isLoggedIn ? (
+            {!authUiReady ? (
+              <div className="flex items-center gap-1.5 px-2.5 py-2 text-[13px] text-neutral-700">
+                <Link href="/profile" className="w-7 h-7 rounded-full bg-brand-light flex items-center justify-center shrink-0 hover:ring-2 hover:ring-brand-primary/20 transition-all">
+                  <User size={16} className="text-brand-primary" />
+                </Link>
+              </div>
+            ) : isAuthenticated ? (
               <div className="flex items-center gap-1.5 px-2.5 py-2 text-[13px] text-neutral-700">
                 <Link href="/profile" className="w-7 h-7 rounded-full bg-brand-light flex items-center justify-center shrink-0 hover:ring-2 hover:ring-brand-primary/20 transition-all">
                   <User size={16} className="text-brand-primary" />
@@ -356,7 +361,11 @@ export function CustomerNavbar() {
                 Track Order
               </Link>
               <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className={`px-4 py-2.5 text-[14px] font-medium hover:bg-brand-light rounded-md transition-colors ${pathname === "/contact" ? "text-brand-primary bg-brand-light/50" : "text-neutral-700"}`}>Contact</Link>
-              {isLoggedIn ? (
+              {!authUiReady ? (
+                <div className="px-4 py-2.5 text-[14px] font-medium text-neutral-400">
+                  Account
+                </div>
+              ) : isAuthenticated ? (
                 <button onClick={handleLogout} className="px-4 py-2.5 text-[14px] font-medium hover:bg-brand-light rounded-md transition-colors text-neutral-700 text-left">Sign Out</button>
               ) : (
                 <button

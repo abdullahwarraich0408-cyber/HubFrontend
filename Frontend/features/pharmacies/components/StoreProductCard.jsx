@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Heart, Minus, Plus } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { useAddToCart } from "@/lib/hooks/useApi";
+import { hasAuthSession } from "@/lib/auth/tokenStore";
 
 export function StoreProductCard({ product }) {
   const [qty, setQty] = useState(1);
@@ -14,9 +15,7 @@ export function StoreProductCard({ product }) {
   const handleAddToCart = () => {
     if (!product.inStock) return;
 
-    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-
-    if (token) {
+    if (typeof window !== "undefined" && hasAuthSession()) {
       addToCart.mutate(
         { productId: product.id, quantity: qty },
         {

@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useSelector } from "react-redux";
 import { toast } from "sonner";
 import { 
   CheckCircle, 
@@ -17,24 +16,18 @@ import { Input } from "@/shared/components/Input";
 import { useCart, useCreateOrder } from "@/lib/hooks/useApi";
 import { paymentsApi } from "@/lib/api/index";
 import { openSignInModal } from "@/lib/authModalEvents";
-
-function hasStoredAuth() {
-  if (typeof window === "undefined") return false;
-  const token = localStorage.getItem("token");
-  return Boolean(token && token !== "cookie-auth-active");
-}
+import { useAuth } from "@/lib/auth/AuthProvider";
 
 export function CheckoutPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { isAuthenticated, initialized } = useSelector((state) => state.auth);
-  const loggedIn = isAuthenticated || hasStoredAuth();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const loggedIn = isAuthenticated;
   const { data: cartData, isLoading: cartLoading } = useCart({ enabled: loggedIn });
   const createOrder = useCreateOrder();
   const [step, setStep] = useState(1);
   const [redirecting, setRedirecting] = useState(false);
   const [orderId, setOrderId] = useState("");
-  const [guestCartItems, setGuestCartItems] = useState([]);
   const [address, setAddress] = useState({
     firstName: "",
     lastName: "",
@@ -46,11 +39,11 @@ export function CheckoutPage() {
   });
 
   useEffect(() => {
-    if (!initialized) return;
+    if (authLoading) return;
     if (!loggedIn) {
       openSignInModal({ redirect: "/checkout" });
     }
-  }, [initialized, loggedIn]);
+  }, [authLoading, loggedIn]);
 
   useEffect(() => {
     const success = searchParams.get("success");
@@ -78,10 +71,9 @@ export function CheckoutPage() {
     }
   }, [searchParams, loggedIn]);
 
-  useEffect(() => {
-    if (typeof window !== "undefined" && !loggedIn) {
-      setGuestCartItems(JSON.parse(localStorage.getItem("guest_cart") || "[]"));
-    }
+  const guestCartItems = useMemo(() => {
+    if (typeof window === "undefined" || loggedIn) return [];
+    return JSON.parse(localStorage.getItem("guest_cart") || "[]");
   }, [loggedIn]);
 
   const cartItems = loggedIn ? (cartData?.items || []) : guestCartItems;
@@ -150,7 +142,7 @@ export function CheckoutPage() {
     }
   };
 
-  if (!initialized || (loggedIn && cartLoading)) {
+  if (authLoading || (loggedIn && cartLoading)) {
     return (
       <div className="min-h-[calc(100vh-180px)] bg-[var(--color-surface-subtle)] flex items-center justify-center">
         <p className="text-[14px] text-[var(--color-neutral-500)]">Loading checkout...</p>
@@ -178,13 +170,13 @@ export function CheckoutPage() {
     navigator.clipboard.writeText(orderId || "ORD-2025-04821");
   };
 
-  const OrderSummary = ({ isCompact = false }) => (
-    <div className={`bg-white rounded-[16px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-[var(--color-neutral-200)] p-6 ${isCompact ? '' : 'sticky top-24'}`}>
+  const orderSummary = (
+    <div className="bg-white rounded-[16px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-[var(--color-neutral-200)] p-6 sticky top-24">
       <h3 className="text-[18px] font-[var(--font-heading)] font-bold text-[var(--color-ink-headline)] mb-5">
         Order Summary
       </h3>
 
-      {!isCompact && cartItems.length > 0 && (
+      {cartItems.length > 0 && (
         <div className="space-y-4 mb-6 border-b border-[var(--color-neutral-100)] pb-6">
           {cartItems.map((item) => (
             <div key={item.id} className="flex gap-4">
@@ -315,7 +307,7 @@ export function CheckoutPage() {
                 </div>
               </div>
               <div className="w-full lg:w-[40%] hidden lg:block">
-                <OrderSummary />
+                {orderSummary}
               </div>
             </div>
           )}

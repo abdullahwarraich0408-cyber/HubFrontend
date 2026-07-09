@@ -275,6 +275,7 @@ export function SignInForm({
           className="grid grid-cols-2 gap-4"
         >
           <Button
+            type="button"
             variant="secondary"
             onClick={handleGoogleLogin}
             disabled={loading || googleLoading}
@@ -284,6 +285,7 @@ export function SignInForm({
             {googleLoading ? "Wait..." : "Google"}
           </Button>
           <Button
+            type="button"
             variant="secondary"
             disabled={loading || googleLoading}
             className="w-full h-[48px] text-[14px] font-bold bg-white border border-[var(--color-neutral-200)] hover:bg-[var(--color-neutral-50)] hover:border-[var(--color-neutral-300)] hover:shadow-md transition-all text-[var(--color-neutral-800)] flex items-center justify-center hover:-translate-y-0.5"

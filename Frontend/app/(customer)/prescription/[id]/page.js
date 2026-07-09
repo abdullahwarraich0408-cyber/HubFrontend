@@ -7,6 +7,7 @@ import { Button } from "@/shared/components/Button";
 import { Badge } from "@/shared/components/Badge";
 import { HorizontalTrackingTimeline } from "@/shared/components/HorizontalTrackingTimeline";
 import { usePrescriptionOrder, useConfirmPrescriptionOrder, useRetryPrescriptionOrder } from "@/lib/hooks/useApi";
+import { useCustomerOrderTracking } from "@/lib/hooks/useOrderTracking";
 import { PRESCRIPTION_STATUS_LABELS } from "@/lib/mappers/prescriptionOrder";
 import { PrescriptionAssignmentTimeline } from "@/features/prescription/components/PrescriptionAssignmentTimeline";
 
@@ -15,6 +16,8 @@ export default function Page({ params }) {
   const { data: order, isLoading } = usePrescriptionOrder(id);
   const confirmOrder = useConfirmPrescriptionOrder();
   const retryOrder = useRetryPrescriptionOrder();
+
+  useCustomerOrderTracking({ orderId: id, enabled: Boolean(id) });
 
   if (isLoading) return <div className="p-8 text-center">Loading prescription order...</div>;
   if (!order) {

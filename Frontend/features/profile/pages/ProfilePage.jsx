@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -25,28 +25,27 @@ import {
   Flask,
 } from "@phosphor-icons/react";
 import { Button } from "@/shared/components/Button";
+import { ProfileSettingsForm } from "../components/ProfileSettingsForm";
 import { Input } from "@/shared/components/Input";
 import { Badge } from "@/shared/components/Badge";
 import { ProfileModal } from "../components/ProfileModal";
 import {
-  mergeProfileData,
   NOTIFICATION_PREF_LABELS,
   formatMemberSince,
   formatDobDisplay,
   createId,
 } from "../lib/profileData";
+import { useDynamicProfile } from "../lib/useDynamicProfile";
 import {
-  useUserProfile,
-  useUpdateProfile,
   useUpdateProfileData,
-  useChangePassword,
   useAddresses,
   useCreateAddress,
   useUpdateAddress,
   useDeleteAddress,
-  usePrescriptions,
-  usePrescriptionOrders,
-  useAllOrders,
+  useCreateFamily,
+  useAddFamilyMember,
+  useUpdateFamilyMember,
+  useDeleteFamilyMember,
 } from "@/lib/hooks/useApi";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { useAuthModal } from "@/features/auth/context/AuthModalContext";
@@ -62,7 +61,7 @@ const NAV_ITEMS = [
   { id: "settings", label: "Settings", icon: Gear },
 ];
 
-const EMPTY_FAMILY = { name: "", relation: "", age: "", bloodGroup: "B+" };
+const EMPTY_FAMILY = { full_name: "", relationship: "Spouse", blood_group: "B+", gender: "" };
 const EMPTY_ADDRESS = { name: "Home", street: "", city: "", country: "Pakistan", postal_code: "", is_default: false };
 const EMPTY_RECORD = { type: "Lab Report", title: "", date: "", lab: "" };
 const EMPTY_PAYMENT = { type: "card", label: "", expiry: "", isDefault: false };
@@ -75,36 +74,30 @@ export function ProfilePage() {
   const [modal, setModal] = useState(null);
   const [form, setForm] = useState({});
 
-  const { data: profile, isLoading } = useUserProfile({ enabled: isAuthenticated });
-  const { data: addresses = [] } = useAddresses({ enabled: isAuthenticated });
-  const { data: uploadedPrescriptions = [] } = usePrescriptions({ enabled: isAuthenticated });
-  const { data: prescriptionOrders = [] } = usePrescriptionOrders({ enabled: isAuthenticated });
-  const { data: allOrders = [] } = useAllOrders({ enabled: isAuthenticated });
+  const {
+    profile,
+    profileData,
+    familyMembers,
+    medicalRecords,
+    dashboardStats,
+    familyAlerts,
+    familyHealthScore,
+    prescriptionOrders,
+    uploadedPrescriptions,
+    isLoading,
+    hasVault,
+  } = useDynamicProfile({ enabled: isAuthenticated });
 
-  const updateProfile = useUpdateProfile();
+  const { data: addresses = [] } = useAddresses({ enabled: isAuthenticated });
+
   const updateProfileData = useUpdateProfileData();
-  const changePassword = useChangePassword();
   const createAddress = useCreateAddress();
   const updateAddress = useUpdateAddress();
   const deleteAddress = useDeleteAddress();
-
-  const profileData = useMemo(() => mergeProfileData(profile?.profile_data), [profile?.profile_data]);
-
-  const dashboardStats = useMemo(() => {
-    const activeOrders = allOrders.filter((o) => !["delivered", "cancelled"].includes(o.status)).length;
-    const upcomingAppts = allOrders.filter(
-      (o) => o.type === "doctor" && !["completed", "cancelled", "delivered"].includes(o.rawStatus || o.status)
-    ).length;
-    const activeRx = prescriptionOrders.filter(
-      (o) => !["delivered", "cancelled", "no_vendor"].includes(o.status)
-    ).length;
-    return [
-      { label: "Active Orders", value: String(activeOrders), href: "/orders" },
-      { label: "Upcoming Appointments", value: String(upcomingAppts), href: "/orders" },
-      { label: "Active Prescriptions", value: String(activeRx), href: null, section: "prescriptions" },
-      { label: "Family Members", value: String(profileData.familyMembers.length), href: null, section: "family" },
-    ];
-  }, [allOrders, prescriptionOrders, profileData.familyMembers.length]);
+  const createFamily = useCreateFamily();
+  const addFamilyMember = useAddFamilyMember();
+  const updateFamilyMember = useUpdateFamilyMember();
+  const deleteFamilyMember = useDeleteFamilyMember();
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) openSignIn({ redirect: "/profile" });
@@ -116,7 +109,18 @@ export function ProfilePage() {
 
   const openModal = (type, item = null) => {
     setModal({ type, item });
-    if (type === "family") setForm(item || EMPTY_FAMILY);
+    if (type === "family") {
+      setForm(
+        item
+          ? {
+              full_name: item.name,
+              relationship: item.relation,
+              blood_group: item.bloodGroup || "B+",
+              gender: item.gender || "",
+            }
+          : EMPTY_FAMILY
+      );
+    }
     if (type === "address") setForm(item || EMPTY_ADDRESS);
     if (type === "record") setForm(item || EMPTY_RECORD);
     if (type === "payment") setForm(item || EMPTY_PAYMENT);
@@ -133,35 +137,49 @@ export function ProfilePage() {
   };
 
   const saveFamilyMember = async () => {
-    if (!form.name?.trim() || !form.relation?.trim()) {
-      toast.error("Name and relation are required");
+    if (!form.full_name?.trim() || !form.relationship?.trim()) {
+      toast.error("Name and relationship are required");
       return;
     }
-    const members = [...profileData.familyMembers];
-    const payload = {
-      id: modal.item?.id || createId(),
-      name: form.name.trim(),
-      relation: form.relation.trim(),
-      age: form.age ? Number(form.age) : "",
-      bloodGroup: form.bloodGroup || "",
-    };
-    if (modal.item) {
-      const idx = members.findIndex((m) => m.id === modal.item.id);
-      if (idx >= 0) members[idx] = payload;
-    } else {
-      members.push(payload);
+    try {
+      if (!hasVault) {
+        await createFamily.mutateAsync({ name: `${profile?.name || "My"} Family` });
+      }
+      const payload = {
+        full_name: form.full_name.trim(),
+        relationship: form.relationship.trim(),
+        blood_group: form.blood_group || undefined,
+        gender: form.gender || undefined,
+      };
+      if (modal.item?.id) {
+        await updateFamilyMember.mutateAsync({ memberId: modal.item.id, ...payload });
+        toast.success("Family member updated");
+      } else {
+        await addFamilyMember.mutateAsync(payload);
+        toast.success("Family member added");
+      }
+      closeModal();
+    } catch (error) {
+      toast.error(error.message || "Could not save family member");
     }
-    await persistProfileData({ ...profileData, familyMembers: members });
-    toast.success(modal.item ? "Family member updated" : "Family member added");
-    closeModal();
   };
 
-  const deleteFamilyMember = async (id) => {
-    await persistProfileData({
-      ...profileData,
-      familyMembers: profileData.familyMembers.filter((m) => m.id !== id),
-    });
-    toast.success("Family member removed");
+  const removeFamilyMember = async (id) => {
+    try {
+      await deleteFamilyMember.mutateAsync(id);
+      toast.success("Family member removed");
+    } catch (error) {
+      toast.error(error.message || "Could not remove family member");
+    }
+  };
+
+  const setupFamilyVault = async () => {
+    try {
+      await createFamily.mutateAsync({ name: `${profile?.name || "My"} Family` });
+      toast.success("Family health vault created");
+    } catch (error) {
+      toast.error(error.message || "Could not create family");
+    }
   };
 
   const saveAddress = async () => {
@@ -212,6 +230,10 @@ export function ProfilePage() {
   };
 
   const deleteRecord = async (id) => {
+    if (String(id).startsWith("lab-")) {
+      toast.error("Lab reports are managed from your lab bookings");
+      return;
+    }
     await persistProfileData({
       ...profileData,
       medicalRecords: profileData.medicalRecords.filter((r) => r.id !== id),
@@ -263,40 +285,6 @@ export function ProfilePage() {
     await persistProfileData({ ...profileData, notificationPrefs });
   };
 
-  const saveSettings = async (e) => {
-    e.preventDefault();
-    const fd = new FormData(e.target);
-    await updateProfile.mutateAsync({
-      name: fd.get("name"),
-      phone: fd.get("phone"),
-      profile_data: {
-        ...profileData,
-        dob: fd.get("dob"),
-        bloodGroup: fd.get("bloodGroup"),
-      },
-    });
-    toast.success("Profile saved");
-  };
-
-  const savePassword = async (e) => {
-    e.preventDefault();
-    const fd = new FormData(e.target);
-    const current = fd.get("current_password");
-    const next = fd.get("new_password");
-    const confirm = fd.get("confirm_password");
-    if (next !== confirm) {
-      toast.error("New passwords do not match");
-      return;
-    }
-    try {
-      await changePassword.mutateAsync({ current_password: current, new_password: next });
-      toast.success("Password updated");
-      e.target.reset();
-    } catch (error) {
-      toast.error(error.message || "Could not update password");
-    }
-  };
-
   if (authLoading) {
     return <div className="min-h-[60vh] flex items-center justify-center">Loading profile...</div>;
   }
@@ -320,32 +308,57 @@ export function ProfilePage() {
           <div>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-[22px] font-bold">Family Members</h2>
-              <Button className="h-[40px] text-[13px]" leftIcon={<Plus size={16} />} onClick={() => openModal("family")}>
-                Add Member
-              </Button>
+              <div className="flex gap-2">
+                <Link href="/family-health">
+                  <Button className="h-[40px] text-[13px]" variant="secondary">Open Vault</Button>
+                </Link>
+                <Button
+                  className="h-[40px] text-[13px]"
+                  leftIcon={<Plus size={16} />}
+                  onClick={() => openModal("family")}
+                  isLoading={createFamily.isPending}
+                >
+                  Add Member
+                </Button>
+              </div>
             </div>
-            {profileData.familyMembers.length === 0 ? (
-              <p className="text-[14px] text-[var(--color-neutral-500)]">No family members yet. Add one to manage their health info.</p>
+            {!hasVault ? (
+              <div className="p-6 border border-[var(--color-neutral-200)] rounded-[16px] text-center">
+                <p className="text-[14px] text-[var(--color-neutral-600)] mb-4">
+                  Create your family health vault to manage members, medicines, labs, and AI monitoring.
+                </p>
+                <Button onClick={setupFamilyVault} isLoading={createFamily.isPending}>Create Family Vault</Button>
+              </div>
+            ) : familyMembers.length === 0 ? (
+              <p className="text-[14px] text-[var(--color-neutral-500)]">No family members yet. Add one to get started.</p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {profileData.familyMembers.map((member) => (
+                {familyMembers.map((member) => (
                   <div key={member.id} className="p-5 border border-[var(--color-neutral-200)] rounded-[16px]">
                     <div className="flex items-start justify-between mb-3">
-                      <div className="w-12 h-12 rounded-full bg-[var(--color-brand-light)] flex items-center justify-center">
+                      <Link href={`/family-health/members/${member.id}`} className="w-12 h-12 rounded-full bg-[var(--color-brand-light)] flex items-center justify-center hover:ring-2 hover:ring-[var(--color-brand-primary)]/20">
                         <User size={24} className="text-[var(--color-brand-primary)]" weight="fill" />
-                      </div>
+                      </Link>
                       <div className="flex gap-1">
                         <button type="button" onClick={() => openModal("family", member)} className="p-2 text-[var(--color-neutral-400)] hover:text-[var(--color-brand-primary)]">
                           <PencilSimple size={16} />
                         </button>
-                        <button type="button" onClick={() => deleteFamilyMember(member.id)} className="p-2 text-[var(--color-neutral-400)] hover:text-[var(--color-status-danger)]">
+                        <button type="button" onClick={() => removeFamilyMember(member.id)} className="p-2 text-[var(--color-neutral-400)] hover:text-[var(--color-status-danger)]">
                           <Trash size={16} />
                         </button>
                       </div>
                     </div>
-                    <h3 className="text-[16px] font-bold">{member.name}</h3>
-                    <p className="text-[13px] text-[var(--color-neutral-500)]">{member.relation}{member.age ? ` · ${member.age} years` : ""}</p>
-                    {member.bloodGroup && <p className="text-[12px] text-[var(--color-brand-primary)] font-semibold mt-2">Blood Group: {member.bloodGroup}</p>}
+                    <Link href={`/family-health/members/${member.id}`} className="block hover:text-[var(--color-brand-primary)]">
+                      <h3 className="text-[16px] font-bold">{member.name}</h3>
+                    </Link>
+                    <p className="text-[13px] text-[var(--color-neutral-500)]">{member.relation}</p>
+                    {member.healthScore != null && (
+                      <p className="text-[12px] font-semibold text-[var(--color-brand-primary)] mt-2">Health Score: {member.healthScore}</p>
+                    )}
+                    {member.bloodGroup && <p className="text-[12px] text-[var(--color-neutral-600)] mt-1">Blood Group: {member.bloodGroup}</p>}
+                    {member.statusLines?.[0] && (
+                      <p className="text-[12px] text-[var(--color-neutral-500)] mt-2">{member.statusLines[0]}</p>
+                    )}
                   </div>
                 ))}
               </div>
@@ -458,28 +471,42 @@ export function ProfilePage() {
                 Add Record
               </Button>
             </div>
-            {profileData.medicalRecords.length === 0 ? (
-              <p className="text-[14px] text-[var(--color-neutral-500)]">No medical records saved yet.</p>
+            {medicalRecords.length === 0 ? (
+              <p className="text-[14px] text-[var(--color-neutral-500)]">No medical records yet. Lab reports appear here automatically after booking.</p>
             ) : (
               <div className="space-y-3">
-                {profileData.medicalRecords.map((record) => (
+                {medicalRecords.map((record) => (
                   <div key={record.id} className="flex items-center justify-between gap-4 p-4 border border-[var(--color-neutral-200)] rounded-[14px]">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-10 h-10 rounded-[10px] bg-[var(--color-brand-mist)] flex items-center justify-center shrink-0">
                         <FolderOpen size={20} className="text-[var(--color-brand-primary)]" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-[14px] font-bold truncate">{record.title}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-[14px] font-bold truncate">{record.title}</p>
+                          {record.source === "lab" && (
+                            <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-[var(--color-brand-mist)] text-[var(--color-brand-primary)]">Live</span>
+                          )}
+                        </div>
                         <p className="text-[12px] text-[var(--color-neutral-500)]">{record.type} · {record.lab} · {record.date}</p>
                       </div>
                     </div>
                     <div className="flex gap-1 shrink-0">
-                      <button type="button" onClick={() => openModal("record", record)} className="p-2 text-[var(--color-neutral-400)] hover:text-[var(--color-brand-primary)]">
-                        <PencilSimple size={16} />
-                      </button>
-                      <button type="button" onClick={() => deleteRecord(record.id)} className="p-2 text-[var(--color-neutral-400)] hover:text-[var(--color-status-danger)]">
-                        <Trash size={16} />
-                      </button>
+                      {record.fileUrl && (
+                        <a href={record.fileUrl} target="_blank" rel="noreferrer" className="p-2 text-[var(--color-neutral-400)] hover:text-[var(--color-brand-primary)]">
+                          <DownloadSimple size={16} />
+                        </a>
+                      )}
+                      {record.source === "manual" && (
+                        <>
+                          <button type="button" onClick={() => openModal("record", record)} className="p-2 text-[var(--color-neutral-400)] hover:text-[var(--color-brand-primary)]">
+                            <PencilSimple size={16} />
+                          </button>
+                          <button type="button" onClick={() => deleteRecord(record.id)} className="p-2 text-[var(--color-neutral-400)] hover:text-[var(--color-status-danger)]">
+                            <Trash size={16} />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -577,29 +604,7 @@ export function ProfilePage() {
         return (
           <div>
             <h2 className="text-[22px] font-bold mb-6">Settings</h2>
-            <form onSubmit={saveSettings} className="space-y-6 max-w-[480px]">
-              <Input label="Full Name" name="name" defaultValue={profile?.name || ""} key={`name-${profile?.name}`} />
-              <Input label="Email" type="email" defaultValue={profile?.email || ""} disabled />
-              <Input label="Phone" name="phone" defaultValue={profile?.phone || ""} key={`phone-${profile?.phone}`} />
-              <Input label="Date of Birth" name="dob" type="date" defaultValue={profileData.dob || ""} key={`dob-${profileData.dob}`} />
-              <div>
-                <label className="text-[13px] font-semibold mb-1.5 block">Blood Group</label>
-                <select name="bloodGroup" defaultValue={profileData.bloodGroup || ""} className="w-full h-[44px] px-4 border border-[var(--color-neutral-200)] rounded-[var(--radius-md)] text-[14px] outline-none focus:border-[var(--color-brand-primary)]">
-                  <option value="">Select</option>
-                  {["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"].map((bg) => (
-                    <option key={bg} value={bg}>{bg}</option>
-                  ))}
-                </select>
-              </div>
-              <Button type="submit" className="h-[44px]" isLoading={updateProfile.isPending}>Save Changes</Button>
-            </form>
-            <form onSubmit={savePassword} className="space-y-4 max-w-[480px] pt-8 mt-8 border-t border-[var(--color-neutral-200)]">
-              <h3 className="text-[15px] font-bold">Security</h3>
-              <Input label="Current Password" name="current_password" type="password" placeholder="••••••••" required />
-              <Input label="New Password" name="new_password" type="password" placeholder="••••••••" required />
-              <Input label="Confirm New Password" name="confirm_password" type="password" placeholder="••••••••" required />
-              <Button type="submit" variant="secondary" className="h-[44px]" isLoading={changePassword.isPending}>Update Password</Button>
-            </form>
+            <ProfileSettingsForm profile={profile} profileData={profileData} />
           </div>
         );
 
@@ -624,6 +629,7 @@ export function ProfilePage() {
             <h3 className="text-[15px] font-bold mb-4">Quick Actions</h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
               {[
+                { label: "Family Health Vault", href: "/family-health", icon: Users },
                 { label: "Order Medicines", href: "/browse", icon: Package },
                 { label: "Book Doctor", href: "/doctors", icon: Stethoscope },
                 { label: "Book Lab Test", href: "/lab-tests", icon: Flask },
@@ -637,16 +643,34 @@ export function ProfilePage() {
               ))}
             </div>
             <h3 className="text-[15px] font-bold mb-4">Health Summary</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
               <div className="p-4 border border-[var(--color-neutral-200)] rounded-[14px]">
                 <p className="text-[12px] text-[var(--color-neutral-400)] uppercase font-semibold mb-1">Blood Group</p>
-                <p className="text-[20px] font-bold">{profileData.bloodGroup || "—"}</p>
+                <p className="text-[20px] font-bold">{profileData.bloodGroup || profile?.profile_data?.bloodGroup || "—"}</p>
               </div>
               <div className="p-4 border border-[var(--color-neutral-200)] rounded-[14px]">
                 <p className="text-[12px] text-[var(--color-neutral-400)] uppercase font-semibold mb-1">Member Since</p>
                 <p className="text-[20px] font-bold">{formatMemberSince(profile?.created_at)}</p>
               </div>
+              {familyHealthScore != null && (
+                <div className="p-4 border border-[var(--color-brand-primary)]/20 bg-[var(--color-brand-mist)] rounded-[14px]">
+                  <p className="text-[12px] text-[var(--color-brand-primary)] uppercase font-semibold mb-1">Family Health Score</p>
+                  <p className="text-[20px] font-bold text-[var(--color-brand-primary)]">{familyHealthScore}</p>
+                </div>
+              )}
             </div>
+            {familyAlerts.length > 0 && (
+              <>
+                <h3 className="text-[15px] font-bold mb-3">Family Alerts</h3>
+                <div className="space-y-2 mb-6">
+                  {familyAlerts.map((alert, i) => (
+                    <div key={i} className="p-3 rounded-[12px] bg-amber-50 border border-amber-200 text-[13px] text-amber-900">
+                      <strong>{alert.member}:</strong> {alert.message}
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
             {profileData.dob && (
               <p className="text-[13px] text-[var(--color-neutral-500)] mt-4">Date of birth: {formatDobDisplay(profileData.dob)}</p>
             )}
@@ -709,17 +733,16 @@ export function ProfilePage() {
         footer={
           <>
             <Button variant="secondary" onClick={closeModal}>Cancel</Button>
-            <Button onClick={saveFamilyMember} isLoading={updateProfileData.isPending}>Save</Button>
+            <Button onClick={saveFamilyMember} isLoading={addFamilyMember.isPending || updateFamilyMember.isPending || createFamily.isPending}>Save</Button>
           </>
         }
       >
         <div className="space-y-4">
-          <Input label="Full Name" value={form.name || ""} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-          <Input label="Relation" value={form.relation || ""} onChange={(e) => setForm({ ...form, relation: e.target.value })} placeholder="Spouse, Son, etc." />
-          <Input label="Age" type="number" value={form.age || ""} onChange={(e) => setForm({ ...form, age: e.target.value })} />
+          <Input label="Full Name" value={form.full_name || ""} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
+          <Input label="Relationship" value={form.relationship || ""} onChange={(e) => setForm({ ...form, relationship: e.target.value })} placeholder="Spouse, Son, Father..." />
           <div>
             <label className="text-[13px] font-semibold mb-1.5 block">Blood Group</label>
-            <select value={form.bloodGroup || "B+"} onChange={(e) => setForm({ ...form, bloodGroup: e.target.value })} className="w-full h-[44px] px-4 border border-[var(--color-neutral-200)] rounded-[var(--radius-md)]">
+            <select value={form.blood_group || "B+"} onChange={(e) => setForm({ ...form, blood_group: e.target.value })} className="w-full h-[44px] px-4 border border-[var(--color-neutral-200)] rounded-[var(--radius-md)]">
               {["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"].map((bg) => <option key={bg} value={bg}>{bg}</option>)}
             </select>
           </div>

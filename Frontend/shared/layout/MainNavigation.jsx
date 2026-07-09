@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { House, Pill, Stethoscope, Flask, Storefront, Buildings } from "@phosphor-icons/react";
+import { House, Pill, Stethoscope, Flask, Storefront, Buildings, UsersThree } from "@phosphor-icons/react";
 
 const TABS = [
   { label: "Home", href: "/", icon: House, match: (path) => path === "/" },
@@ -10,6 +10,7 @@ const TABS = [
   { label: "Doctors", href: "/doctors", icon: Stethoscope, match: (path) => path.startsWith("/doctors") },
   { label: "Hospitals", href: "/hospitals", icon: Buildings, match: (path) => path.startsWith("/hospitals") },
   { label: "Lab Tests", href: "/lab-tests", icon: Flask, match: (path) => path.startsWith("/lab-tests") },
+  { label: "Family Health", href: "/family-health", icon: UsersThree, match: (path) => path.startsWith("/family-health") },
   { label: "Pharmacies", href: "/vendors", icon: Storefront, match: (path) => path.startsWith("/vendors") || path.startsWith("/pharmacies") },
 ];
 

@@ -18,6 +18,7 @@ import {
   uploadApi,
   inventoryApi,
   adminGeneralApi,
+  familyVaultApi,
 } from "@/lib/api/index";
 import { mapProductsToMedicines, mapProductToMedicine, mapProductsToStoreProducts } from "@/lib/mappers/product";
 import { mapVendorsToPharmacies, mapVendorToPharmacy } from "@/lib/mappers/vendor";
@@ -221,6 +222,12 @@ export function useUploadPublicDocument() {
 export function useUploadImage() {
   return useMutation({
     mutationFn: (file) => uploadApi.uploadImage(file).then(res => res.data || res),
+  });
+}
+
+export function useReadPrescription() {
+  return useMutation({
+    mutationFn: (data) => prescriptionsApi.read(data).then(res => res.data || res),
   });
 }
 
@@ -1176,5 +1183,212 @@ export function useAuditLogs(options = {}) {
 export function useImpersonate() {
   return useMutation({
     mutationFn: ({ entity_id, role }) => adminGeneralApi.impersonate(entity_id, role),
+  });
+}
+
+// ─── Family Health Vault ───────────────────────────────────────────────────
+
+export function useFamilyVault(options = {}) {
+  return useQuery({
+    queryKey: ["family-vault"],
+    queryFn: async () => {
+      const res = await familyVaultApi.getFamily();
+      return res?.vault ?? null;
+    },
+    retry: 1,
+    ...options,
+  });
+}
+
+export function useFamilyDashboard(options = {}) {
+  return useQuery({
+    queryKey: ["family-vault-dashboard"],
+    queryFn: () => familyVaultApi.getDashboard(),
+    ...options,
+  });
+}
+
+export function useFamilyCalendar(options = {}) {
+  return useQuery({
+    queryKey: ["family-vault-calendar"],
+    queryFn: async () => {
+      const res = await familyVaultApi.getCalendar();
+      return res?.events ?? [];
+    },
+    ...options,
+  });
+}
+
+export function useFamilyAiInsights(options = {}) {
+  return useQuery({
+    queryKey: ["family-vault-ai-insights"],
+    queryFn: () => familyVaultApi.getAiInsights(),
+    ...options,
+  });
+}
+
+export function useFamilyWeeklySummary(options = {}) {
+  return useQuery({
+    queryKey: ["family-vault-weekly-summary"],
+    queryFn: () => familyVaultApi.getWeeklySummary(),
+    ...options,
+  });
+}
+
+export function useFamilyMember(memberId, options = {}) {
+  return useQuery({
+    queryKey: ["family-vault-member", memberId],
+    queryFn: async () => {
+      const res = await familyVaultApi.getMember(memberId);
+      return res?.member ?? null;
+    },
+    enabled: Boolean(memberId),
+    ...options,
+  });
+}
+
+function invalidateFamilyVault(queryClient) {
+  queryClient.invalidateQueries({ queryKey: ["family-vault"] });
+  queryClient.invalidateQueries({ queryKey: ["family-vault-dashboard"] });
+  queryClient.invalidateQueries({ queryKey: ["family-vault-calendar"] });
+  queryClient.invalidateQueries({ queryKey: ["family-vault-ai-insights"] });
+  queryClient.invalidateQueries({ queryKey: ["family-vault-weekly-summary"] });
+}
+
+export function useCreateFamily() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data) => familyVaultApi.createFamily(data),
+    onSuccess: () => invalidateFamilyVault(queryClient),
+  });
+}
+
+export function useUpdateFamily() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data) => familyVaultApi.updateFamily(data),
+    onSuccess: () => invalidateFamilyVault(queryClient),
+  });
+}
+
+export function useAddFamilyMember() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data) => familyVaultApi.addMember(data),
+    onSuccess: () => invalidateFamilyVault(queryClient),
+  });
+}
+
+export function useUpdateFamilyMember() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ memberId, ...data }) => familyVaultApi.updateMember(memberId, data),
+    onSuccess: (_, vars) => {
+      invalidateFamilyVault(queryClient);
+      queryClient.invalidateQueries({ queryKey: ["family-vault-member", vars.memberId] });
+    },
+  });
+}
+
+export function useDeleteFamilyMember() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (memberId) => familyVaultApi.deleteMember(memberId),
+    onSuccess: () => invalidateFamilyVault(queryClient),
+  });
+}
+
+export function useFamilyCopilotQuery() {
+  return useMutation({
+    mutationFn: (question) => familyVaultApi.copilotQuery(question),
+  });
+}
+
+export function useAddMemberMedicine() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ memberId, ...data }) => familyVaultApi.addMedicine(memberId, data),
+    onSuccess: (_, vars) => {
+      invalidateFamilyVault(queryClient);
+      queryClient.invalidateQueries({ queryKey: ["family-vault-member", vars.memberId] });
+    },
+  });
+}
+
+export function useAddMemberLabReport() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ memberId, ...data }) => familyVaultApi.addLabReport(memberId, data),
+    onSuccess: (_, vars) => {
+      invalidateFamilyVault(queryClient);
+      queryClient.invalidateQueries({ queryKey: ["family-vault-member", vars.memberId] });
+    },
+  });
+}
+
+export function useAddMemberVaccination() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ memberId, ...data }) => familyVaultApi.addVaccination(memberId, data),
+    onSuccess: (_, vars) => {
+      invalidateFamilyVault(queryClient);
+      queryClient.invalidateQueries({ queryKey: ["family-vault-member", vars.memberId] });
+    },
+  });
+}
+
+export function useAddMemberVital() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ memberId, ...data }) => familyVaultApi.addVital(memberId, data),
+    onSuccess: (_, vars) => {
+      invalidateFamilyVault(queryClient);
+      queryClient.invalidateQueries({ queryKey: ["family-vault-member", vars.memberId] });
+    },
+  });
+}
+
+export function useAddMemberDoctor() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ memberId, ...data }) => familyVaultApi.addDoctor(memberId, data),
+    onSuccess: (_, vars) => {
+      invalidateFamilyVault(queryClient);
+      queryClient.invalidateQueries({ queryKey: ["family-vault-member", vars.memberId] });
+    },
+  });
+}
+
+export function useAddMemberAppointment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ memberId, ...data }) => familyVaultApi.addAppointment(memberId, data),
+    onSuccess: (_, vars) => {
+      invalidateFamilyVault(queryClient);
+      queryClient.invalidateQueries({ queryKey: ["family-vault-member", vars.memberId] });
+    },
+  });
+}
+
+export function useAddMemberPrescription() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ memberId, ...data }) => familyVaultApi.addPrescription(memberId, data),
+    onSuccess: (_, vars) => {
+      invalidateFamilyVault(queryClient);
+      queryClient.invalidateQueries({ queryKey: ["family-vault-member", vars.memberId] });
+    },
+  });
+}
+
+export function useDeleteMemberPrescription() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ memberId, prescriptionId }) =>
+      familyVaultApi.deletePrescription(memberId, prescriptionId),
+    onSuccess: (_, vars) => {
+      invalidateFamilyVault(queryClient);
+      queryClient.invalidateQueries({ queryKey: ["family-vault-member", vars.memberId] });
+    },
   });
 }

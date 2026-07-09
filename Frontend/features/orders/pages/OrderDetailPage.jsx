@@ -19,6 +19,7 @@ import { Button } from "@/shared/components/Button";
 import { Badge } from "@/shared/components/Badge";
 import { HorizontalTrackingTimeline } from "@/shared/components/HorizontalTrackingTimeline";
 import { useOrderDetail } from "@/lib/hooks/useApi";
+import { useCustomerOrderTracking } from "@/lib/hooks/useOrderTracking";
 import { formatDoctorDisplayName } from "@/lib/hooks/useTelehealth";
 import { useAuthModal } from "@/features/auth/context/AuthModalContext";
 
@@ -29,6 +30,11 @@ export function OrderDetailPage() {
   const { isAuthenticated } = useSelector((state) => state.auth);
 
   const { data: order, isLoading, isError } = useOrderDetail(params.id, {
+    enabled: isAuthenticated,
+  });
+
+  useCustomerOrderTracking({
+    orderId: params.id,
     enabled: isAuthenticated,
   });
 

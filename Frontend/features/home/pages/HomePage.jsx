@@ -61,14 +61,14 @@ const PROMO_BANNERS = [
 ];
 
 const CATEGORIES = [
-  { name: "OTC", icon: Pill, href: "/browse?category=otc", circle: "bg-[#DDF3F4]", color: "text-[#0B6E72]" },
-  { name: "Vitamins", icon: CircleHalf, href: "/browse?category=vitamins", circle: "bg-[#FFECCC]", color: "text-[#E65100]" },
-  { name: "Diabetes", icon: Drop, href: "/browse?category=diabetes", circle: "bg-[#D6EAFD]", color: "text-[#1565C0]" },
-  { name: "Baby Care", icon: Baby, href: "/browse?category=baby-care", circle: "bg-[#FADCE8]", color: "text-[#C2185B]" },
-  { name: "Skin Care", icon: Jar, href: "/browse?category=skin-care", circle: "bg-[#D6EAFD]", color: "text-[#0288D1]" },
-  { name: "Hair Care", icon: HairDryer, href: "/browse?category=hair-care", circle: "bg-[#FFF3CD]", color: "text-[#F57C00]" },
-  { name: "Health Devices", icon: Stethoscope, href: "/browse?category=health-devices", circle: "bg-[#DDF5E4]", color: "text-[#2E7D32]" },
-  { name: "Personal Care", icon: HandSoap, href: "/browse?category=personal-care", circle: "bg-[#EDE7F6]", color: "text-[#7B1FA2]" },
+  { name: "OTC", icon: Pill, href: "/browse?category=otc" },
+  { name: "Vitamins", icon: CircleHalf, href: "/browse?category=vitamins" },
+  { name: "Diabetes", icon: Drop, href: "/browse?category=diabetes" },
+  { name: "Baby Care", icon: Baby, href: "/browse?category=baby-care" },
+  { name: "Skin Care", icon: Jar, href: "/browse?category=skin-care" },
+  { name: "Hair Care", icon: HairDryer, href: "/browse?category=hair-care" },
+  { name: "Health Devices", icon: Stethoscope, href: "/browse?category=health-devices" },
+  { name: "Personal Care", icon: HandSoap, href: "/browse?category=personal-care" },
 ];
 
 const NEARBY_PHARMACIES = [
@@ -215,18 +215,18 @@ function FeaturedDoctorCard({ doctor }) {
   );
 }
 
-function CategoryItem({ name, href, icon: Icon, circle, color, isViewAll = false }) {
+function CategoryItem({ name, href, icon: Icon, isViewAll = false }) {
   return (
     <Link href={href} className="flex flex-col items-center w-full min-w-[72px] max-lg:shrink-0 group">
       <div className="w-[80px] h-[80px] rounded-[12px] bg-[#F5F7F9] flex items-center justify-center mb-2 group-hover:bg-[#EEF2F5] transition-colors">
         <div
           className={`w-[52px] h-[52px] rounded-full flex items-center justify-center ${
-            isViewAll ? "bg-[#ECEFF1]" : circle
+            isViewAll ? "bg-[#ECEFF1]" : "icon-box-light"
           }`}
         >
           <Icon
             size={isViewAll ? 22 : 24}
-            className={isViewAll ? "text-[#90A4AE]" : color}
+            className={isViewAll ? "text-[#90A4AE]" : "text-[var(--color-brand-primary)]"}
             weight="fill"
           />
         </div>

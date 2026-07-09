@@ -186,6 +186,7 @@ export const prescriptionsApi = {
     formData.append("prescriptionFile", file);
     return api.post("/prescriptions/upload", formData);
   },
+  read: (data) => api.post("/prescriptions/read", data),
 };
 
 export const prescriptionOrdersApi = {
@@ -307,6 +308,36 @@ export const labTestsApi = {
   getMyBookings: () => api.get("/lab-tests/bookings/me", { auth: "customer" }),
   getMyReports: () => api.get("/lab-tests/reports/me", { auth: "customer" }),
   cancelBooking: (id) => api.delete(`/lab-tests/bookings/${id}`, { auth: "customer" }),
+};
+
+export const familyVaultApi = {
+  createFamily: (data) => api.post("/family-vault", data),
+  getFamily: () => api.get("/family-vault"),
+  updateFamily: (data) => api.patch("/family-vault", data),
+  getDashboard: () => api.get("/family-vault/dashboard"),
+  getCalendar: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return api.get(query ? `/family-vault/calendar?${query}` : "/family-vault/calendar");
+  },
+  getAiInsights: () => api.get("/family-vault/ai-insights"),
+  getWeeklySummary: () => api.get("/family-vault/weekly-summary"),
+  copilotQuery: (question) => api.post("/family-vault/copilot", { question }),
+  searchTimeline: (q) => api.get(`/family-vault/search?q=${encodeURIComponent(q)}`),
+  addMember: (data) => api.post("/family-vault/members", data),
+  getMember: (memberId) => api.get(`/family-vault/members/${memberId}`),
+  updateMember: (memberId, data) => api.patch(`/family-vault/members/${memberId}`, data),
+  deleteMember: (memberId) => api.delete(`/family-vault/members/${memberId}`),
+  getEmergencyProfile: (memberId) => api.get(`/family-vault/members/${memberId}/emergency`),
+  addTimelineEvent: (memberId, data) => api.post(`/family-vault/members/${memberId}/timeline`, data),
+  addMedicine: (memberId, data) => api.post(`/family-vault/members/${memberId}/medicines`, data),
+  addLabReport: (memberId, data) => api.post(`/family-vault/members/${memberId}/lab-reports`, data),
+  addVaccination: (memberId, data) => api.post(`/family-vault/members/${memberId}/vaccinations`, data),
+  addVital: (memberId, data) => api.post(`/family-vault/members/${memberId}/vitals`, data),
+  addDoctor: (memberId, data) => api.post(`/family-vault/members/${memberId}/doctors`, data),
+  addAppointment: (memberId, data) => api.post(`/family-vault/members/${memberId}/appointments`, data),
+  addPrescription: (memberId, data) => api.post(`/family-vault/members/${memberId}/prescriptions`, data),
+  deletePrescription: (memberId, prescriptionId) =>
+    api.delete(`/family-vault/members/${memberId}/prescriptions/${prescriptionId}`),
 };
 
 export const adminGeneralApi = {

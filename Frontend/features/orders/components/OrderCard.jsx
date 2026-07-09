@@ -22,23 +22,23 @@ const TYPE_CONFIG = {
   doctor: {
     icon: Stethoscope,
     label: "Doctor Appointment",
-    ring: "ring-[var(--color-status-info)]/20",
-    iconBg: "bg-[var(--color-status-info-bg)]",
-    iconColor: "text-[var(--color-status-info)]",
+    ring: "ring-[var(--color-brand-primary)]/20",
+    iconBg: "bg-[var(--color-brand-mist)]",
+    iconColor: "text-[var(--color-brand-primary)]",
   },
   lab: {
     icon: Flask,
     label: "Lab Test",
-    ring: "ring-emerald-500/20",
-    iconBg: "bg-emerald-50",
-    iconColor: "text-emerald-600",
+    ring: "ring-[var(--color-brand-primary)]/20",
+    iconBg: "bg-[var(--color-brand-mist)]",
+    iconColor: "text-[var(--color-brand-primary)]",
   },
   prescription: {
     icon: FileText,
     label: "Prescription Order",
-    ring: "ring-violet-500/20",
-    iconBg: "bg-violet-50",
-    iconColor: "text-violet-600",
+    ring: "ring-[var(--color-brand-primary)]/20",
+    iconBg: "bg-[var(--color-brand-mist)]",
+    iconColor: "text-[var(--color-brand-primary)]",
   },
 };
 

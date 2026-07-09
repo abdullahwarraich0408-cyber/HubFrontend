@@ -3,11 +3,14 @@
 import { useState } from "react";
 import { PartnerAuthGuard } from "@/shared/components/PartnerAuthGuard";
 import { VendorSidebar } from "@/shared/layout/VendorSidebar";
+import { useVendorOrderTracking } from "@/lib/hooks/useOrderTracking";
 import { List } from "@phosphor-icons/react";
 
 export function VendorDashboardLayout({ children }) {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+
+  useVendorOrderTracking();
 
   return (
     <PartnerAuthGuard role="vendor">

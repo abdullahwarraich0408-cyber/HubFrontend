@@ -14,6 +14,7 @@ import { OrderCard } from "../components/OrderCard";
 import { ORDER_TYPES } from "../data/mockOrders";
 import Link from "next/link";
 import { useAllOrders } from "@/lib/hooks/useApi";
+import { useCustomerOrderTracking } from "@/lib/hooks/useOrderTracking";
 import { useAuthModal } from "@/features/auth/context/AuthModalContext";
 
 const TABS = [
@@ -46,6 +47,8 @@ export function OrdersPage() {
   const { data: orders = [], isLoading, isError, refetch } = useAllOrders({
     enabled: isAuthenticated,
   });
+
+  useCustomerOrderTracking({ enabled: isAuthenticated });
 
   const filtered = useMemo(
     () => (activeSubtab === "all" ? orders : orders.filter((o) => o.type === activeSubtab)),

@@ -15,9 +15,7 @@ const SERVICE_CARDS = [
     subtitle: "Essentials at your doorstep",
     href: "/browse",
     gradient: "from-[#E6F7F8] via-[#F4FCFD] to-white",
-    iconBg: "bg-[#0B6E72]/12",
-    iconColor: "text-[#0B6E72]",
-    watermark: "text-[#0B6E72]",
+    watermark: "text-[var(--color-brand-primary)]",
     icon: Pill,
   },
   {
@@ -25,9 +23,7 @@ const SERVICE_CARDS = [
     subtitle: "Video or in-clinic appointments",
     href: "/doctors",
     gradient: "from-[#E0F4F6] via-[#F0FAFB] to-white",
-    iconBg: "bg-[#0891A0]/12",
-    iconColor: "text-[#0891A0]",
-    watermark: "text-[#0891A0]",
+    watermark: "text-[var(--color-brand-primary)]",
     icon: Stethoscope,
   },
   {
@@ -35,9 +31,7 @@ const SERVICE_CARDS = [
     subtitle: "Verified stores near you",
     href: "/vendors",
     gradient: "from-[#E8F8EF] via-[#F4FBF7] to-white",
-    iconBg: "bg-[#0F9D58]/12",
-    iconColor: "text-[#0F9D58]",
-    watermark: "text-[#0F9D58]",
+    watermark: "text-[var(--color-brand-primary)]",
     icon: Storefront,
   },
   {
@@ -45,9 +39,7 @@ const SERVICE_CARDS = [
     subtitle: "Sample pickup at your home",
     href: "/lab-tests",
     gradient: "from-[#EEEAF8] via-[#F7F5FC] to-white",
-    iconBg: "bg-[#6366F1]/12",
-    iconColor: "text-[#6366F1]",
-    watermark: "text-[#6366F1]",
+    watermark: "text-[var(--color-brand-primary)]",
     icon: Flask,
   },
 ];
@@ -115,8 +107,8 @@ export function HeroSlider() {
               </div>
 
               <div className="relative z-10 flex flex-col h-full">
-                <div className={`w-11 h-11 rounded-[14px] ${card.iconBg} flex items-center justify-center mb-4 shadow-sm`}>
-                  <card.icon size={22} weight="duotone" className={card.iconColor} />
+                <div className="w-11 h-11 rounded-[14px] icon-box-light flex items-center justify-center mb-4 shadow-sm">
+                  <card.icon size={22} weight="duotone" className="text-[var(--color-brand-primary)]" />
                 </div>
 
                 <h3 className="text-[17px] md:text-[18px] font-bold text-[var(--color-ink-headline)] leading-snug mb-1.5 pr-2">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { toast } from "sonner";
@@ -12,11 +12,12 @@ import {
   LockKey,
   House,
   Buildings,
+  FileArrowUp,
 } from "@phosphor-icons/react";
 import { Button } from "@/shared/components/Button";
 import { Input } from "@/shared/components/Input";
 import { TIME_SLOTS } from "../data/mockLabTests";
-import { useLabTestTimeSlots, useBookLabTest } from "@/lib/hooks/useApi";
+import { useLabTestTimeSlots, useBookLabTest, useUploadDocument, useReadPrescription } from "@/lib/hooks/useApi";
 import { openSignInModal } from "@/lib/authModalEvents";
 
 const STEPS = [
@@ -31,6 +32,9 @@ export function LabBookingFlow({ test }) {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const { data: apiTimeSlots = [] } = useLabTestTimeSlots();
   const bookLabTest = useBookLabTest();
+  const uploadDocument = useUploadDocument();
+  const readPrescription = useReadPrescription();
+  const prescriptionInputRef = useRef(null);
   const timeSlots = apiTimeSlots.length > 0 ? apiTimeSlots : TIME_SLOTS;
   const [step, setStep] = useState(1);
   const [collectionType, setCollectionType] = useState(test.homeCollection ? "HOME" : "VISIT_LAB");
@@ -39,9 +43,41 @@ export function LabBookingFlow({ test }) {
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [collectionDate, setCollectionDate] = useState(new Date().toISOString().slice(0, 10));
   const [prescriptionUrl, setPrescriptionUrl] = useState("");
+  const [prescriptionOcr, setPrescriptionOcr] = useState(null);
+  const [readingPrescription, setReadingPrescription] = useState(false);
 
   const next = () => setStep((s) => Math.min(4, s + 1));
   const detailsValid = patient.name.trim() && patient.phone.trim() && (collectionType === "VISIT_LAB" || address.line.trim());
+
+  const handleReadPrescription = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!isAuthenticated) {
+      toast.error("Please sign in to upload a prescription");
+      openSignInModal({ redirect: `/lab-tests/${test.id}` });
+      return;
+    }
+
+    setReadingPrescription(true);
+    try {
+      const uploaded = await uploadDocument.mutateAsync(file);
+      const fileUrl = uploaded.url || uploaded.fileUrl || uploaded.path;
+      setPrescriptionUrl(fileUrl);
+      const result = await readPrescription.mutateAsync({ file_url: fileUrl });
+      setPrescriptionOcr(result.ocr_data || null);
+      toast.success("Prescription uploaded and read");
+    } catch (error) {
+      toast.error(error.message || "Could not read prescription");
+    } finally {
+      setReadingPrescription(false);
+      e.target.value = "";
+    }
+  };
+
+  const clearPrescription = () => {
+    setPrescriptionUrl("");
+    setPrescriptionOcr(null);
+  };
 
   const handleConfirmBooking = async () => {
     if (!isAuthenticated) {
@@ -128,7 +164,65 @@ export function LabBookingFlow({ test }) {
               <Input value={address.city} onChange={(e) => setAddress({ ...address, city: e.target.value })} placeholder="City" />
             </>
           )}
-          <Input placeholder="Prescription URL (optional)" value={prescriptionUrl} onChange={(e) => setPrescriptionUrl(e.target.value)} />
+          <div className="rounded-[12px] border border-neutral-200 bg-surface-subtle p-4 space-y-3">
+            <div>
+              <p className="text-[13px] font-semibold text-ink-headline">Prescription (optional)</p>
+              <p className="text-[12px] text-neutral-500 mt-1">
+                Upload a prescription photo. We read medicines and lab tests when possible.
+              </p>
+            </div>
+            {!prescriptionUrl ? (
+              <label className="inline-flex items-center justify-center gap-2 h-[44px] px-4 rounded-[12px] bg-brand-primary text-white text-[13px] font-semibold cursor-pointer">
+                <input
+                  ref={prescriptionInputRef}
+                  type="file"
+                  accept="image/*,.pdf"
+                  className="hidden"
+                  onChange={handleReadPrescription}
+                  disabled={readingPrescription}
+                />
+                <FileArrowUp size={16} />
+                {readingPrescription ? "Reading..." : "Read Prescription"}
+              </label>
+            ) : (
+              <div className="rounded-[10px] bg-white border border-neutral-200 p-3 space-y-2">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-[13px] font-semibold text-status-success">Prescription attached</p>
+                  <button type="button" onClick={clearPrescription} className="text-[12px] font-semibold text-rose-600">
+                    Remove
+                  </button>
+                </div>
+                {prescriptionOcr?.doctor && <p className="text-[12px] text-neutral-700">Dr. {prescriptionOcr.doctor}</p>}
+                {prescriptionOcr?.diagnosis && (
+                  <p className="text-[12px] font-medium text-brand-dark">Diagnosis: {prescriptionOcr.diagnosis}</p>
+                )}
+                {prescriptionOcr?.note && <p className="text-[12px] text-neutral-600">{prescriptionOcr.note}</p>}
+                {(prescriptionOcr?.lab_tests || []).length > 0 && (
+                  <div className="pt-2 border-t border-neutral-100">
+                    <p className="text-[11px] font-bold uppercase tracking-wide text-brand-primary mb-1">Lab tests on prescription</p>
+                    <ul className="space-y-1 text-[13px] text-neutral-700">
+                      {prescriptionOcr.lab_tests.map((testName) => (
+                        <li key={testName}>• {testName}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {(prescriptionOcr?.medicines || []).length > 0 && (
+                  <div className="pt-2 border-t border-neutral-100">
+                    <p className="text-[11px] font-bold uppercase tracking-wide text-brand-primary mb-1">Extracted medicines</p>
+                    <ul className="space-y-1 text-[13px] text-neutral-700">
+                      {prescriptionOcr.medicines.map((med, i) => (
+                        <li key={`${med.name}-${i}`}>
+                          • {med.name}{med.dose ? ` (${med.dose})` : ""}
+                          {med.purpose ? ` — For: ${med.purpose}` : ""}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
           <Button className="w-full h-[48px]" disabled={!detailsValid} onClick={next}>Continue to Slot</Button>
         </div>
       )}

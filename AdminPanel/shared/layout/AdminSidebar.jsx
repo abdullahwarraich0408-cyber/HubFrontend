@@ -82,7 +82,7 @@ export function AdminSidebar() {
           </div>
           <div className="flex flex-col">
             <span className="font-[var(--font-dm-serif-display)] text-xl tracking-wide text-[#0C1A2E] leading-tight group-hover:text-[#0B6E72] transition-colors">
-              PharmaHub
+              Medzoos
             </span>
             <span className="text-[10px] font-bold text-[#B8860B] tracking-[0.2em] uppercase leading-none mt-0.5">
               Admin Portal

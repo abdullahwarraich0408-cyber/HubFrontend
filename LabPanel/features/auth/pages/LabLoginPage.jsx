@@ -44,7 +44,7 @@ export function LabLoginPage() {
             <Flask size={32} weight="fill" className="mb-6" />
             <h2 className="text-[32px] font-heading font-extrabold mb-4">Lab Partner Portal</h2>
             <p className="text-white/80 text-[15px] leading-relaxed">
-              Manage bookings, upload reports, and grow your diagnostic services on PharmaHub.
+              Manage bookings, upload reports, and grow your diagnostic services on Medzoos.
             </p>
           </div>
           <div className="space-y-3 text-[13px]">
@@ -68,7 +68,7 @@ export function LabLoginPage() {
               {loading ? "Signing in..." : "Sign In"} <ArrowRight size={18} className="ml-2" />
             </Button>
           </form>
-          <p className="text-[12px] text-neutral-400 mt-6">Demo: lab@pharmahub.com / password123</p>
+          <p className="text-[12px] text-neutral-400 mt-6">Demo: lab@medzoos.com / password123</p>
         </div>
       </div>
     </div>

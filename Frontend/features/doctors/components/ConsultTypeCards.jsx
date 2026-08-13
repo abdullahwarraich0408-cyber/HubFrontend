@@ -58,7 +58,7 @@ export function ConsultTypeCards({ onSelect, onlineCount = 0, layout = "grid", h
             key={option.id}
             type="button"
             onClick={() => onSelect(option.id)}
-            className={`group text-left bg-white rounded-[20px] border-2 border-[var(--color-neutral-200)] hover:border-[var(--color-brand-primary)] overflow-hidden transition-all hover:shadow-[0_12px_32px_-12px_rgba(11,110,114,0.25)] ${
+            className={`group text-left bg-white rounded-[20px] border-2 border-[var(--color-neutral-200)] hover:border-[var(--color-brand-primary)] overflow-hidden transition-all hover:shadow-[0_12px_32px_-12px_rgba(8,43,63,0.25)] ${
               isHero ? "p-0" : "p-5"
             }`}
           >

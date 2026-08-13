@@ -44,7 +44,19 @@ export function formatFirebaseAuthError(error) {
     return message;
   }
 
-  return message.replace(/^Firebase:\s*/i, "");
+  if (
+    /Invalid `prisma|does not exist on the database server|PrismaClient/i.test(message)
+  ) {
+    return "Sign-in is temporarily unavailable. Please try again in a moment.";
+  }
+
+  // Keep OTP UI readable — never dump backend stack traces into the modal
+  const cleaned = message.replace(/^Firebase:\s*/i, "").trim();
+  if (cleaned.length > 180 || cleaned.includes("\n")) {
+    return "Could not verify that code. Please try again.";
+  }
+
+  return cleaned;
 }
 
 /** Test accounts — must match Backend dev-auth.service.js */

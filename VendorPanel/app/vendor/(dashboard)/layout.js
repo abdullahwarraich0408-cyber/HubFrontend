@@ -1,7 +1,7 @@
 import { VendorDashboardLayout } from "./VendorDashboardLayout";
 
 export const metadata = {
-  title: "Vendor Portal | PharmaHub",
+  title: "Vendor Portal | Medzoos",
   description: "Manage your pharmacy products and orders.",
 };
 

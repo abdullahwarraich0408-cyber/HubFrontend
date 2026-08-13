@@ -79,7 +79,7 @@ export function SignInForm({
               <Pill size={24} weight="fill" className="text-[var(--color-brand-light)]" />
             </div>
             <h2 className="text-[32px] font-[var(--font-heading)] font-extrabold text-white mb-3 leading-[1.2] tracking-tight">
-              Welcome to <br /> PharmaHub.
+              Welcome to <br /> Medzoos.
             </h2>
             <p className="text-[14px] text-[var(--color-neutral-300)] leading-relaxed max-w-[320px]">
               Access your digital prescriptions, track deliveries, and manage your family&apos;s health securely.
@@ -170,7 +170,7 @@ export function SignInForm({
           <Button
             type="submit"
             disabled={loading}
-            className="w-full h-[48px] text-[14px] font-bold mt-1 rounded-[var(--radius-md)] bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-dark)] text-white transition-all shadow-[0_4px_12px_rgba(11,110,114,0.15)] hover:shadow-[0_6px_16px_rgba(11,110,114,0.25)] flex justify-center items-center group border-none"
+            className="w-full h-[48px] text-[14px] font-bold mt-1 rounded-[var(--radius-md)] bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-dark)] text-white transition-all shadow-[0_4px_12px_rgba(8,43,63,0.15)] hover:shadow-[0_6px_16px_rgba(8,43,63,0.25)] flex justify-center items-center group border-none"
           >
             {loading ? "Signing in..." : "Sign In"}
             <ArrowRight size={18} className="ml-2 group-hover:translate-x-1 transition-transform" />

@@ -2,7 +2,7 @@ import { AdminSidebar } from "@/shared/layout/AdminSidebar";
 import AdminAuthGuard from "./AdminAuthGuard";
 
 export const metadata = {
-  title: "Admin Portal | PharmaHub",
+  title: "Admin Portal | Medzoos",
   description: "Platform administration and overview.",
 };
 

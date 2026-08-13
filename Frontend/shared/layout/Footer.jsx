@@ -16,11 +16,11 @@ export function Footer() {
                 <FirstAidKit size={24} className="text-brand-primary" weight="fill" />
               </div>
               <span className="font-bold text-[20px] text-white tracking-tight">
-                PharmaHub
+                Medzoos
               </span>
             </Link>
             <p className="text-neutral-500 text-[14px] leading-relaxed max-w-[280px]">
-              Pakistan's most trusted online pharmacy. Authentic medicines from verified vendors, delivered across 1800+ cities.
+              Diabetes care and psychologist support — medicines, consults, and labs focused on what matters first.
             </p>
             <div className="flex items-center gap-3">
               <Link href="#" className="w-10 h-10 rounded-md bg-neutral-800 flex items-center justify-center text-neutral-500 hover:bg-brand-primary hover:text-white transition-all" aria-label="Facebook">
@@ -38,14 +38,15 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Column 2: Shop */}
+          {/* Column 2: Care */}
           <div className="flex flex-col gap-4">
-            <h4 className="text-white font-bold text-[15px] mb-2">Shop</h4>
-            <Link href="/browse" className="text-neutral-500 hover:text-white text-[14px] transition-colors">All Medicines</Link>
+            <h4 className="text-white font-bold text-[15px] mb-2">Care</h4>
+            <Link href="/browse?category=diabetes" className="text-neutral-500 hover:text-white text-[14px] transition-colors">Diabetes Care</Link>
+            <Link href="/doctors?specialty=psychologist" className="text-neutral-500 hover:text-white text-[14px] transition-colors">Psychologists</Link>
+            <Link href="/lab-tests" className="text-neutral-500 hover:text-white text-[14px] transition-colors">Diabetes Lab Panels</Link>
             <Link href="/vendors" className="text-neutral-500 hover:text-white text-[14px] transition-colors">Pharmacies Directory</Link>
-            <Link href="/browse" className="text-neutral-500 hover:text-white text-[14px] transition-colors">Health Devices</Link>
-            <Link href="/browse" className="text-neutral-500 hover:text-white text-[14px] transition-colors">Vitamins & Supplements</Link>
-            <Link href="/offers" className="text-neutral-500 hover:text-white text-[14px] transition-colors">Offers & Deals</Link>
+            <Link href="/hospitals" className="text-neutral-500 hover:text-white text-[14px] transition-colors">Hospitals</Link>
+            <Link href="/family-health" className="text-neutral-500 hover:text-white text-[14px] transition-colors">Family Health</Link>
           </div>
 
           {/* Column 3: Company */}
@@ -67,7 +68,7 @@ export function Footer() {
             </div>
             <div className="flex items-start gap-3">
               <Envelope size={18} className="text-brand-primary mt-0.5 shrink-0" />
-              <span className="text-neutral-500 text-[14px]">support@pharmahub.pk</span>
+              <span className="text-neutral-500 text-[14px]">support@medzoos.pk</span>
             </div>
             <div className="flex items-start gap-3">
               <MapPin size={18} className="text-brand-primary mt-0.5 shrink-0" />
@@ -80,12 +81,12 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-neutral-800 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-[14px] text-neutral-500">
-            © 2025 PharmaHub. All rights reserved.
+            © 2025 Medzoos. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
-            <Link href="#" className="text-[13px] text-neutral-500 hover:text-white transition-colors">Privacy Policy</Link>
-            <Link href="#" className="text-[13px] text-neutral-500 hover:text-white transition-colors">Terms of Service</Link>
-            <Link href="#" className="text-[13px] text-neutral-500 hover:text-white transition-colors">Cookie Policy</Link>
+            <Link href="/privacy" className="text-[13px] text-neutral-500 hover:text-white transition-colors">Privacy Policy</Link>
+            <Link href="/terms" className="text-[13px] text-neutral-500 hover:text-white transition-colors">Terms of Service</Link>
+            <Link href="/cookie-policy" className="text-[13px] text-neutral-500 hover:text-white transition-colors">Cookie Policy</Link>
           </div>
         </div>
       </div>

@@ -216,7 +216,7 @@ export function ProfilePage() {
       type: form.type || "Lab Report",
       title: form.title.trim(),
       date: form.date || new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-      lab: form.lab?.trim() || "PharmaHub",
+      lab: form.lab?.trim() || "Medzoos",
     };
     if (modal.item) {
       const idx = records.findIndex((r) => r.id === modal.item.id);

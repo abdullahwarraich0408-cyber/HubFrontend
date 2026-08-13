@@ -28,7 +28,7 @@ function AuthHydrator({ children }) {
     if (!initialized || typeof window === "undefined") return;
 
     const token = localStorage.getItem("token");
-    const user = localStorage.getItem("pharmahub_user");
+    const user = localStorage.getItem("medzoos_user") || localStorage.getItem("sehat1_user") || localStorage.getItem("pharmahub_user");
     if (token && !user) {
       dispatch(fetchProfile());
     }

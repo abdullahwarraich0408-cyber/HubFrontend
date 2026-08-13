@@ -45,7 +45,7 @@ export function ContactPage() {
                     <div>
                       <h4 className="text-[16px] font-bold text-[var(--color-ink-headline)] mb-1">Email Us</h4>
                       <p className="text-[14px] text-[var(--color-neutral-500)] mb-1.5">For general inquiries and support.</p>
-                      <a href="mailto:support@pharmahub.pk" className="text-[15px] font-bold text-[var(--color-brand-primary)] hover:underline">support@pharmahub.pk</a>
+                      <a href="mailto:support@medzoos.pk" className="text-[15px] font-bold text-[var(--color-brand-primary)] hover:underline">support@medzoos.pk</a>
                     </div>
                   </div>
 
@@ -83,7 +83,7 @@ export function ContactPage() {
                 </div>
                 <h3 className="text-[28px] font-bold text-white mb-3 tracking-tight">Become a Partner</h3>
                 <p className="text-white/70 text-[16px] mb-8 leading-relaxed">
-                  Join hundreds of verified pharmacies expanding their reach through PharmaHub's digital network.
+                  Join hundreds of verified pharmacies expanding their reach through Medzoos's digital network.
                 </p>
                 <Button className="bg-white text-ink-900 hover:bg-neutral-100 font-bold rounded-xl w-full h-14 text-[16px]">
                   Partner Application <CaretRight size={20} className="ml-2" />

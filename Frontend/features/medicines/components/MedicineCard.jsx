@@ -59,7 +59,7 @@ export function MedicineCard({ medicine }) {
   };
 
   return (
-    <div className="group flex flex-col bg-white rounded-[16px] border border-[var(--color-neutral-200)] overflow-hidden hover:border-[var(--color-brand-primary)]/30 hover:shadow-[0_8px_24px_-8px_rgba(11,110,114,0.12)] transition-all duration-200">
+    <div className="group flex flex-col bg-white rounded-[16px] border border-[var(--color-neutral-200)] overflow-hidden hover:border-[var(--color-brand-primary)]/30 hover:shadow-[0_8px_24px_-8px_rgba(8,43,63,0.12)] transition-all duration-200">
       <Link href={`/product/${medicine.id}`} className="relative aspect-[4/3] bg-[var(--color-neutral-100)] overflow-hidden block">
         <Image
           src={medicine.image}

@@ -3,9 +3,9 @@
 import { CheckCircle, DeviceMobile, QrCode } from "@phosphor-icons/react";
 
 const APP_FEATURES = [
-  "Track Orders",
-  "Exclusive Offers",
-  "Easy Reorder",
+  "Track diabetes orders",
+  "Book psychologist sessions",
+  "Reorder strips & insulin",
 ];
 
 export function AppDownloadBanner() {
@@ -23,9 +23,9 @@ export function AppDownloadBanner() {
         </div>
 
         <div className="text-white min-w-0">
-          <h2 className="text-[22px] md:text-[26px] font-bold mb-2">Get the PharmaHub App</h2>
+          <h2 className="text-[22px] md:text-[26px] font-bold mb-2">Get the Medzoos App</h2>
           <p className="text-[14px] text-white/75 mb-5 max-w-[420px]">
-            Faster, easier &amp; better experience on the app
+            Diabetes care and psychologist support — medicines, consults, and labs in one place.
           </p>
           <ul className="space-y-2.5">
             {APP_FEATURES.map((feature) => (

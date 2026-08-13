@@ -9,7 +9,7 @@ export function PharmacyCard({ pharmacy }) {
   return (
     <Link
       href="/browse"
-      className="group flex flex-col bg-white rounded-[20px] border border-[var(--color-neutral-200)] overflow-hidden hover:border-[var(--color-brand-primary)]/35 hover:shadow-[0_12px_40px_-12px_rgba(11,110,114,0.15)] transition-all duration-300"
+      className="group flex flex-col bg-white rounded-[20px] border border-[var(--color-neutral-200)] overflow-hidden hover:border-[var(--color-brand-primary)]/35 hover:shadow-[0_12px_40px_-12px_rgba(8,43,63,0.15)] transition-all duration-300"
     >
       {/* Cover image */}
       <div className="relative h-[180px] overflow-hidden bg-[var(--color-neutral-100)]">

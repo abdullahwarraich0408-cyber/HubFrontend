@@ -1,8 +1,8 @@
 import { ContactPage } from "@/features/contact/pages/ContactPage";
 
 export const metadata = {
-  title: "Contact Us | PharmaHub",
-  description: "Get in touch with the PharmaHub support team.",
+  title: "Contact Us | Medzoos",
+  description: "Get in touch with the Medzoos support team.",
 };
 
 export default function Contact() {

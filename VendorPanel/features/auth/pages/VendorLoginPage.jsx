@@ -63,7 +63,7 @@ export function VendorLoginPage() {
               <Storefront size={24} weight="fill" className="text-white" />
             </div>
             <h2 className="text-[36px] font-[var(--font-heading)] font-extrabold text-white mb-4 leading-[1.2] tracking-tight">
-              Vendor Portal <br /> for PharmaHub.
+              Vendor Portal <br /> for Medzoos.
             </h2>
             <p className="text-[15px] text-white/80 leading-relaxed max-w-[320px]">
               Manage your inventory, track orders, and grow your pharmacy business on our trusted platform.
@@ -103,7 +103,7 @@ export function VendorLoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="vendor@pharmahub.com"
+              placeholder="vendor@medzoos.com"
               leftIcon={<Envelope size={18} />}
               required
             />

@@ -78,7 +78,7 @@ export default function AdminLoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@pharmahub.com"
+                  placeholder="admin@medzoos.com"
                   className="w-full h-12 pl-10 pr-4 rounded-lg border border-[#0C1A2E]/10 bg-[#F6F8FA] text-[#0C1A2E] text-sm outline-none focus:bg-white focus:border-[#0B6E72] focus:ring-1 focus:ring-[#0B6E72] transition-all font-medium"
                 />
               </div>

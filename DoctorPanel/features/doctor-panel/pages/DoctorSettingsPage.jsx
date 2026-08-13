@@ -195,7 +195,7 @@ export function DoctorSettingsPage() {
               />
               <NotificationToggle
                 label="Marketing Updates"
-                description="Receive news and platform updates from PharmaHub"
+                description="Receive news and platform updates from Medzoos"
                 checked={profile.notifications.marketing}
                 onChange={() => handleNotificationToggle("marketing")}
               />

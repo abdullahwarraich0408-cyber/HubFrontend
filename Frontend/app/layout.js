@@ -19,8 +19,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata = {
-  title: "PharmaHub | Your Health, Delivered to Your Door",
-  description: "Authentic medicines from verified vendors, delivered across Pakistan.",
+  title: "Medzoos | Diabetes Care & Psychologist Support",
+  description: "Diabetes care and psychologist support — medicines, consults, and labs focused on diabetes and mental wellness.",
 };
 
 export default function RootLayout({ children }) {

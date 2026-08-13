@@ -14,7 +14,7 @@ export function downloadProductCsvTemplate() {
     [CSV_HEADERS.join(","), sampleRow.join(",")].join("\n");
   const link = document.createElement("a");
   link.setAttribute("href", encodeURI(csvContent));
-  link.setAttribute("download", "pharmahub_products_template.csv");
+  link.setAttribute("download", "medzoos_products_template.csv");
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);

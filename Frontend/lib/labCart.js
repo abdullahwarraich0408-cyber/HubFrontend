@@ -1,11 +1,11 @@
 "use client";
 
-const CART_KEY = "pharmahub_lab_cart";
+const CART_KEY = "medzoos_lab_cart";
 
 export function getLabCart() {
   if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem(CART_KEY);
+    const raw = localStorage.getItem(CART_KEY) || localStorage.getItem("sehat1_lab_cart") || localStorage.getItem("pharmahub_lab_cart");
     return raw ? JSON.parse(raw) : [];
   } catch {
     return [];

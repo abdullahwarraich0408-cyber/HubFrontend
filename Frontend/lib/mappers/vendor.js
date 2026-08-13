@@ -39,7 +39,7 @@ export function mapVendorToPharmacy(vendor, index = 0) {
     id: vendor.id,
     slug,
     name,
-    desc: vendor.description || "Verified pharmacy partner on PharmaHub.",
+    desc: vendor.description || "Verified pharmacy partner on Medzoos.",
     shortDesc: vendor.short_desc || "Authentic medicines & fast delivery",
     products: vendor.product_count ?? vendor.products ?? 0,
     rating: vendor.rating ?? 4.5,
@@ -67,7 +67,7 @@ export function mapVendorToPharmacy(vendor, index = 0) {
     services: vendor.services || { medicines: true, doctors: false, labTests: false },
     pricing: vendor.pricing || "mid",
     compare: vendor.compare || { delivery: 8, pricing: 8, availability: 8 },
-    about: vendor.about || `${name} is a ${isOperational ? "verified" : "reviewed"} PharmaHub partner.`,
+    about: vendor.about || `${name} is a ${isOperational ? "verified" : "reviewed"} Medzoos partner.`,
     address: vendor.address || "Karachi, Pakistan",
     phone: vendor.phone || "",
   };

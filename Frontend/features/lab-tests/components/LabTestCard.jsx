@@ -8,7 +8,7 @@ import { toast } from "sonner";
 
 export function LabTestCard({ test, compact = false }) {
   return (
-    <div className={`bg-white rounded-[16px] border border-[var(--color-neutral-200)] overflow-hidden hover:border-[var(--color-brand-primary)]/30 hover:shadow-[0_8px_24px_-8px_rgba(11,110,114,0.15)] transition-all ${compact ? "" : "h-full flex flex-col"}`}>
+    <div className={`bg-white rounded-[16px] border border-[var(--color-neutral-200)] overflow-hidden hover:border-[var(--color-brand-primary)]/30 hover:shadow-[0_8px_24px_-8px_rgba(8,43,63,0.15)] transition-all ${compact ? "" : "h-full flex flex-col"}`}>
       <div className="p-5 flex flex-col flex-1">
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex-1 min-w-0">

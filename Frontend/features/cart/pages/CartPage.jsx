@@ -161,7 +161,7 @@ export function CartPage() {
             Looks like you haven&apos;t added any medicines or health products to your cart yet.
           </p>
           <Link href="/browse">
-            <Button className="w-full h-[48px] font-bold shadow-[0_4px_12px_rgba(11,110,114,0.15)]">
+            <Button className="w-full h-[48px] font-bold shadow-[0_4px_12px_rgba(8,43,63,0.15)]">
               Continue Shopping
             </Button>
           </Link>
@@ -373,7 +373,7 @@ export function CartPage() {
 
               <div className="p-6">
                 <Link href="/checkout">
-                  <Button className="w-full h-[54px] text-[16px] font-bold rounded-[var(--radius-lg)] bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-brand-dark)] shadow-[0_8px_20px_rgba(11,110,114,0.25)] hover:shadow-[0_12px_25px_rgba(11,110,114,0.35)] hover:-translate-y-[2px] transition-all group border-none mb-4 flex justify-center items-center">
+                  <Button className="w-full h-[54px] text-[16px] font-bold rounded-[var(--radius-lg)] bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-brand-dark)] shadow-[0_8px_20px_rgba(8,43,63,0.25)] hover:shadow-[0_12px_25px_rgba(8,43,63,0.35)] hover:-translate-y-[2px] transition-all group border-none mb-4 flex justify-center items-center">
                     Proceed to Checkout
                     <ArrowRight size={20} className="ml-2 group-hover:translate-x-1 transition-transform" weight="bold" />
                   </Button>

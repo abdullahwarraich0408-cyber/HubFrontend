@@ -19,7 +19,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata = {
-  title: "Lab Portal | PharmaHub",
+  title: "Lab Portal | Medzoos",
   description: "Manage lab bookings, tests, and reports.",
 };
 

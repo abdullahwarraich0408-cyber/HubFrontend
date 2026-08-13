@@ -6,12 +6,11 @@ import {
   Stethoscope,
   Flask,
   Star,
-  Baby,
   Drop,
-  HairDryer,
   CircleHalf,
-  Jar,
-  HandSoap,
+  Brain,
+  Pulse,
+  ForkKnife,
   ArrowRight,
   CaretRight,
   SquaresFour,
@@ -26,71 +25,83 @@ import { useVendors, useDoctors, usePopularLabTests } from "@/lib/hooks/useApi";
 
 const PROMO_BANNERS = [
   {
-    title: "Flat 25% OFF",
-    subtitle: "On Medicines",
-    code: "Use Code: HEALTH25",
+    title: "20% OFF Diabetes Care",
+    subtitle: "Insulin, strips & monitors",
+    code: "Use Code: DIABETES20",
     cta: "Shop Now",
-    href: "/browse",
-    bg: "bg-[#E8F8F0]",
-    titleColor: "text-[#1B5E20]",
-    btnClass: "bg-[#0B6E72] hover:bg-[#084F52]",
-    image: "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&q=80&w=400",
+    href: "/browse?category=diabetes",
+    bg: "bg-[#DEEEF9]",
+    titleColor: "text-[#17618E]",
+    btnClass: "bg-[#17618E] hover:bg-[#082B3F]",
+    image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=400",
   },
   {
-    title: "Consult Top Doctors",
-    subtitle: "From the comfort of your home",
+    title: "Talk to a Psychologist",
+    subtitle: "Support for stress & diabetes burnout",
     code: null,
     cta: "Book Now",
-    href: "/doctors",
-    bg: "bg-[#E3F2FD]",
-    titleColor: "text-[#0D47A1]",
-    btnClass: "bg-[#1565C0] hover:bg-[#0D47A1]",
-    image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=400",
+    href: "/doctors?specialty=psychologist",
+    bg: "bg-[#EBF3FA]",
+    titleColor: "text-[#124362]",
+    btnClass: "bg-[#17618E] hover:bg-[#082B3F]",
+    image: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=400",
   },
   {
-    title: "Lab Tests at Home",
-    subtitle: "Accurate • Fast • Reliable",
+    title: "HbA1c & Sugar Panels",
+    subtitle: "Home sample pickup available",
     code: null,
-    cta: "Book Now",
+    cta: "Book Lab",
     href: "/lab-tests",
-    bg: "bg-[#F3E5F5]",
-    titleColor: "text-[#6A1B9A]",
-    btnClass: "bg-[#7B1FA2] hover:bg-[#6A1B9A]",
+    bg: "bg-[#E4F5ED]",
+    titleColor: "text-[#176B4C]",
+    btnClass: "bg-[#17618E] hover:bg-[#082B3F]",
     image: "https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&q=80&w=400",
   },
 ];
 
 const CATEGORIES = [
-  { name: "OTC", icon: Pill, href: "/browse?category=otc" },
+  { name: "Diabetes Care", icon: Drop, href: "/browse?category=diabetes" },
+  { name: "Glucose Monitors", icon: Pulse, href: "/browse?category=health-devices" },
+  { name: "Insulin & Supplies", icon: Pill, href: "/browse?category=diabetes" },
+  { name: "Nutrition", icon: ForkKnife, href: "/browse?category=nutrition" },
+  { name: "Mental Wellness", icon: Brain, href: "/doctors?specialty=psychologist" },
   { name: "Vitamins", icon: CircleHalf, href: "/browse?category=vitamins" },
-  { name: "Diabetes", icon: Drop, href: "/browse?category=diabetes" },
-  { name: "Baby Care", icon: Baby, href: "/browse?category=baby-care" },
-  { name: "Skin Care", icon: Jar, href: "/browse?category=skin-care" },
-  { name: "Hair Care", icon: HairDryer, href: "/browse?category=hair-care" },
-  { name: "Health Devices", icon: Stethoscope, href: "/browse?category=health-devices" },
-  { name: "Personal Care", icon: HandSoap, href: "/browse?category=personal-care" },
+  { name: "Lab Tests", icon: Flask, href: "/lab-tests" },
+  { name: "Specialists", icon: Stethoscope, href: "/doctors" },
 ];
 
 const NEARBY_PHARMACIES = [
-  { slug: "city-pharmacy", name: "City Pharmacy", rating: 4.8, reviews: 230, time: "30 mins", distance: "1.2 km", minOrder: "PKR 500", open: true, bgImage: "https://images.unsplash.com/photo-1576602976047-174e57a47881?auto=format&fit=crop&q=80&w=500" },
-  { slug: "healthplus-pharmacy", name: "HealthPlus Pharmacy", rating: 4.9, reviews: 412, time: "20 mins", distance: "0.8 km", minOrder: "PKR 500", open: true, bgImage: "https://images.unsplash.com/photo-1586281380349-632531db7ed4?auto=format&fit=crop&q=80&w=500" },
-  { slug: "medicare-direct", name: "MedPlus", rating: 4.7, reviews: 185, time: "25 mins", distance: "2.1 km", minOrder: "PKR 400", open: true, bgImage: "https://images.unsplash.com/photo-1631549916768-4119b2e5f926?auto=format&fit=crop&q=80&w=500" },
-  { slug: "pharmacare-24-7", name: "Care Pharmacy", rating: 4.9, reviews: 320, time: "15 mins", distance: "3.4 km", minOrder: "PKR 500", open: true, bgImage: "https://images.unsplash.com/photo-1585435557343-3b092031a831?auto=format&fit=crop&q=80&w=500" },
+  { slug: "city-pharmacy", name: "City Diabetes Pharmacy", rating: 4.8, reviews: 230, time: "30 mins", distance: "1.2 km", minOrder: "PKR 500", open: true, bgImage: "https://images.unsplash.com/photo-1576602976047-174e57a47881?auto=format&fit=crop&q=80&w=500" },
+  { slug: "healthplus-pharmacy", name: "HealthPlus Diabetes Care", rating: 4.9, reviews: 412, time: "20 mins", distance: "0.8 km", minOrder: "PKR 500", open: true, bgImage: "https://images.unsplash.com/photo-1586281380349-632531db7ed4?auto=format&fit=crop&q=80&w=500" },
+  { slug: "medicare-direct", name: "MedPlus Sugar Care", rating: 4.7, reviews: 185, time: "25 mins", distance: "2.1 km", minOrder: "PKR 400", open: true, bgImage: "https://images.unsplash.com/photo-1631549916768-4119b2e5f926?auto=format&fit=crop&q=80&w=500" },
+  { slug: "pharmacare-24-7", name: "Care Diabetes Pharmacy", rating: 4.9, reviews: 320, time: "15 mins", distance: "3.4 km", minOrder: "PKR 500", open: true, bgImage: "https://images.unsplash.com/photo-1585435557343-3b092031a831?auto=format&fit=crop&q=80&w=500" },
 ];
 
 const FEATURED_DOCTORS = [
-  { id: "1", name: "Dr. Ayesha Khan", specialty: "Cardiologist", rating: 4.9, reviews: 420, consultations: "2.5k", fee: 1500, image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=400" },
-  { id: "2", name: "Dr. Hassan Ali", specialty: "General Physician", rating: 4.8, reviews: 189, consultations: "1.8k", fee: 1200, image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=400" },
-  { id: "3", name: "Dr. Sara Ahmed", specialty: "Dermatologist", rating: 4.9, reviews: 312, consultations: "3.2k", fee: 2000, image: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&q=80&w=400" },
-  { id: "4", name: "Dr. Omar Farooq", specialty: "Pediatrician", rating: 4.7, reviews: 156, consultations: "980", fee: 1800, image: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=400" },
+  { id: "1", name: "Dr. Ayesha Khan", specialty: "Psychologist", rating: 4.9, reviews: 420, consultations: "2.5k", fee: 2000, image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=400" },
+  { id: "2", name: "Dr. Hassan Ali", specialty: "Endocrinologist", rating: 4.8, reviews: 189, consultations: "1.8k", fee: 2500, image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=400" },
+  { id: "3", name: "Dr. Sara Ahmed", specialty: "Clinical Psychologist", rating: 4.9, reviews: 312, consultations: "3.2k", fee: 2200, image: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&q=80&w=400" },
+  { id: "4", name: "Dr. Omar Farooq", specialty: "Diabetes Specialist", rating: 4.7, reviews: 156, consultations: "980", fee: 1800, image: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=400" },
 ];
 
 const LAB_PACKAGES = [
-  { name: "Complete Health Checkup", tests: ["CBC", "LFT", "KFT", "Lipid Profile", "Thyroid"], price: "PKR 4,999", discount: "30% OFF" },
   { name: "Diabetes Care Panel", tests: ["Fasting Sugar", "HbA1c", "Insulin"], price: "PKR 1,299", discount: "20% OFF" },
-  { name: "Women's Wellness", tests: ["CBC", "Thyroid", "Vitamin D", "Iron"], price: "PKR 2,499", discount: null },
-  { name: "Heart Health Panel", tests: ["ECG Report", "Lipid Profile", "CRP"], price: "PKR 3,499", discount: "15% OFF" },
+  { name: "HbA1c Monitoring", tests: ["HbA1c", "Random Sugar", "Urine Sugar"], price: "PKR 899", discount: "15% OFF" },
+  { name: "Diabetes Risk Profile", tests: ["Fasting Sugar", "Lipid Profile", "BMI Review"], price: "PKR 1,999", discount: null },
+  { name: "Kidney & Sugar Panel", tests: ["KFT", "HbA1c", "Urine Microalbumin"], price: "PKR 2,499", discount: "10% OFF" },
 ];
+
+const NICHE_SPECIALTY_RE = /psycholog|endocrin|diabet/i;
+
+function isNicheSpecialty(specialty = "") {
+  return NICHE_SPECIALTY_RE.test(String(specialty));
+}
+
+function pickNicheDoctors(doctors = [], limit = 4) {
+  const preferred = doctors.filter((d) => isNicheSpecialty(d.specialty));
+  const rest = doctors.filter((d) => !isNicheSpecialty(d.specialty));
+  return [...preferred, ...rest].slice(0, limit);
+}
 
 function formatConsultations(reviews) {
   const count = Math.max(reviews * 6, 100);
@@ -281,13 +292,13 @@ export function HomePage() {
 
   const featuredDoctors =
     apiDoctors.length > 0
-      ? apiDoctors.slice(0, 4).map((doctor, i) => {
+      ? pickNicheDoctors(apiDoctors, 4).map((doctor, i) => {
           const fallback = FEATURED_DOCTORS[i] || FEATURED_DOCTORS[0];
           const reviews = doctor.reviews ?? fallback.reviews;
           return {
             id: doctor.id,
             name: doctor.name,
-            specialty: doctor.specialty,
+            specialty: doctor.specialty || fallback.specialty,
             rating: doctor.rating,
             reviews,
             consultations: formatConsultations(reviews),
@@ -312,7 +323,7 @@ export function HomePage() {
   };
 
   return (
-    <div className="w-full flex flex-col bg-[#FAFBFC]">
+    <div className="w-full flex flex-col bg-[var(--color-surface-subtle)]">
       <HeroSlider />
 
       <div className="w-full home-container mx-auto py-6 md:py-8 space-y-8 md:space-y-10">
@@ -345,18 +356,18 @@ export function HomePage() {
 
         {/* Shop by Category */}
         <section>
-          <SectionHeader title="Shop by Category" href="/browse" />
+          <SectionHeader title="Diabetes & Wellness Categories" href="/browse?category=diabetes" />
           <div className="grid grid-cols-9 max-lg:flex max-lg:overflow-x-auto max-lg:gap-3 max-lg:pb-1 scrollbar-hide w-full">
             {CATEGORIES.map((cat) => (
               <CategoryItem key={cat.name} {...cat} />
             ))}
-            <CategoryItem name="View All" href="/browse" icon={SquaresFour} isViewAll />
+            <CategoryItem name="View All" href="/browse?category=diabetes" icon={SquaresFour} isViewAll />
           </div>
         </section>
 
         {/* Nearby Pharmacies */}
         <section>
-          <SectionHeader title="Nearby Pharmacies" href="/vendors" />
+          <SectionHeader title="Diabetes Care Pharmacies" href="/vendors" />
           <div className="relative">
             <div ref={pharmacyScrollRef} className="flex items-stretch gap-4 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory pr-12">
               {nearbyPharmacies.map((pharmacy) => (
@@ -376,7 +387,7 @@ export function HomePage() {
 
         {/* Featured Doctors */}
         <section>
-          <SectionHeader title="Featured Doctors" href="/doctors" linkLabel="View All Doctors" />
+          <SectionHeader title="Psychologists & Diabetes Specialists" href="/doctors?specialty=psychologist" linkLabel="View Specialists" />
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
             {featuredDoctors.map((doctor) => (
               <FeaturedDoctorCard key={doctor.id || doctor.name} doctor={doctor} />
@@ -386,7 +397,7 @@ export function HomePage() {
 
         {/* Popular Lab Packages */}
         <section>
-          <SectionHeader title="Popular Lab Packages" href="/lab-tests" linkLabel="View All Packages" />
+          <SectionHeader title="Diabetes Lab Panels" href="/lab-tests" linkLabel="View All Panels" />
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-5">
             {labPackages.map((pkg) => (
               <Link key={pkg.name} href="/lab-tests" className="bg-white border border-[var(--color-neutral-200)] rounded-[12px] p-5 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all flex flex-col h-full group relative">

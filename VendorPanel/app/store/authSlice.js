@@ -1,12 +1,12 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { authApi, usersApi } from "@/lib/api/index";
 
-const STORAGE_KEY = "pharmahub_user";
+const STORAGE_KEY = "medzoos_user";
 
 function loadStoredUser() {
   if (typeof window === "undefined") return null;
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("sehat1_user") || localStorage.getItem("pharmahub_user");
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;

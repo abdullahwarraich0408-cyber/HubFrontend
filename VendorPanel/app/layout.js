@@ -19,7 +19,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata = {
-  title: "Vendor Portal | PharmaHub",
+  title: "Vendor Portal | Medzoos",
   description: "Manage inventory, orders, and pharmacy operations.",
 };
 

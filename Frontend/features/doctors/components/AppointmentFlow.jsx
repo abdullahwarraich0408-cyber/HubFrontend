@@ -228,7 +228,7 @@ export function AppointmentFlow({
           />
 
           <div className="mt-6 p-4 rounded-[12px] bg-[var(--color-brand-mist)]/40 border border-[var(--color-brand-light)] text-[12px] text-[var(--color-neutral-600)]">
-            95% patients feel satisfied after booking on PharmaHub. It takes only 30 sec to book an appointment.
+            95% patients feel satisfied after booking on Medzoos. It takes only 30 sec to book an appointment.
           </div>
 
           <Button

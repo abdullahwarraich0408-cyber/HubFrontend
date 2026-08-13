@@ -109,7 +109,7 @@ export const api = {
         api.setToken("cookie-auth-active");
       }
       if (data.user && typeof window !== 'undefined') {
-        localStorage.setItem('pharmahub_user', JSON.stringify(data.user));
+        localStorage.setItem('medzoos_user', JSON.stringify(data.user));
       }
       return data;
     },
@@ -129,7 +129,7 @@ export const api = {
         api.setToken("cookie-auth-active");
       }
       if (data.user && typeof window !== 'undefined') {
-        localStorage.setItem('pharmahub_user', JSON.stringify(data.user));
+        localStorage.setItem('medzoos_user', JSON.stringify(data.user));
       }
       return data;
     },
@@ -159,6 +159,8 @@ export const api = {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('token');
       localStorage.removeItem('refreshToken');
+      localStorage.removeItem('medzoos_user');
+      localStorage.removeItem('sehat1_user');
       localStorage.removeItem('pharmahub_user');
     }
   },

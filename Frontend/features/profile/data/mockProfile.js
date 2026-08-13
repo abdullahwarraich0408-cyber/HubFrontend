@@ -27,7 +27,7 @@ export const PRESCRIPTIONS = [
 export const MEDICAL_RECORDS = [
   { id: "MR-001", type: "Lab Report", title: "Executive Full Body Checkup", date: "Jun 09, 2026", lab: "Shaukat Khanum Labs" },
   { id: "MR-002", type: "Lab Report", title: "HbA1c & Fasting Glucose", date: "Apr 12, 2026", lab: "Dr. Essa Laboratory" },
-  { id: "MR-003", type: "Consultation", title: "Video Consult — Dr. Ayesha Khan", date: "Jun 09, 2026", lab: "PharmaHub" },
+  { id: "MR-003", type: "Consultation", title: "Video Consult — Dr. Ayesha Khan", date: "Jun 09, 2026", lab: "Medzoos" },
 ];
 
 export const PAYMENT_METHODS = [

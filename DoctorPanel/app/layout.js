@@ -19,7 +19,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata = {
-  title: "Doctor Portal | PharmaHub",
+  title: "Doctor Portal | Medzoos",
   description: "Manage appointments, patients, and telehealth consultations.",
 };
 

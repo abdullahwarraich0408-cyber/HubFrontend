@@ -57,7 +57,7 @@ export function DoctorLoginPage() {
               <Stethoscope size={24} weight="fill" className="text-white" />
             </div>
             <h2 className="text-[36px] font-[var(--font-heading)] font-extrabold text-white mb-4 leading-[1.2] tracking-tight">
-              Doctor Portal <br /> for PharmaHub.
+              Doctor Portal <br /> for Medzoos.
             </h2>
             <p className="text-[15px] text-white/80 leading-relaxed max-w-[320px]">
               Manage appointments, view patient schedules, and provide quality healthcare through our platform.
@@ -96,7 +96,7 @@ export function DoctorLoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="doctor@pharmahub.com"
+              placeholder="doctor@medzoos.com"
               leftIcon={<Envelope size={18} />}
               required
             />

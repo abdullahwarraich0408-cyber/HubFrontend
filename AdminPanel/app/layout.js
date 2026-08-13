@@ -19,7 +19,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata = {
-  title: "Admin Portal | PharmaHub",
+  title: "Admin Portal | Medzoos",
   description: "Platform administration and overview.",
 };
 

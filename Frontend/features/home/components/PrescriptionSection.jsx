@@ -4,24 +4,24 @@ import {
   UploadSimple,
   MagnifyingGlass,
   Truck,
-  Users,
-  Storefront,
-  Stethoscope,
+  Drop,
+  Brain,
+  Flask,
   CheckCircle,
 } from "@phosphor-icons/react";
 import { PrescriptionUploadZone } from "./PrescriptionUploadZone";
 
 const HOW_IT_WORKS = [
-  { step: "1", title: "Upload", desc: "Upload prescription", icon: UploadSimple },
-  { step: "2", title: "Auto Assign", desc: "Nearest pharmacy gets it", icon: MagnifyingGlass },
-  { step: "3", title: "We Deliver", desc: "Fast delivery at home", icon: Truck },
+  { step: "1", title: "Upload", desc: "Share your diabetes prescription", icon: UploadSimple },
+  { step: "2", title: "Match", desc: "We assign a diabetes-ready pharmacy", icon: MagnifyingGlass },
+  { step: "3", title: "Deliver", desc: "Medicines & supplies to your door", icon: Truck },
 ];
 
 const PLATFORM_STATS = [
-  { value: "50K+", label: "Happy Customers", icon: Users },
-  { value: "500+", label: "Partner Pharmacies", icon: Storefront },
-  { value: "200+", label: "Expert Doctors", icon: Stethoscope },
-  { value: "99%", label: "On-time Delivery", icon: CheckCircle },
+  { value: "Diabetes", label: "Focused Care Niche", icon: Drop },
+  { value: "Psych", label: "Psychologist Consults", icon: Brain },
+  { value: "Labs", label: "HbA1c & Sugar Panels", icon: Flask },
+  { value: "99%", label: "On-time Delivery Goal", icon: CheckCircle },
 ];
 
 export function PrescriptionSection() {
@@ -33,7 +33,7 @@ export function PrescriptionSection() {
         </div>
 
         <div className="p-6 md:p-8">
-          <h3 className="text-[16px] font-bold text-[var(--color-ink-headline)] mb-5">How it works?</h3>
+          <h3 className="text-[16px] font-bold text-[var(--color-ink-headline)] mb-5">How diabetes care works</h3>
           <div className="space-y-5">
             {HOW_IT_WORKS.map((item) => (
               <div key={item.step} className="flex items-start gap-3">

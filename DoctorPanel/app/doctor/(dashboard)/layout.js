@@ -1,7 +1,7 @@
 import { DoctorDashboardLayout } from "./DoctorDashboardLayout";
 
 export const metadata = {
-  title: "Doctor Portal | PharmaHub",
+  title: "Doctor Portal | Medzoos",
   description: "Manage your appointments and patient schedule.",
 };
 

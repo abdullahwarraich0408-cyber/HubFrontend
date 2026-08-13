@@ -1,8 +1,8 @@
-# PharmaHub — Frontend Design Specification
+# Medzoos — Frontend Design Specification
 ### Multi-Vendor Online Pharmacy Marketplace
 **Version 2.0 · Complete UI/UX Blueprint · June 2025**
 
-> **Document Purpose:** This specification is the single source of truth for the PharmaHub frontend. It covers design system tokens, component library, all three portal layouts (Customer · Vendor · Admin), page-by-page wireframe intent, responsive behaviour, state handling, and technology stack. Hand this document directly to a frontend development team.
+> **Document Purpose:** This specification is the single source of truth for the Medzoos frontend. It covers design system tokens, component library, all three portal layouts (Customer · Vendor · Admin), page-by-page wireframe intent, responsive behaviour, state handling, and technology stack. Hand this document directly to a frontend development team.
 
 ---
 
@@ -37,7 +37,7 @@
 
 ### Concept — *"Clinical Clarity meets Human Warmth"*
 
-PharmaHub sits at the intersection of medical precision and consumer-grade accessibility. The interface rejects the cold, sterile feel common to most pharmacy websites. Every design decision communicates three qualities: **Trust**, **Clarity**, and **Care**.
+Medzoos sits at the intersection of medical precision and consumer-grade accessibility. The interface rejects the cold, sterile feel common to most pharmacy websites. Every design decision communicates three qualities: **Trust**, **Clarity**, and **Care**.
 
 ### Aesthetic Pillars
 
@@ -499,7 +499,7 @@ Right:  Price (16px 600, teal) | Status badge
 Height: 64px | Background: White | Shadow: shadow-navbar | Position: sticky top-0 z-50
 
 Left section:
-  Logo: Phosphor <FirstAidKit> icon (teal, 28px) + "PharmaHub" in DM Serif Display 22px
+  Logo: Phosphor <FirstAidKit> icon (teal, 28px) + "Medzoos" in DM Serif Display 22px
 
 Center section (desktop only):
   Pill search bar, 480px wide max
@@ -735,7 +735,7 @@ Product cards (see §4.3)
 
 #### Vendor Spotlight
 ```
-Section header: "Top Vendors on PharmaHub"
+Section header: "Top Vendors on Medzoos"
 Horizontal scrollable row of vendor cards (gap 16px)
 
 Vendor card (200px wide):
@@ -787,7 +787,7 @@ Background: #0C1A2E | Text: white/70% | Padding: 64px 80px 32px
   Col 4: Download App — store badge buttons + QR code placeholder
 
 Bottom bar (32px top margin, 1px top border white/10%):
-  © 2025 PharmaHub — Privacy Policy · Terms of Service · Cookie Policy
+  © 2025 Medzoos — Privacy Policy · Terms of Service · Cookie Policy
 ```
 
 ---
@@ -801,7 +801,7 @@ Split layout (50/50)
 Left panel — Branded:
   Background: #0C1A2E
   Large Phosphor <FirstAidKit> icon (80px, teal, centered)
-  Headline: "Welcome back to PharmaHub" (28px, DM Serif Display, white)
+  Headline: "Welcome back to Medzoos" (28px, DM Serif Display, white)
   3 trust bullets with Phosphor <Check> icons (teal)
 
 Right panel — Form:
@@ -1744,7 +1744,7 @@ Design placeholders are built into the current spec to accommodate these planned
 
 ## 16. Tailwind CSS Configuration
 
-The following is the recommended `tailwind.config.js` extending the default theme with PharmaHub's design tokens.
+The following is the recommended `tailwind.config.js` extending the default theme with Medzoos's design tokens.
 
 ```javascript
 // tailwind.config.js
@@ -1937,7 +1937,7 @@ Add to your `app/globals.css`:
 
 ---
 
-*End of PharmaHub Frontend Design Specification v2.0*
+*End of Medzoos Frontend Design Specification v2.0*
 
 *This document covers all UI/UX design decisions for the 48 system requirements.*
 *Ready to be handed to a frontend development team.*

@@ -2,16 +2,34 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { House, Pill, Stethoscope, Flask, Storefront, Buildings, UsersThree } from "@phosphor-icons/react";
+import { House, Drop, Brain, Flask, Storefront } from "@phosphor-icons/react";
 
 const TABS = [
   { label: "Home", href: "/", icon: House, match: (path) => path === "/" },
-  { label: "Medicines", href: "/browse", icon: Pill, match: (path) => path.startsWith("/browse") || path.startsWith("/product") },
-  { label: "Doctors", href: "/doctors", icon: Stethoscope, match: (path) => path.startsWith("/doctors") },
-  { label: "Hospitals", href: "/hospitals", icon: Buildings, match: (path) => path.startsWith("/hospitals") },
-  { label: "Lab Tests", href: "/lab-tests", icon: Flask, match: (path) => path.startsWith("/lab-tests") },
-  { label: "Family Health", href: "/family-health", icon: UsersThree, match: (path) => path.startsWith("/family-health") },
-  { label: "Pharmacies", href: "/vendors", icon: Storefront, match: (path) => path.startsWith("/vendors") || path.startsWith("/pharmacies") },
+  {
+    label: "Diabetes Care",
+    href: "/browse?category=diabetes",
+    icon: Drop,
+    match: (path) => path.startsWith("/browse") || path.startsWith("/product"),
+  },
+  {
+    label: "Psychologists",
+    href: "/doctors?specialty=psychologist",
+    icon: Brain,
+    match: (path) => path.startsWith("/doctors"),
+  },
+  {
+    label: "Lab Tests",
+    href: "/lab-tests",
+    icon: Flask,
+    match: (path) => path.startsWith("/lab-tests"),
+  },
+  {
+    label: "Pharmacies",
+    href: "/vendors",
+    icon: Storefront,
+    match: (path) => path.startsWith("/vendors") || path.startsWith("/pharmacies"),
+  },
 ];
 
 export function MainNavigation() {

@@ -344,7 +344,7 @@ export default function MyProductsPage() {
             </div>
 
             <p className="text-[14px] text-neutral-600">
-              Are you sure you want to delete <strong className="text-ink-900">{deletingProduct.name}</strong> from your inventory? It will be permanently removed from PharmaHub.
+              Are you sure you want to delete <strong className="text-ink-900">{deletingProduct.name}</strong> from your inventory? It will be permanently removed from Medzoos.
             </p>
 
             <div className="flex justify-end gap-3">

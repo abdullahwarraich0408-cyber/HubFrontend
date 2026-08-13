@@ -27,7 +27,7 @@ export default function AdminSettingsPage() {
           </div>
           <div>
             <label className="block text-sm font-bold text-neutral-700 mb-1.5">Email Address</label>
-            <input type="email" defaultValue={profile?.email || "admin@pharmahub.com"} className="w-full px-4 py-2.5 rounded-lg border border-neutral-200 bg-neutral-50 text-sm font-medium text-neutral-600 outline-none" readOnly />
+            <input type="email" defaultValue={profile?.email || "admin@medzoos.com"} className="w-full px-4 py-2.5 rounded-lg border border-neutral-200 bg-neutral-50 text-sm font-medium text-neutral-600 outline-none" readOnly />
           </div>
         </div>
       </div>

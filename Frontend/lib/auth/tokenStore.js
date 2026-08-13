@@ -2,7 +2,7 @@
 
 let memoryAccessToken = null;
 
-const USER_KEY = "pharmahub_user";
+const USER_KEY = "medzoos_user";
 
 export function getMemoryAccessToken() {
   return memoryAccessToken;
@@ -57,10 +57,10 @@ export function clearLegacyTokenStorage() {
 
 export function getDeviceId() {
   if (typeof window === "undefined") return "web-anonymous";
-  let deviceId = localStorage.getItem("pharmahub_device_id");
+  let deviceId = localStorage.getItem("medzoos_device_id") || localStorage.getItem("sehat1_device_id") || localStorage.getItem("pharmahub_device_id");
   if (!deviceId) {
     deviceId = `web-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-    localStorage.setItem("pharmahub_device_id", deviceId);
+    localStorage.setItem("medzoos_device_id", deviceId);
   }
   return deviceId;
 }

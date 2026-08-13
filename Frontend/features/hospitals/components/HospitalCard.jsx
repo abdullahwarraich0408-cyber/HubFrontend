@@ -8,7 +8,7 @@ export function HospitalCard({ hospital }) {
   return (
     <Link
       href={`/hospitals/${hospital.id}`}
-      className="block bg-white rounded-[20px] border border-[var(--color-neutral-200)] overflow-hidden hover:border-[var(--color-brand-primary)]/40 hover:shadow-[0_8px_24px_-8px_rgba(11,110,114,0.15)] transition-all"
+      className="block bg-white rounded-[20px] border border-[var(--color-neutral-200)] overflow-hidden hover:border-[var(--color-brand-primary)]/40 hover:shadow-[0_8px_24px_-8px_rgba(8,43,63,0.15)] transition-all"
     >
       <div className="relative h-[140px] bg-[var(--color-brand-mist)]">
         <Image src={hospital.coverImage} alt={hospital.name} fill className="object-cover" />

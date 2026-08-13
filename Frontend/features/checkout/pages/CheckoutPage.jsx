@@ -295,7 +295,7 @@ export function CheckoutPage() {
                       <span className="text-[14px] font-medium text-[var(--color-neutral-700)]">Save this address for future orders</span>
                     </label>
 
-                    <Button type="submit" disabled={createOrder.isPending || redirecting} className="w-full h-[52px] text-[15px] shadow-[0_4px_12px_rgba(11,110,114,0.15)] flex justify-center items-center">
+                    <Button type="submit" disabled={createOrder.isPending || redirecting} className="w-full h-[52px] text-[15px] shadow-[0_4px_12px_rgba(8,43,63,0.15)] flex justify-center items-center">
                       {createOrder.isPending || redirecting ? "Opening Stripe..." : `Pay Rs ${total.toLocaleString()} with Stripe`}
                     </Button>
 

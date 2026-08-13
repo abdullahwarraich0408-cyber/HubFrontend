@@ -153,7 +153,7 @@ export function CustomerNavbar() {
     <>
       {/* Top Trust Bar */}
       <div className="w-full bg-gradient-to-r from-brand-mist via-surface-subtle to-brand-mist border-b border-neutral-200 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_0%,rgba(11,110,114,0.04)_50%,transparent_100%)] animate-[shimmer_8s_linear_infinite]"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_0%,rgba(23,97,142,0.06)_50%,transparent_100%)] animate-[shimmer_8s_linear_infinite]"></div>
         <div className="w-full home-container mx-auto min-h-[32px] py-1.5 flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-1.5 sm:gap-0 relative">
           <div className="hidden sm:flex items-center gap-6 text-[10px] sm:text-[11px] text-neutral-600">
             <span className="flex items-center gap-1.5">
@@ -161,15 +161,15 @@ export function CustomerNavbar() {
                 <span className="absolute w-1.5 h-1.5 rounded-full bg-status-success opacity-60 animate-ping"></span>
                 <span className="w-1.5 h-1.5 rounded-full bg-status-success"></span>
               </span>
-              <span className="font-medium text-center">Authentic Medicines Guaranteed</span>
+              <span className="font-medium text-center">Diabetes medicines &amp; devices</span>
             </span>
             <span className="hidden md:flex items-center gap-1.5">
               <span className="text-neutral-300">•</span>
-              <span>Free Delivery on Orders over PKR 2,000</span>
+              <span>Psychologist support for diabetes burnout</span>
             </span>
             <span className="hidden lg:flex items-center gap-1.5">
               <span className="text-neutral-300">•</span>
-              <span className="font-medium text-brand-primary">24/7 Customer Support</span>
+              <span className="font-medium text-brand-primary">HbA1c &amp; sugar labs at home</span>
             </span>
           </div>
           <div className="flex items-center gap-2.5 sm:gap-4 text-[10px] sm:text-[11px] text-neutral-600">
@@ -194,8 +194,8 @@ export function CustomerNavbar() {
             <div className="w-9 h-9 rounded-md icon-box-light flex items-center justify-center transition-all duration-300 group-hover:scale-105 group-hover:rotate-[-4deg]">
               <FirstAidKit size={20} className="text-brand-primary transition-transform duration-300 group-hover:scale-110" weight="fill" />
             </div>
-            <span className="font-bold text-[18px] text-ink-headline tracking-tight">
-              Pharma<span className="text-brand-primary">Hub</span>
+            <span className="font-extrabold text-[20px] text-ink-headline tracking-tight">
+              Med<span className="text-brand-primary">zoos</span>
             </span>
           </Link>
 
@@ -351,12 +351,10 @@ export function CustomerNavbar() {
           <div className="md:hidden absolute top-full left-0 w-full border-t border-neutral-200 bg-white shadow-xl max-h-[calc(100vh-64px)] overflow-y-auto z-40">
             <nav className="w-full mx-auto px-4 py-3 flex flex-col gap-1">
               <Link href="/" onClick={() => setMobileMenuOpen(false)} className={`px-4 py-2.5 text-[14px] font-medium hover:bg-brand-light rounded-md transition-colors ${pathname === "/" ? "text-brand-primary bg-brand-light/50" : "text-neutral-700"}`}>Home</Link>
-              <Link href="/browse" onClick={() => setMobileMenuOpen(false)} className={`px-4 py-2.5 text-[14px] font-medium hover:bg-brand-light rounded-md transition-colors ${pathname === "/browse" ? "text-brand-primary bg-brand-light/50" : "text-neutral-700"}`}>Browse</Link>
+              <Link href="/browse?category=diabetes" onClick={() => setMobileMenuOpen(false)} className={`px-4 py-2.5 text-[14px] font-medium hover:bg-brand-light rounded-md transition-colors ${pathname === "/browse" ? "text-brand-primary bg-brand-light/50" : "text-neutral-700"}`}>Diabetes Care</Link>
+              <Link href="/doctors?specialty=psychologist" onClick={() => setMobileMenuOpen(false)} className={`px-4 py-2.5 text-[14px] font-medium hover:bg-brand-light rounded-md transition-colors ${pathname.startsWith("/doctors") ? "text-brand-primary bg-brand-light/50" : "text-neutral-700"}`}>Psychologists</Link>
+              <Link href="/lab-tests" onClick={() => setMobileMenuOpen(false)} className={`px-4 py-2.5 text-[14px] font-medium hover:bg-brand-light rounded-md transition-colors ${pathname.startsWith("/lab-tests") ? "text-brand-primary bg-brand-light/50" : "text-neutral-700"}`}>Lab Tests</Link>
               <Link href="/vendors" onClick={() => setMobileMenuOpen(false)} className={`px-4 py-2.5 text-[14px] font-medium hover:bg-brand-light rounded-md transition-colors ${pathname === "/vendors" ? "text-brand-primary bg-brand-light/50" : "text-neutral-700"}`}>Pharmacies</Link>
-              <Link href="/offers" onClick={() => setMobileMenuOpen(false)} className={`px-4 py-2.5 text-[14px] font-medium hover:bg-brand-light rounded-md transition-colors flex items-center justify-between ${pathname === "/offers" ? "text-brand-primary bg-brand-light/50" : "text-neutral-700"}`}>
-                Offers
-                <span className="inline-flex items-center justify-center px-1.5 py-0.5 text-[9px] font-bold text-white bg-[var(--color-status-danger)] rounded-full">HOT</span>
-              </Link>
               <Link href="/orders" onClick={() => setMobileMenuOpen(false)} className={`px-4 py-2.5 text-[14px] font-medium hover:bg-brand-light rounded-md transition-colors flex items-center gap-2 ${isTrackingRoute ? "text-brand-primary bg-brand-light/50" : "text-neutral-700"}`}>
                 <Package size={18} />
                 Track Order

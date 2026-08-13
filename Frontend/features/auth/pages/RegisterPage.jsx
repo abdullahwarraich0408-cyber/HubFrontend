@@ -79,7 +79,7 @@ export function RegisterPage() {
               Create your <br /> Account.
             </h2>
             <p className="text-[15px] text-[var(--color-neutral-300)] leading-relaxed max-w-[320px]">
-              Join PharmaHub today and take control of your healthcare with ease, security, and convenience.
+              Join Medzoos today and take control of your healthcare with ease, security, and convenience.
             </p>
           </div>
 
@@ -185,7 +185,7 @@ export function RegisterPage() {
               </label>
             </div>
 
-            <Button type="submit" disabled={loading} className="w-full h-[48px] text-[14px] font-bold mt-2 rounded-[var(--radius-md)] bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-dark)] text-white transition-all shadow-[0_4px_12px_rgba(11,110,114,0.15)] hover:shadow-[0_6px_16px_rgba(11,110,114,0.25)] flex justify-center items-center group border-none">
+            <Button type="submit" disabled={loading} className="w-full h-[48px] text-[14px] font-bold mt-2 rounded-[var(--radius-md)] bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-dark)] text-white transition-all shadow-[0_4px_12px_rgba(8,43,63,0.15)] hover:shadow-[0_6px_16px_rgba(8,43,63,0.25)] flex justify-center items-center group border-none">
               {loading ? "Creating account..." : "Create Account"}
               <ArrowRight size={18} className="ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>

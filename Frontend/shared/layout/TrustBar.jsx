@@ -1,27 +1,27 @@
 "use client";
 
-import { CreditCard, ShieldCheck, ArrowCounterClockwise, Headset } from "@phosphor-icons/react";
+import { Drop, Brain, Flask, Headset } from "@phosphor-icons/react";
 
 const TRUST_ITEMS = [
   {
-    icon: CreditCard,
-    title: "Secure Payments",
-    subtitle: "100% Secure & Safe",
+    icon: Drop,
+    title: "Diabetes-First Care",
+    subtitle: "Medicines, monitors & supplies",
   },
   {
-    icon: ShieldCheck,
-    title: "Authentic Medicines",
-    subtitle: "100% Genuine Products",
+    icon: Brain,
+    title: "Psychologist Support",
+    subtitle: "Mental wellness with clinical care",
   },
   {
-    icon: ArrowCounterClockwise,
-    title: "Easy Returns",
-    subtitle: "7 Days Return Policy",
+    icon: Flask,
+    title: "Trusted Lab Panels",
+    subtitle: "HbA1c & sugar tests at home",
   },
   {
     icon: Headset,
-    title: "24/7 Support",
-    subtitle: "We are here to help",
+    title: "Care Guidance",
+    subtitle: "Help for your diabetes journey",
   },
 ];
 

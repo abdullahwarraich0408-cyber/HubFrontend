@@ -77,7 +77,8 @@ function parseConsultType(value) {
 export function DoctorsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [search, setSearch] = useState("");
+  const specialtyParam = searchParams.get("specialty") || "";
+  const [search, setSearch] = useState(specialtyParam);
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const { data: apiDoctors = [], isLoading, isError } = useDoctors();

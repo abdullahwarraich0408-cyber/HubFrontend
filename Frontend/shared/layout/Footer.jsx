@@ -41,7 +41,7 @@ export function Footer() {
           {/* Column 2: Care */}
           <div className="flex flex-col gap-4">
             <h4 className="text-white font-bold text-[15px] mb-2">Care</h4>
-            <Link href="/browse?category=diabetes" className="text-neutral-500 hover:text-white text-[14px] transition-colors">Diabetes Care</Link>
+            <Link href="/browse" className="text-neutral-500 hover:text-white text-[14px] transition-colors">Medicine</Link>
             <Link href="/doctors?specialty=psychologist" className="text-neutral-500 hover:text-white text-[14px] transition-colors">Psychologists</Link>
             <Link href="/lab-tests" className="text-neutral-500 hover:text-white text-[14px] transition-colors">Diabetes Lab Panels</Link>
             <Link href="/vendors" className="text-neutral-500 hover:text-white text-[14px] transition-colors">Pharmacies Directory</Link>

@@ -1,5 +1,5 @@
-import { LabTestsPage } from "@/features/lab-tests/pages/LabTestsPage";
+import { LabsPage } from "@/features/lab-tests/pages/LabsPage";
 
 export default function Page() {
-  return <LabTestsPage />;
+  return <LabsPage />;
 }

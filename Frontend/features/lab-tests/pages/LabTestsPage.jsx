@@ -1,22 +1,52 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { LabTestsHero } from "../components/LabTestsHero";
 import { LabTestCard } from "../components/LabTestCard";
+import {
+  LabQuickLinks,
+  LabHomeSamplingBand,
+  LabCategoryFilter,
+  LabProviderFilter,
+  LabPopularStrip,
+} from "../components/LabBrowseExtras";
 import { MOCK_LAB_TESTS, CATEGORIES, getPopularPackages } from "../data/mockLabTests";
 import { useLabTests, usePopularLabTests, useLabTestCategories } from "@/lib/hooks/useApi";
 
 export function LabTestsPage() {
-  const [search, setSearch] = useState("");
+  const searchParams = useSearchParams();
+  const qParam = searchParams.get("q") || "";
+  const labParam = searchParams.get("lab") || "";
+
+  const [search, setSearch] = useState(qParam);
   const [activeCategory, setActiveCategory] = useState(null);
+  const [activeLab, setActiveLab] = useState(labParam || null);
+
   const { data: apiTests = [], isLoading, isError } = useLabTests();
   const { data: apiPopular = [] } = usePopularLabTests();
   const { data: apiCategories = [] } = useLabTestCategories();
 
+  useEffect(() => {
+    setSearch(qParam);
+  }, [qParam]);
+
+  useEffect(() => {
+    if (labParam) setActiveLab(labParam);
+  }, [labParam]);
+
   const tests = apiTests.length > 0 || !isError ? apiTests : MOCK_LAB_TESTS;
   const popular = apiPopular.length > 0 ? apiPopular : getPopularPackages();
   const categories = apiCategories.length > 0 ? apiCategories : CATEGORIES;
+
+  const labNames = useMemo(() => {
+    const names = new Set();
+    tests.forEach((t) => {
+      const name = t.labPartner?.name || t.lab;
+      if (name) names.add(name);
+    });
+    return Array.from(names).sort((a, b) => a.localeCompare(b));
+  }, [tests]);
 
   const filtered = useMemo(() => {
     let result = [...tests];
@@ -25,117 +55,96 @@ export function LabTestsPage() {
       const q = search.toLowerCase();
       result = result.filter(
         (t) =>
-          t.name.toLowerCase().includes(q) ||
-          t.lab.toLowerCase().includes(q) ||
-          t.category.toLowerCase().includes(q)
+          String(t.name || "").toLowerCase().includes(q) ||
+          String(t.lab || "").toLowerCase().includes(q) ||
+          String(t.labPartner?.name || "").toLowerCase().includes(q) ||
+          String(t.category || "").toLowerCase().includes(q)
       );
     }
 
     if (activeCategory) {
-      result = result.filter((t) => t.category === activeCategory);
+      result = result.filter(
+        (t) =>
+          t.category === activeCategory ||
+          String(t.category || "").toLowerCase() === String(activeCategory).toLowerCase()
+      );
+    }
+
+    if (activeLab) {
+      result = result.filter((t) => {
+        const name = t.labPartner?.name || t.lab;
+        return name === activeLab;
+      });
     }
 
     return result;
-  }, [tests, search, activeCategory]);
+  }, [tests, search, activeCategory, activeLab]);
+
+  const showPopular = !search.trim() && !activeCategory && !activeLab;
 
   return (
-    <div className="w-full bg-[var(--color-surface-subtle)] min-h-screen py-6 md:py-8">
-      <div className="w-full max-w-[1280px] mx-auto px-4 md:px-[80px]">
+    <div className="min-h-screen w-full bg-[#F0F4F8]">
+      <div className="home-container mx-auto py-8 md:py-10 lg:py-12">
         <LabTestsHero search={search} onSearchChange={setSearch} />
 
-        <div className="flex flex-wrap gap-3 mb-6">
-          <Link href="/lab-tests/labs" className="px-4 py-2 rounded-full bg-white border border-neutral-200 text-[13px] font-semibold hover:border-brand-primary">
-            Browse Labs
-          </Link>
-          <Link href="/lab-tests/cart" className="px-4 py-2 rounded-full bg-brand-primary text-white text-[13px] font-semibold">
-            Lab Cart
-          </Link>
-          <Link href="/account/reports" className="px-4 py-2 rounded-full bg-white border border-neutral-200 text-[13px] font-semibold hover:border-brand-primary">
-            My Reports
-          </Link>
-        </div>
+        <LabQuickLinks />
+        <LabHomeSamplingBand />
 
-        {/* Home sample collection banner */}
-        <div className="flex items-center gap-4 p-4 md:p-5 bg-white rounded-[16px] border border-[var(--color-neutral-200)] mb-6">
-          <div className="w-12 h-12 rounded-[12px] bg-[var(--color-brand-mist)] flex items-center justify-center shrink-0 text-[24px]">
-            🏠
-          </div>
-          <div>
-            <p className="text-[14px] font-bold text-[var(--color-ink-headline)]">Free Home Sample Collection</p>
-            <p className="text-[13px] text-[var(--color-neutral-500)]">
-              Certified phlebotomist visits your home. No lab visit required.
+        {showPopular ? <LabPopularStrip tests={popular.length ? popular : tests} /> : null}
+
+        <LabCategoryFilter
+          categories={categories}
+          activeCategory={activeCategory}
+          onChange={setActiveCategory}
+        />
+        <LabProviderFilter
+          labs={labNames}
+          activeLab={activeLab}
+          onChange={setActiveLab}
+        />
+
+        <section id="all-lab-tests">
+          <div className="mb-5">
+            <p className="text-[12px] font-bold uppercase tracking-[0.16em] text-[#0B6E99]">
+              Catalogue
+            </p>
+            <p className="mt-1 text-[15px] font-semibold text-[#102A43]">
+              {isLoading ? "Loading…" : `${filtered.length} tests`}
             </p>
           </div>
-        </div>
-
-        {/* Popular packages */}
-        {!search && !activeCategory && (
-          <section className="mb-8">
-            <h2 className="text-[18px] font-bold text-[var(--color-ink-headline)] mb-4">Popular Packages</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {popular.map((test) => (
-                <LabTestCard key={test.id} test={test} compact />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Categories */}
-        <section className="mb-6">
-          <h2 className="text-[18px] font-bold text-[var(--color-ink-headline)] mb-4">Categories</h2>
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setActiveCategory(null)}
-              className={`px-4 py-2 rounded-full text-[13px] font-semibold transition-colors ${
-                !activeCategory
-                  ? "bg-[var(--color-brand-primary)] text-white"
-                  : "bg-white border border-[var(--color-neutral-200)] text-[var(--color-neutral-600)] hover:border-[var(--color-brand-primary)]"
-              }`}
-            >
-              All Tests
-            </button>
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
-                className={`px-4 py-2 rounded-full text-[13px] font-semibold transition-colors ${
-                  activeCategory === cat.id
-                    ? "bg-[var(--color-brand-primary)] text-white"
-                    : "bg-white border border-[var(--color-neutral-200)] text-[var(--color-neutral-600)] hover:border-[var(--color-brand-primary)]"
-                }`}
-              >
-                {cat.icon} {cat.label}
-              </button>
-            ))}
-          </div>
-        </section>
-
-        {/* All tests grid */}
-        <section>
-          <p className="text-[13px] text-[var(--color-neutral-500)] mb-4">
-            {isLoading ? "Loading tests..." : (
-              <>
-                <span className="font-semibold text-[var(--color-ink-headline)]">{filtered.length}</span> tests available
-              </>
-            )}
-          </p>
 
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="h-[240px] bg-white rounded-[16px] border border-[var(--color-neutral-200)] animate-pulse" />
+                <div
+                  key={i}
+                  className="h-[280px] animate-pulse rounded-[24px] bg-[#D7E2EA]"
+                />
               ))}
             </div>
           ) : filtered.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+            <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((test) => (
                 <LabTestCard key={test.id} test={test} />
               ))}
             </div>
           ) : (
-            <div className="bg-white rounded-[16px] border border-[var(--color-neutral-200)] p-12 text-center">
-              <p className="text-[16px] font-bold text-[var(--color-ink-headline)] mb-2">No tests found</p>
-              <p className="text-[14px] text-[var(--color-neutral-500)]">Try a different search or category.</p>
+            <div className="rounded-[28px] border border-dashed border-[#102A43]/15 bg-white px-5 py-14 text-center">
+              <p className="text-[18px] font-bold text-[#102A43]">No tests found</p>
+              <p className="mt-1 text-[14px] text-[#627D98]">
+                Try another search or category.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setSearch("");
+                  setActiveCategory(null);
+                  setActiveLab(null);
+                }}
+                className="mt-4 rounded-full bg-[#062F3D] px-5 py-2.5 text-[13px] font-bold text-white"
+              >
+                Clear filters
+              </button>
             </div>
           )}
         </section>

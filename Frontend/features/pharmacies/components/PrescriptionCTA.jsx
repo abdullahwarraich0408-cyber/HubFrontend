@@ -5,15 +5,17 @@ import { PrescriptionUploadZone } from "@/features/home/components/PrescriptionU
 
 export function PrescriptionCTA() {
   return (
-    <section className="mb-10 p-6 md:p-8 rounded-[20px] bg-white border border-[var(--color-neutral-200)] shadow-[var(--shadow-card)]">
-      <div className="flex items-center gap-3 mb-5">
-        <div className="w-12 h-12 rounded-full bg-[var(--color-brand-mist)] flex items-center justify-center shrink-0">
-          <FileArrowUp size={24} className="text-[var(--color-brand-primary)]" weight="duotone" />
+    <section className="overflow-hidden rounded-[22px] border border-[#0B6E99]/12 bg-white p-6 shadow-[0_10px_32px_rgba(11,110,153,0.08)] md:p-8">
+      <div className="mb-5 flex items-start gap-3 md:items-center">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[14px] bg-[#E8F4F8]">
+          <FileArrowUp size={24} className="text-[#0B6E99]" weight="duotone" />
         </div>
         <div>
-          <h2 className="text-[20px] md:text-[22px] font-bold text-[var(--color-ink-headline)]">Upload Prescription</h2>
-          <p className="text-[13px] text-[var(--color-neutral-500)]">
-            We&apos;ll auto-assign the nearest pharmacy based on stock, distance, and availability. No manual quotes.
+          <h2 className="text-[20px] font-bold tracking-tight text-[#102A43] md:text-[22px]">
+            Upload prescription
+          </h2>
+          <p className="mt-1 text-[13px] text-[#627D98] md:text-[14px]">
+            Send your prescription and we&apos;ll match stock from partner pharmacies.
           </p>
         </div>
       </div>

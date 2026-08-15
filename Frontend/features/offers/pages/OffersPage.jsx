@@ -51,7 +51,13 @@ export function OffersPage() {
               oldPrice,
               category: product.category || "OTC",
               image: product.image,
-              vendor: product.vendor,
+              vendor:
+                product.vendor?.name ||
+                product.vendor?.business_name ||
+                product.vendorName ||
+                product.pharmacy ||
+                product.vendor ||
+                "Partner pharmacy",
               offerType: "percent",
               badge: "15% OFF",
             };

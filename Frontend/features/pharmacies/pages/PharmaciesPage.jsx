@@ -1,113 +1,146 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { Storefront } from "@phosphor-icons/react";
-import { PharmacyPageHeader } from "../components/PharmacyPageHeader";
-import { FeaturedPharmacies } from "../components/FeaturedPharmacies";
-import { PharmacySidebarFilters } from "../components/PharmacySidebarFilters";
-import { VendorGridCard } from "../components/VendorGridCard";
-import { ComparePharmacies } from "../components/ComparePharmacies";
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import { ArrowRight, Storefront } from "@phosphor-icons/react";
+import { PharmaciesHero } from "../components/PharmaciesHero";
+import { PharmacyPosterCard } from "../components/PharmacyPosterCard";
+import { PharmacyOffersSection } from "../components/PharmacyOffersSection";
 import { PrescriptionCTA } from "../components/PrescriptionCTA";
-import { WhyChooseUs } from "../components/WhyChooseUs";
-import {
-  MOCK_PHARMACIES,
-  DEFAULT_SIDEBAR_FILTERS,
-  applyChipFilter,
-  applySidebarFilters,
-  filterPharmacies,
-} from "../data/mockPharmacies";
 import { useVendors } from "@/lib/hooks/useApi";
+
+const FILTERS = [
+  { id: "all", label: "All" },
+  { id: "open", label: "Open now" },
+  { id: "verified", label: "Verified" },
+  { id: "fast", label: "Fast delivery" },
+];
+
+function applyFilters(pharmacies, { search, filter }) {
+  let result = [...pharmacies];
+
+  if (filter === "open") {
+    result = result.filter((p) => p.status === "open");
+  } else if (filter === "verified") {
+    result = result.filter((p) => p.verified);
+  } else if (filter === "fast") {
+    result = result.filter((p) => p.fast);
+  }
+
+  if (search.trim()) {
+    const q = search.toLowerCase();
+    result = result.filter(
+      (p) =>
+        String(p.name || "").toLowerCase().includes(q) ||
+        String(p.address || "").toLowerCase().includes(q) ||
+        String(p.shortDesc || "").toLowerCase().includes(q)
+    );
+  }
+
+  return result;
+}
 
 export function PharmaciesPage() {
   const [search, setSearch] = useState("");
-  const [location, setLocation] = useState("DHA Phase 6, Karachi");
-  const [activeChip, setActiveChip] = useState(null);
-  const [sidebarFilters, setSidebarFilters] = useState(DEFAULT_SIDEBAR_FILTERS);
-  const [compareIds, setCompareIds] = useState([]);
-  const { data: apiPharmacies = [], isLoading, isError } = useVendors();
+  const [filter, setFilter] = useState("all");
+  const { data: pharmacies = [], isLoading } = useVendors();
 
-  const pharmacies =
-    apiPharmacies.length > 0 || !isError ? apiPharmacies : MOCK_PHARMACIES;
-
-  const filtered = useMemo(() => {
-    let result = pharmacies;
-    result = filterPharmacies(result, search);
-    result = applyChipFilter(result, activeChip);
-    result = applySidebarFilters(result, sidebarFilters);
-    return result;
-  }, [pharmacies, search, activeChip, sidebarFilters]);
-
-  const comparePharmacies = useMemo(
-    () => pharmacies.filter((p) => compareIds.includes(p.id)),
-    [pharmacies, compareIds]
+  const filtered = useMemo(
+    () => applyFilters(pharmacies, { search, filter }),
+    [pharmacies, search, filter]
   );
 
-  const handleCompareToggle = (id) => {
-    setCompareIds((prev) => {
-      if (prev.includes(id)) return prev.filter((x) => x !== id);
-      if (prev.length >= 3) return prev;
-      return [...prev, id];
-    });
-  };
-
   return (
-    <div className="w-full bg-[var(--color-surface-subtle)] min-h-screen py-6 md:py-8">
-      <div className="w-full max-w-[1280px] mx-auto px-4 md:px-[80px]">
-        <PharmacyPageHeader
-          search={search}
-          onSearchChange={setSearch}
-          location={location}
-          onLocationChange={setLocation}
-          activeChip={activeChip}
-          onChipChange={setActiveChip}
-        />
+    <div className="min-h-screen w-full bg-[#E8F2F6]">
+      <div className="home-container mx-auto py-8 md:py-10 lg:py-12">
+        <PharmaciesHero search={search} onSearchChange={setSearch} />
 
-        <FeaturedPharmacies />
+        <PharmacyOffersSection />
 
-        <div className="flex flex-col lg:flex-row gap-6 mb-10">
-          <div className="w-full lg:w-[260px] shrink-0">
-            <PharmacySidebarFilters
-              filters={sidebarFilters}
-              onChange={setSidebarFilters}
-              onReset={() => setSidebarFilters(DEFAULT_SIDEBAR_FILTERS)}
-            />
+        {/* Segmented filters — different from Labs rounded navy chips */}
+        <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="inline-flex max-w-full overflow-x-auto rounded-[14px] bg-white/80 p-1 shadow-[0_4px_20px_rgba(11,110,153,0.06)] scrollbar-hide">
+            {FILTERS.map((item) => {
+              const active = filter === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setFilter(item.id)}
+                  className={`shrink-0 rounded-[10px] px-3.5 py-2.5 text-[13px] font-bold transition-colors ${
+                    active
+                      ? "bg-[#0B6E99] text-white"
+                      : "text-[#334E68] hover:bg-[#E8F4F8]"
+                  }`}
+                >
+                  {item.label}
+                </button>
+              );
+            })}
           </div>
 
-          <div className="flex-1 min-w-0">
-            <p className="text-[14px] text-[var(--color-neutral-500)] mb-5">
-              <span className="font-bold text-[var(--color-ink-headline)]">{filtered.length}</span> pharmacies near{" "}
-              {location.split(",")[0]}
-            </p>
+          <Link
+            href="/browse"
+            className="group inline-flex items-center gap-1.5 self-start text-[14px] font-bold text-[#0B6E99] sm:self-auto"
+          >
+            Browse all medicines
+            <ArrowRight
+              size={15}
+              weight="bold"
+              className="transition-transform group-hover:translate-x-[3px]"
+            />
+          </Link>
+        </div>
 
-            {filtered.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 md:gap-6">
-                {filtered.map((pharmacy) => (
-                  <VendorGridCard
-                    key={pharmacy.id}
-                    pharmacy={pharmacy}
-                    compareSelected={compareIds.includes(pharmacy.id)}
-                    compareDisabled={compareIds.length >= 3}
-                    onCompareToggle={handleCompareToggle}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="bg-white rounded-[16px] border border-[var(--color-neutral-200)] p-12 text-center">
-                <Storefront size={48} className="text-[var(--color-neutral-300)] mx-auto mb-4" weight="duotone" />
-                <h3 className="text-[18px] font-bold text-[var(--color-ink-headline)] mb-2">No pharmacies found</h3>
-                <p className="text-[14px] text-[var(--color-neutral-500)]">Try adjusting your search or filters.</p>
-              </div>
-            )}
+        <div className="mb-5 flex items-end justify-between gap-3">
+          <div>
+            <p className="text-[12px] font-bold uppercase tracking-[0.16em] text-[#0B6E99]">
+              Storefronts
+            </p>
+            <h2 className="mt-1 text-[20px] font-bold tracking-tight text-[#102A43]">
+              {isLoading ? "Loading…" : `${filtered.length} pharmacies nearby`}
+            </h2>
           </div>
         </div>
 
-        <ComparePharmacies
-          selectedPharmacies={comparePharmacies}
-          onRemove={(id) => setCompareIds((prev) => prev.filter((x) => x !== id))}
-        />
+        {isLoading ? (
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-[160px] animate-pulse rounded-[22px] bg-white/70"
+              />
+            ))}
+          </div>
+        ) : filtered.length > 0 ? (
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            {filtered.map((pharmacy) => (
+              <PharmacyPosterCard key={pharmacy.id} pharmacy={pharmacy} />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-[22px] border border-dashed border-[#0B6E99]/25 bg-white/70 px-5 py-14 text-center">
+            <Storefront size={40} className="mx-auto text-[#0B6E99]" weight="duotone" />
+            <p className="mt-4 text-[18px] font-bold text-[#102A43]">No pharmacies found</p>
+            <p className="mt-1 text-[14px] text-[#627D98]">
+              Try another search or filter.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setSearch("");
+                setFilter("all");
+              }}
+              className="mt-4 rounded-[12px] bg-[#0B6E99] px-5 py-2.5 text-[13px] font-bold text-white"
+            >
+              Clear filters
+            </button>
+          </div>
+        )}
 
-        <PrescriptionCTA />
-        <WhyChooseUs />
+        <div className="mt-10 md:mt-12">
+          <PrescriptionCTA />
+        </div>
       </div>
     </div>
   );

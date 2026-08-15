@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useSelector } from "react-redux";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
   Package,
   Pill,
@@ -40,9 +41,27 @@ function OrderSkeleton() {
 }
 
 export function OrdersPage() {
-  const [activeSubtab, setActiveSubtab] = useState("all");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const typeParam = searchParams.get("type") || "all";
+  const initialTab = TABS.some((t) => t.id === typeParam) ? typeParam : "all";
+  const [activeSubtab, setActiveSubtab] = useState(initialTab);
   const { openSignIn } = useAuthModal();
   const { isAuthenticated } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    const next = searchParams.get("type") || "all";
+    if (TABS.some((t) => t.id === next)) setActiveSubtab(next);
+  }, [searchParams]);
+
+  const selectTab = (id) => {
+    setActiveSubtab(id);
+    const params = new URLSearchParams(searchParams.toString());
+    if (id === "all") params.delete("type");
+    else params.set("type", id);
+    const query = params.toString();
+    router.replace(query ? `/orders?${query}` : "/orders", { scroll: false });
+  };
 
   const { data: orders = [], isLoading, isError, refetch } = useAllOrders({
     enabled: isAuthenticated,
@@ -101,10 +120,12 @@ export function OrdersPage() {
         {/* Header */}
         <div className="mb-5 sm:mb-6">
           <h1 className="text-2xl sm:text-[28px] font-[var(--font-heading)] font-bold text-[var(--color-ink-headline)]">
-            My Orders
+            {activeSubtab === "lab" ? "Lab Bookings" : "My Orders"}
           </h1>
           <p className="text-[13px] sm:text-[14px] text-[var(--color-neutral-500)] mt-1">
-            Track all your bookings and purchases
+            {activeSubtab === "lab"
+              ? "Track your lab test bookings and reports"
+              : "Track all your bookings and purchases"}
           </p>
         </div>
 
@@ -145,7 +166,7 @@ export function OrdersPage() {
                   key={tab.id}
                   role="tab"
                   aria-selected={isActive}
-                  onClick={() => setActiveSubtab(tab.id)}
+                  onClick={() => selectTab(tab.id)}
                   className={`snap-start shrink-0 inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-full text-[12px] sm:text-[13px] font-semibold border transition-colors ${
                     isActive
                       ? "bg-[var(--color-brand-primary)] text-white border-[var(--color-brand-primary)]"

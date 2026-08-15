@@ -1,66 +1,52 @@
 "use client";
 
-import { MagnifyingGlass, MapPin, Storefront, ShieldCheck, Clock, Truck } from "@phosphor-icons/react";
+import Image from "next/image";
+import { MagnifyingGlass, Pill } from "@phosphor-icons/react";
 
-export function PharmaciesHero({ search, onSearchChange, location, onLocationChange }) {
+export function PharmaciesHero({ search, onSearchChange }) {
   return (
-    <div className="relative rounded-[20px] md:rounded-[24px] bg-hero-gradient overflow-hidden p-6 md:p-10 mb-6">
-      <div className="absolute top-0 right-0 w-72 h-72 bg-[var(--color-brand-primary)]/10 rounded-full blur-[100px] pointer-events-none" />
-      <div
-        className="absolute inset-0 opacity-[0.04] pointer-events-none"
-        style={{
-          backgroundImage: "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)",
-          backgroundSize: "40px 40px",
-        }}
-      />
+    <div className="mb-8 md:mb-10">
+      <div className="relative grid overflow-hidden rounded-[28px] bg-[#0B6E99] md:grid-cols-[1.1fr_0.9fr] md:rounded-[32px]">
+        <div className="relative z-10 flex flex-col justify-center px-6 py-9 text-white md:px-10 md:py-12 lg:px-12">
+          <p className="inline-flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.2em] text-[#B8E8F5]">
+            <Pill size={14} weight="fill" />
+            Pharmacies
+          </p>
+          <h1 className="mt-3 max-w-[16ch] text-[clamp(1.9rem,4.2vw,3.1rem)] font-bold leading-[1.08] tracking-tight text-white">
+            Your neighbourhood{" "}
+            <span className="text-[#7DD3C7]">pharmacy shelf</span>
+          </h1>
+          <p className="mt-4 max-w-md text-[15px] leading-relaxed text-white/75">
+            Open a partner store, browse their medicines, and order what you need —
+            including prescription uploads.
+          </p>
 
-      <div className="relative z-10">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 text-white/80 text-[11px] font-semibold uppercase tracking-wide mb-4">
-          <ShieldCheck size={14} weight="fill" className="text-[var(--color-brand-highlight)]" />
-          Verified Pharmacy Network
-        </div>
-
-        <h1 className="text-[28px] md:text-[36px] font-[var(--font-heading)] font-bold text-white leading-tight mb-3">
-          Find Trusted Pharmacies Near You
-        </h1>
-        <p className="text-[14px] md:text-[15px] text-white/65 max-w-[520px] mb-6 leading-relaxed">
-          Order from verified local pharmacies with fast delivery, authentic medicines, and real-time tracking.
-        </p>
-
-        <div className="flex flex-col md:flex-row gap-3 max-w-[720px]">
-          <div className="flex-1 flex items-center gap-3 bg-white rounded-[14px] px-4 py-3 focus-within:ring-2 focus-within:ring-[var(--color-brand-highlight)]/40">
-            <MagnifyingGlass size={20} className="text-[var(--color-brand-primary)] shrink-0" weight="bold" />
+          <div className="mt-7 flex max-w-lg items-center gap-2 rounded-[14px] border border-white/20 bg-white px-4 py-3 text-[#102A43] shadow-[0_16px_40px_rgba(0,0,0,0.18)] focus-within:ring-[3px] focus-within:ring-[#7DD3C7]/45">
+            <MagnifyingGlass size={20} className="shrink-0 text-[#0B6E99]" weight="bold" />
             <input
               type="text"
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Search pharmacies..."
-              className="flex-1 bg-transparent border-none outline-none text-[14px] text-[var(--color-neutral-900)] min-w-0"
-            />
-          </div>
-          <div className="flex-1 flex items-center gap-3 bg-white rounded-[14px] px-4 py-3">
-            <MapPin size={20} className="text-[var(--color-brand-primary)] shrink-0" weight="fill" />
-            <input
-              type="text"
-              value={location}
-              onChange={(e) => onLocationChange(e.target.value)}
-              placeholder="Your location"
-              className="flex-1 bg-transparent border-none outline-none text-[14px] text-[var(--color-neutral-900)] min-w-0"
+              placeholder="Search pharmacy name..."
+              className="min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-[#627D98]"
+              aria-label="Search pharmacies"
             />
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-5 mt-5">
-          {[
-            { icon: Storefront, label: "50+ partners" },
-            { icon: Truck, label: "30-min delivery" },
-            { icon: Clock, label: "24/7 available" },
-          ].map((item) => (
-            <div key={item.label} className="flex items-center gap-2 text-[12px] text-white/70 font-medium">
-              <item.icon size={16} className="text-[var(--color-brand-highlight)]" weight="fill" />
-              {item.label}
-            </div>
-          ))}
+        <div className="relative hidden min-h-[260px] md:block">
+          <Image
+            src="/images/home-pharmacy-editorial.png"
+            alt="Pharmacy shelves and healthcare products"
+            fill
+            className="object-cover object-center"
+            sizes="45vw"
+            priority
+          />
+          <div
+            className="absolute inset-0 bg-gradient-to-l from-transparent via-[#0B6E99]/25 to-[#0B6E99]"
+            aria-hidden
+          />
         </div>
       </div>
     </div>

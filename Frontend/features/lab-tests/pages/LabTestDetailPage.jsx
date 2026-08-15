@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { CaretRight, Flask, Clock, FileText, House, Check } from "@phosphor-icons/react";
+import { CaretRight, Flask, Clock, FileText, House, Check, Buildings, ArrowRight } from "@phosphor-icons/react";
 import { Button } from "@/shared/components/Button";
 import { LabBookingFlow } from "../components/LabBookingFlow";
 import { getLabTestById } from "../data/mockLabTests";
@@ -60,9 +60,34 @@ export function LabTestDetailPage() {
                 <h1 className="text-[22px] md:text-[26px] font-[var(--font-heading)] font-bold text-[var(--color-ink-headline)] leading-tight">
                   {test.name}
                 </h1>
-                <p className="text-[14px] text-[var(--color-neutral-500)] mt-1">{test.lab}</p>
               </div>
             </div>
+
+            {/* Clear lab provider */}
+            <Link
+              href={
+                test.labPartnerId || test.labPartner?.id
+                  ? `/lab-tests/labs/${test.labPartnerId || test.labPartner.id}`
+                  : "/lab-tests"
+              }
+              className="mb-6 flex items-center gap-3 rounded-[16px] border border-[#102A43]/08 bg-[#F4F7FA] px-4 py-3.5 transition-colors hover:border-[#0B6E99]/30"
+            >
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] bg-[#EAF7F5] text-[#0B6E99]">
+                <Buildings size={22} weight="duotone" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#627D98]">
+                  Laboratory offering this test
+                </span>
+                <span className="mt-0.5 block text-[16px] font-bold text-[#102A43]">
+                  {test.labPartner?.name || test.lab || "Participating laboratory"}
+                </span>
+              </span>
+              <span className="inline-flex items-center gap-1 text-[12px] font-bold text-[#0B6E99]">
+                View lab
+                <ArrowRight size={13} weight="bold" />
+              </span>
+            </Link>
 
             <p className="text-[14px] text-[var(--color-neutral-600)] leading-relaxed mb-6">{test.description}</p>
 
@@ -93,8 +118,8 @@ export function LabTestDetailPage() {
               <div className="flex items-center gap-3 p-4 bg-[var(--color-brand-mist)] rounded-[12px] border border-[var(--color-brand-light)]">
                 <House size={20} className="text-[var(--color-brand-primary)]" weight="fill" />
                 <div>
-                  <p className="text-[13px] font-bold text-[var(--color-ink-headline)]">Home sample collection included</p>
-                  <p className="text-[12px] text-[var(--color-neutral-500)]">Free phlebotomist visit at your address</p>
+                  <p className="text-[13px] font-bold text-[var(--color-ink-headline)]">Home sample collection</p>
+                  <p className="text-[12px] text-[var(--color-neutral-500)]">Available from this laboratory where offered</p>
                 </div>
               </div>
             )}

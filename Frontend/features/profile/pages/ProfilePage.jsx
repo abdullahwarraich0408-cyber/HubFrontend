@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import {
   User,
@@ -61,6 +61,8 @@ const NAV_ITEMS = [
   { id: "settings", label: "Settings", icon: Gear },
 ];
 
+const VALID_TABS = new Set(NAV_ITEMS.map((item) => item.id));
+
 const EMPTY_FAMILY = { full_name: "", relationship: "Spouse", blood_group: "B+", gender: "" };
 const EMPTY_ADDRESS = { name: "Home", street: "", city: "", country: "Pakistan", postal_code: "", is_default: false };
 const EMPTY_RECORD = { type: "Lab Report", title: "", date: "", lab: "" };
@@ -68,11 +70,29 @@ const EMPTY_PAYMENT = { type: "card", label: "", expiry: "", isDefault: false };
 
 export function ProfilePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { openSignIn } = useAuthModal();
   const { isAuthenticated, isLoading: authLoading, logout } = useAuth();
-  const [activeSection, setActiveSection] = useState("dashboard");
+  const tabParam = searchParams.get("tab") || "dashboard";
+  const [activeSection, setActiveSection] = useState(
+    VALID_TABS.has(tabParam) ? tabParam : "dashboard"
+  );
   const [modal, setModal] = useState(null);
   const [form, setForm] = useState({});
+
+  useEffect(() => {
+    const next = searchParams.get("tab") || "dashboard";
+    if (VALID_TABS.has(next)) setActiveSection(next);
+  }, [searchParams]);
+
+  const selectSection = (id) => {
+    setActiveSection(id);
+    const params = new URLSearchParams(searchParams.toString());
+    if (id === "dashboard") params.delete("tab");
+    else params.set("tab", id);
+    const query = params.toString();
+    router.replace(query ? `/profile?${query}` : "/profile", { scroll: false });
+  };
 
   const {
     profile,
@@ -619,7 +639,7 @@ export function ProfilePage() {
                   <p className="text-[12px] font-semibold text-[var(--color-neutral-600)] mt-1">{stat.label}</p>
                   {stat.href && <Link href={stat.href} className="text-[11px] font-semibold text-[var(--color-brand-primary)] hover:underline mt-2 inline-block">View →</Link>}
                   {stat.section && (
-                    <button type="button" onClick={() => setActiveSection(stat.section)} className="text-[11px] font-semibold text-[var(--color-brand-primary)] hover:underline mt-2 inline-block">
+                    <button type="button" onClick={() => selectSection(stat.section)} className="text-[11px] font-semibold text-[var(--color-brand-primary)] hover:underline mt-2 inline-block">
                       View →
                     </button>
                   )}
@@ -690,7 +710,7 @@ export function ProfilePage() {
               </div>
               <h2 className="text-[17px] font-bold">{profile?.name || "Customer"}</h2>
               <p className="text-[12px] text-[var(--color-neutral-500)] mt-0.5">{profile?.email}</p>
-              <button type="button" onClick={() => setActiveSection("settings")} className="text-[12px] font-semibold text-[var(--color-brand-primary)] mt-2 hover:underline">
+              <button type="button" onClick={() => selectSection("settings")} className="text-[12px] font-semibold text-[var(--color-brand-primary)] mt-2 hover:underline">
                 Edit profile
               </button>
             </div>
@@ -701,7 +721,7 @@ export function ProfilePage() {
                   <button
                     key={item.id}
                     type="button"
-                    onClick={() => setActiveSection(item.id)}
+                    onClick={() => selectSection(item.id)}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-[12px] text-[13px] font-semibold transition-all ${
                       activeSection === item.id ? "bg-[var(--color-brand-primary)] text-white" : "text-[var(--color-neutral-600)] hover:bg-[var(--color-neutral-50)]"
                     }`}

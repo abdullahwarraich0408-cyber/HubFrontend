@@ -1,11 +1,37 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
-import { House, MapPin, Star, Flask } from "@phosphor-icons/react";
+import {
+  ArrowRight,
+  House,
+  MapPin,
+  Flask,
+} from "@phosphor-icons/react";
 import { useLabs } from "@/lib/hooks/useApi";
 import { mapLabToFrontend } from "@/lib/mappers/labTest";
-import { Button } from "@/shared/components/Button";
+import { LabOffersSection } from "../components/LabOffersSection";
+import { LabsHero } from "../components/LabsHero";
+
+const POSTER_VISUALS = [
+  {
+    image: "/images/hero-lab-test.png",
+    tone: "from-[#062F3D]/95 via-[#062F3D]/55 to-transparent",
+  },
+  {
+    image: "/images/laboratory-testing.png",
+    tone: "from-[#073B4C]/95 via-[#0B6E99]/50 to-transparent",
+  },
+  {
+    image: "/images/home-lab-sampling.png",
+    tone: "from-[#087F8C]/95 via-[#16A9E0]/45 to-transparent",
+  },
+  {
+    image: "/images/card-lab-tests.png",
+    tone: "from-[#062F3D]/95 via-[#16A9E0]/40 to-transparent",
+  },
+];
 
 export function LabsPage() {
   const [search, setSearch] = useState("");
@@ -19,77 +45,149 @@ export function LabsPage() {
   const { data: labs = [], isLoading } = useLabs(params);
 
   return (
-    <div className="w-full bg-surface-subtle min-h-screen py-8">
-      <div className="max-w-[1280px] mx-auto px-4 md:px-[80px]">
-        <div className="mb-8">
-          <h1 className="text-[32px] font-bold text-ink-headline mb-2">Lab Partners</h1>
-          <p className="text-neutral-500">Browse certified labs, compare services, and book tests.</p>
-        </div>
+    <div className="min-h-screen w-full bg-[#F0F4F8]">
+      <div className="home-container mx-auto py-8 md:py-10 lg:py-12">
+        <LabsHero search={search} onSearchChange={setSearch} />
 
-        <div className="flex flex-wrap gap-3 mb-6">
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search lab name..."
-            className="px-4 py-3 rounded-[12px] border border-neutral-200 bg-white min-w-[220px]"
-          />
+        <LabOffersSection />
+
+        <div className="mb-6 flex flex-wrap items-center gap-2.5">
           <select
             value={city}
             onChange={(e) => setCity(e.target.value)}
-            className="px-4 py-3 rounded-[12px] border border-neutral-200 bg-white"
+            className="h-11 rounded-full border border-[#102A43]/08 bg-white px-4 text-[13px] font-semibold text-[#102A43] outline-none focus:ring-[3px] focus:ring-[#0B6E99]/15"
+            aria-label="Filter by city"
           >
             <option value="">All cities</option>
-            {["Karachi", "Lahore", "Islamabad", "Rawalpindi", "Faisalabad"].map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
+            {["Karachi", "Lahore", "Islamabad", "Rawalpindi", "Faisalabad", "Gujranwala"].map(
+              (c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              )
+            )}
           </select>
-          <label className="flex items-center gap-2 px-4 py-3 bg-white border border-neutral-200 rounded-[12px] text-[14px]">
-            <input type="checkbox" checked={homeOnly} onChange={(e) => setHomeOnly(e.target.checked)} />
-            Home collection only
+
+          <label className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-full border border-[#102A43]/08 bg-white px-4 text-[13px] font-semibold text-[#102A43]">
+            <input
+              type="checkbox"
+              checked={homeOnly}
+              onChange={(e) => setHomeOnly(e.target.checked)}
+              className="accent-[#0B6E99]"
+            />
+            <House size={14} weight="bold" />
+            Home collection
           </label>
-          <Link href="/lab-tests/cart">
-            <Button variant="secondary">View Cart</Button>
+
+          <Link
+            href="/lab-tests/browse"
+            className="ml-auto inline-flex h-11 items-center gap-1.5 rounded-full bg-[#062F3D] px-4 text-[13px] font-bold text-white transition-colors hover:bg-[#073B4C]"
+          >
+            <Flask size={15} weight="bold" />
+            Browse all tests
+            <ArrowRight size={14} weight="bold" />
           </Link>
         </div>
 
         {isLoading ? (
-          <p className="text-neutral-500">Loading labs...</p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {labs.map((raw) => {
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div
+                key={i}
+                className="aspect-[3/4] animate-pulse rounded-[28px] bg-[#D7E2EA]"
+              />
+            ))}
+          </div>
+        ) : labs.length > 0 ? (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {labs.map((raw, index) => {
               const lab = mapLabToFrontend(raw);
+              if (!lab) return null;
+              const visual = POSTER_VISUALS[index % POSTER_VISUALS.length];
               return (
-                <div key={lab.id} className="bg-white rounded-[16px] border border-neutral-200 p-5 hover:border-brand-primary/30 transition-all">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h3 className="text-[18px] font-bold text-ink-headline">{lab.name}</h3>
-                      <p className="text-[13px] text-neutral-500 flex items-center gap-1 mt-1">
-                        <MapPin size={14} /> {lab.city || lab.address || "Pakistan"}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-1 text-[13px] font-bold text-amber-600">
-                      <Star size={14} weight="fill" /> {lab.rating?.toFixed(1) || "4.5"}
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-2 mb-4 text-[12px]">
-                    <span className="px-2 py-1 bg-brand-mist text-brand-primary rounded-full font-semibold">
-                      {lab.testCount} tests
-                    </span>
-                    {lab.homeCollection && (
-                      <span className="px-2 py-1 bg-neutral-100 rounded-full flex items-center gap-1">
-                        <House size={12} /> Home collection
+                <Link
+                  key={lab.id}
+                  href={`/lab-tests/labs/${lab.id}`}
+                  className="group relative block aspect-[3/4] overflow-hidden rounded-[28px] bg-[#D7E6EF]"
+                >
+                  <Image
+                    src={visual.image}
+                    alt=""
+                    fill
+                    className="object-cover object-center transition-transform duration-700 group-hover:scale-[1.04]"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  />
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-t ${visual.tone}`}
+                    aria-hidden
+                  />
+
+                  <div className="absolute inset-x-0 bottom-0 flex h-full flex-col justify-end p-5 md:p-6">
+                    <p className="inline-flex max-w-full truncate self-start rounded-full bg-white/20 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur-sm">
+                      {lab.name}
+                    </p>
+
+                    <p className="mt-3 text-[12px] font-semibold uppercase tracking-[0.14em] text-white/75">
+                      Laboratory offer
+                    </p>
+                    <h2 className="mt-2 max-w-[18ch] text-[clamp(1.35rem,2.4vw,1.75rem)] font-bold leading-snug tracking-tight text-white">
+                      {lab.name}
+                    </h2>
+
+                    <p className="mt-2 flex items-center gap-1.5 text-[13px] font-medium text-white/70">
+                      <MapPin size={14} weight="fill" />
+                      <span className="truncate">
+                        {lab.city || lab.address || "Pakistan"}
                       </span>
-                    )}
-                    {lab.minPrice && (
-                      <span className="px-2 py-1 bg-neutral-100 rounded-full">From PKR {lab.minPrice.toLocaleString()}</span>
-                    )}
+                    </p>
+
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <span className="rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur-sm">
+                        {lab.testCount} {lab.testCount === 1 ? "test" : "tests"}
+                      </span>
+                      {lab.homeCollection ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur-sm">
+                          <House size={11} weight="fill" />
+                          Home collection
+                        </span>
+                      ) : null}
+                      {lab.minPrice ? (
+                        <span className="rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur-sm">
+                          From PKR {Number(lab.minPrice).toLocaleString()}
+                        </span>
+                      ) : null}
+                    </div>
+
+                    <span className="mt-5 inline-flex items-center gap-1.5 self-start rounded-full bg-[#16A9E0] px-4 py-2.5 text-[13px] font-bold text-white transition-colors group-hover:bg-[#1290c4]">
+                      View tests
+                      <ArrowRight
+                        size={14}
+                        weight="bold"
+                        className="transition-transform group-hover:translate-x-[3px]"
+                      />
+                    </span>
                   </div>
-                  <Link href={`/lab-tests/labs/${lab.id}`}>
-                    <Button className="w-full">View Lab & Book</Button>
-                  </Link>
-                </div>
+                </Link>
               );
             })}
+          </div>
+        ) : (
+          <div className="rounded-[28px] border border-dashed border-[#102A43]/15 bg-white px-5 py-14 text-center">
+            <p className="text-[18px] font-bold text-[#102A43]">No labs found</p>
+            <p className="mt-1 text-[14px] text-[#627D98]">
+              Try another search or city filter.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setSearch("");
+                setCity("");
+                setHomeOnly(false);
+              }}
+              className="mt-4 rounded-full bg-[#062F3D] px-5 py-2.5 text-[13px] font-bold text-white"
+            >
+              Clear filters
+            </button>
           </div>
         )}
       </div>

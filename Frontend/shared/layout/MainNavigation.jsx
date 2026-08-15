@@ -2,47 +2,66 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { House, Drop, Brain, Flask, Storefront } from "@phosphor-icons/react";
+import { House, Pill, Stethoscope, Flask, Storefront } from "@phosphor-icons/react";
+import { cn } from "@/utils/cn";
 
-const TABS = [
-  { label: "Home", href: "/", icon: House, match: (path) => path === "/" },
+export const HEALTHCARE_TABS = [
   {
-    label: "Diabetes Care",
-    href: "/browse?category=diabetes",
-    icon: Drop,
-    match: (path) => path.startsWith("/browse") || path.startsWith("/product"),
+    label: "Home",
+    shortLabel: "Home",
+    href: "/",
+    icon: House,
+    match: (path) => path === "/" || path === "/home",
   },
   {
-    label: "Psychologists",
-    href: "/doctors?specialty=psychologist",
-    icon: Brain,
-    match: (path) => path.startsWith("/doctors"),
+    label: "Medicine",
+    shortLabel: "Medicine",
+    href: "/browse",
+    icon: Pill,
+    match: (path) =>
+      path.startsWith("/browse") ||
+      path.startsWith("/product") ||
+      path.startsWith("/diabetes-care"),
+  },
+  {
+    label: "Doctors",
+    shortLabel: "Doctors",
+    href: "/doctors",
+    icon: Stethoscope,
+    match: (path) => path.startsWith("/doctors") || path.startsWith("/psychologists"),
   },
   {
     label: "Lab Tests",
+    shortLabel: "Lab Tests",
     href: "/lab-tests",
     icon: Flask,
     match: (path) => path.startsWith("/lab-tests"),
   },
   {
     label: "Pharmacies",
+    shortLabel: "Pharmacies",
     href: "/vendors",
     icon: Storefront,
-    match: (path) => path.startsWith("/vendors") || path.startsWith("/pharmacies"),
+    match: (path) =>
+      path.startsWith("/vendors") || path.startsWith("/pharmacies"),
   },
 ];
 
-export function MainNavigation() {
+export function HealthcareNav({ sticky = true, className }) {
   const pathname = usePathname();
 
   return (
     <nav
-      aria-label="Main navigation"
-      className="sticky top-[64px] z-40 w-full bg-[var(--color-ink-900)] border-b border-white/10 shadow-[var(--shadow-navbar)]"
+      aria-label="Healthcare services"
+      className={cn(
+        "z-40 w-full bg-[#073B4C] border-b border-white/10",
+        sticky && "sticky top-[var(--patient-header-offset,72px)]",
+        className
+      )}
     >
-      <div className="w-full max-w-[1280px] mx-auto px-4 md:px-[80px]">
-        <div className="flex items-center gap-1 h-[48px] overflow-x-auto scrollbar-hide">
-          {TABS.map((tab) => {
+      <div className="home-container mx-auto">
+        <div className="flex h-[56px] items-stretch gap-0.5 overflow-x-auto scrollbar-hide md:h-[64px] md:gap-1">
+          {HEALTHCARE_TABS.map((tab) => {
             const isActive = tab.match(pathname);
             const Icon = tab.icon;
 
@@ -50,17 +69,19 @@ export function MainNavigation() {
               <Link
                 key={tab.href}
                 href={tab.href}
-                className={`relative flex items-center gap-2 px-4 h-full text-[14px] font-medium whitespace-nowrap shrink-0 transition-colors ${
+                className={cn(
+                  "relative flex shrink-0 items-center gap-2 px-3.5 text-[13px] font-medium whitespace-nowrap transition-colors md:px-5 md:text-[14px]",
                   isActive
-                    ? "text-[var(--color-brand-highlight)]"
-                    : "text-white/80 hover:text-[var(--color-brand-highlight)]"
-                }`}
+                    ? "text-[#16A9E0]"
+                    : "text-white/75 hover:text-white"
+                )}
               >
                 <Icon size={18} weight={isActive ? "fill" : "regular"} />
-                {tab.label}
-                {isActive && (
-                  <span className="absolute bottom-0 left-4 right-4 h-[2px] bg-[var(--color-brand-primary)] rounded-full" />
-                )}
+                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="sm:hidden">{tab.shortLabel}</span>
+                {isActive ? (
+                  <span className="absolute bottom-0 left-3 right-3 h-[2px] rounded-full bg-[#16A9E0] md:left-4 md:right-4" />
+                ) : null}
               </Link>
             );
           })}
@@ -68,4 +89,8 @@ export function MainNavigation() {
       </div>
     </nav>
   );
+}
+
+export function MainNavigation(props) {
+  return <HealthcareNav {...props} />;
 }

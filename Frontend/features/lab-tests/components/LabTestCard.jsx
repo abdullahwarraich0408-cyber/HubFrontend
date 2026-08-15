@@ -1,82 +1,133 @@
 "use client";
 
 import Link from "next/link";
-import { Flask, Clock, FileText, House, ArrowRight, ShoppingCart } from "@phosphor-icons/react";
-import { Button } from "@/shared/components/Button";
+import {
+  Clock,
+  FileText,
+  House,
+  ArrowRight,
+  ShoppingCart,
+  Buildings,
+} from "@phosphor-icons/react";
 import { addToLabCart } from "@/lib/labCart";
 import { toast } from "sonner";
 
-export function LabTestCard({ test, compact = false }) {
+function getLabName(test) {
   return (
-    <div className={`bg-white rounded-[16px] border border-[var(--color-neutral-200)] overflow-hidden hover:border-[var(--color-brand-primary)]/30 hover:shadow-[0_8px_24px_-8px_rgba(8,43,63,0.15)] transition-all ${compact ? "" : "h-full flex flex-col"}`}>
-      <div className="p-5 flex flex-col flex-1">
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <div className="flex-1 min-w-0">
-            {test.discount && (
-              <span className="inline-block px-2 py-0.5 mb-2 text-[10px] font-bold uppercase bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-brand-dark)] text-white rounded-full">
-                {test.discount}
-              </span>
-            )}
-            <Link href={`/lab-tests/${test.id}`}>
-              <h3 className="text-[15px] font-bold text-[var(--color-ink-headline)] leading-snug hover:text-[var(--color-brand-primary)] transition-colors line-clamp-2">
-                {test.name}
-              </h3>
-            </Link>
-          </div>
-          <div className="w-10 h-10 rounded-[10px] bg-[var(--color-brand-mist)] flex items-center justify-center shrink-0">
-            <Flask size={20} className="text-[var(--color-brand-primary)]" weight="duotone" />
-          </div>
-        </div>
+    test?.labPartner?.name ||
+    test?.labPartner?.business_name ||
+    test?.lab ||
+    null
+  );
+}
 
-        <div className="flex items-center gap-1.5 text-[12px] text-[var(--color-neutral-500)] mb-4">
-          <span className="font-semibold text-[var(--color-ink-headline)]">{test.lab}</span>
-          {test.homeCollection && (
-            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-[var(--color-brand-mist)] text-[var(--color-brand-primary)] text-[10px] font-bold rounded">
-              <House size={10} weight="fill" />
+function getLabHref(test) {
+  const id = test?.labPartnerId || test?.labPartner?.id;
+  return id ? `/lab-tests/labs/${id}` : "/lab-tests";
+}
+
+export function LabTestCard({ test, showLabProvider = true }) {
+  const price =
+    typeof test.price === "number" && !Number.isNaN(test.price) ? test.price : null;
+  const href = `/lab-tests/${test.id}`;
+  const category = test.category
+    ? String(test.category).replace(/_/g, " ")
+    : "Lab test";
+  const labName = getLabName(test);
+  const labHref = getLabHref(test);
+
+  return (
+    <article className="group flex h-full flex-col overflow-hidden rounded-[28px] bg-[#062F3D] text-white transition-transform duration-300 hover:-translate-y-1">
+      <div className="flex flex-1 flex-col p-5 pb-4">
+        <div className="flex items-start justify-between gap-3">
+          <span className="rounded-full bg-[#16A9E0]/20 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#7DD3C7]">
+            {category}
+          </span>
+          {test.homeCollection ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-bold text-white/80">
+              <House size={11} weight="fill" />
               Home
             </span>
+          ) : null}
+        </div>
+
+        <Link href={href} className="mt-4 block focus-visible:outline-none">
+          <h3 className="line-clamp-2 min-h-[3.25rem] text-[18px] font-bold leading-snug tracking-tight text-white transition-colors group-hover:text-[#7DD3C7]">
+            {test.name}
+          </h3>
+        </Link>
+
+        {showLabProvider ? (
+          <Link
+            href={labHref}
+            className="mt-3 flex items-center gap-3 rounded-[16px] border border-white/10 bg-white/10 px-3 py-2.5 transition-colors hover:bg-white/15"
+          >
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-[#16A9E0]/25 text-[#7DD3C7]">
+              <Buildings size={18} weight="duotone" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[10px] font-bold uppercase tracking-[0.12em] text-white/50">
+                Offered by
+              </span>
+              <span className="mt-0.5 block truncate text-[14px] font-bold text-white">
+                {labName || "Participating laboratory"}
+              </span>
+            </span>
+            <ArrowRight size={14} className="shrink-0 text-white/50" weight="bold" />
+          </Link>
+        ) : null}
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-[11px] font-semibold text-white/80">
+            <Clock size={12} weight="bold" />
+            {test.collectionTime || "As scheduled"}
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-[11px] font-semibold text-white/80">
+            <FileText size={12} weight="bold" />
+            {test.reportTime || "After processing"}
+          </span>
+        </div>
+
+        {test.testsIncluded ? (
+          <p className="mt-4 text-[12px] font-medium text-white/45">
+            {test.testsIncluded} tests included
+          </p>
+        ) : (
+          <p className="mt-4 text-[12px] font-medium text-white/45">Diagnostic test</p>
+        )}
+      </div>
+
+      <div className="mt-auto flex items-center gap-2 border-t border-white/10 bg-black/20 px-4 py-3.5">
+        <div className="min-w-0 flex-1">
+          {price != null ? (
+            <p className="truncate text-[18px] font-bold tracking-tight text-white">
+              PKR {price.toLocaleString()}
+            </p>
+          ) : (
+            <p className="text-[13px] font-semibold text-white/60">View details</p>
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          <div className="p-2.5 bg-[var(--color-surface-subtle)] rounded-[10px]">
-            <div className="flex items-center gap-1 text-[10px] font-semibold text-[var(--color-neutral-400)] uppercase mb-0.5">
-              <Clock size={11} />
-              Collection
-            </div>
-            <p className="text-[12px] font-bold text-[var(--color-neutral-700)]">{test.collectionTime}</p>
-          </div>
-          <div className="p-2.5 bg-[var(--color-surface-subtle)] rounded-[10px]">
-            <div className="flex items-center gap-1 text-[10px] font-semibold text-[var(--color-neutral-400)] uppercase mb-0.5">
-              <FileText size={11} />
-              Report
-            </div>
-            <p className="text-[12px] font-bold text-[var(--color-neutral-700)]">{test.reportTime}</p>
-          </div>
-        </div>
+        <button
+          type="button"
+          onClick={() => {
+            addToLabCart(test);
+            toast.success("Added to lab cart");
+          }}
+          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/15 text-white transition-colors hover:bg-white/10"
+          aria-label="Add to lab cart"
+        >
+          <ShoppingCart size={17} weight="bold" />
+        </button>
 
-        <div className="flex items-center justify-between mt-auto pt-3 border-t border-[var(--color-neutral-100)]">
-          <div>
-            <p className="text-[11px] text-[var(--color-neutral-400)]">{test.testsIncluded} tests</p>
-            <p className="text-[20px] font-bold text-[var(--color-ink-headline)]">PKR {test.price.toLocaleString()}</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => { addToLabCart(test); toast.success("Added to cart"); }}
-              className="h-[38px] px-3 rounded-[10px] border border-neutral-200 hover:bg-brand-mist text-brand-primary"
-              title="Add to cart"
-            >
-              <ShoppingCart size={18} />
-            </button>
-            <Link href={`/lab-tests/${test.id}`}>
-              <Button className="h-[38px] text-[12px] px-4 bg-brand-primary hover:bg-brand-dark border-none">
-                Book
-                <ArrowRight size={14} className="ml-1" weight="bold" />
-              </Button>
-            </Link>
-          </div>
-        </div>
+        <Link
+          href={href}
+          className="inline-flex h-11 shrink-0 items-center gap-1.5 rounded-full bg-[#16A9E0] px-4 text-[13px] font-bold text-white transition-colors hover:bg-[#1290c4]"
+        >
+          Book
+          <ArrowRight size={14} weight="bold" />
+        </Link>
       </div>
-    </div>
+    </article>
   );
 }

@@ -72,10 +72,14 @@ function buildBookQuery(doctorId, option, hospitalContext, tab = "book") {
 
 const buildSlotParams = (option) => {
   if (!option || option.type === "online") return { consult: "online" };
+  const practiceLocationId =
+    option.practiceLocationId && option.practiceLocationId !== "legacy"
+      ? option.practiceLocationId
+      : undefined;
   return {
     consult: "in_person",
     hospital_id: option.hospitalId || undefined,
-    practice_location_id: option.practiceLocationId || undefined,
+    practice_location_id: practiceLocationId,
   };
 };
 
@@ -156,7 +160,11 @@ export function AppointmentFlow({
         reason: purpose === "consultation" ? "Normal Consultation" : "Surgery / Procedure Visit",
         preferred_consultation_mode: consultType,
         hospital_id: selectedOption.hospitalId || undefined,
-        practice_location_id: selectedOption.practiceLocationId || undefined,
+        practice_location_id:
+          selectedOption.practiceLocationId &&
+          selectedOption.practiceLocationId !== "legacy"
+            ? selectedOption.practiceLocationId
+            : undefined,
       });
       setBookedAppointment(appointment.appointment || appointment);
       toast.success("Appointment booked successfully");

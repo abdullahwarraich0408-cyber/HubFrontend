@@ -130,8 +130,16 @@ export function LabBookingFlow({ test }) {
       {step === 1 && (
         <div>
           <div className="p-5 bg-brand-mist rounded-[12px] border mb-4">
+            <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#0B6E99] mb-1">
+              Laboratory
+            </p>
+            <p className="text-[15px] font-bold text-[#102A43] mb-3">
+              {test.labPartner?.name || test.lab || "Participating laboratory"}
+            </p>
             <p className="text-[16px] font-bold mb-1">{test.name}</p>
-            <p className="text-[13px] text-neutral-500">{test.lab} · {test.testsIncluded} tests</p>
+            <p className="text-[13px] text-neutral-500">
+              {test.testsIncluded ? `${test.testsIncluded} tests included` : "Diagnostic test"}
+            </p>
             {test.fastingRequired && <p className="text-[12px] text-amber-700 mt-2">⚠ Fasting required before this test</p>}
             {test.preparation && <p className="text-[12px] text-neutral-600 mt-2">{test.preparation}</p>}
             <p className="text-[20px] font-bold text-brand-primary mt-3">PKR {test.price.toLocaleString()}</p>

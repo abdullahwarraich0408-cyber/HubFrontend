@@ -4,22 +4,32 @@ export const DEFAULT_PRODUCT_IMAGE =
 export function mapProductToMedicine(product) {
   if (!product) return null;
 
+  const discountRaw = product.discount;
+  const discount =
+    discountRaw != null && Number(discountRaw) > 0 ? Number(discountRaw) : null;
+
   return {
     id: product.id,
     name: product.name,
     generic: product.formula || product.name,
-    brand: product.category || "Generic",
-    vendor: product.vendor?.business_name || "Verified Pharmacy",
+    brand: product.category || null,
+    vendor:
+      product.vendor?.business_name ||
+      product.vendor?.name ||
+      product.vendorName ||
+      null,
+    vendorId: product.vendor_id || product.vendor?.id || null,
+    vendorSlug: product.vendor?.slug || null,
     category: product.category || "OTC",
     prescriptionRequired: Boolean(product.requires_prescription),
     price: product.price,
+    discount,
     stock: product.stock ?? 0,
-    deliveryEta: "Same day",
+    deliveryEta: product.delivery_eta || product.delivery_time || null,
     image: product.image_url || DEFAULT_PRODUCT_IMAGE,
-    rating: product.rating ?? 4.5,
+    rating: product.rating != null ? Number(product.rating) : null,
     reviews: product.reviews_count ?? 0,
     description: product.description,
-    vendorId: product.vendor_id,
   };
 }
 

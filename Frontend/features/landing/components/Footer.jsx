@@ -1,0 +1,105 @@
+"use client";
+
+import Link from "next/link";
+
+const YEAR = new Date().getFullYear();
+
+const COLUMNS = [
+  {
+    title: "Services",
+    links: [
+      { label: "Medicines", href: "/browse" },
+      { label: "Doctors", href: "/doctors" },
+      { label: "Lab Tests", href: "/lab-tests" },
+      { label: "Diabetes Care", href: "#diabetes-care" },
+      { label: "Mental Health", href: "#mental-health" },
+    ],
+  },
+  {
+    title: "For Providers",
+    links: [
+      { label: "Doctors", href: "/partner-with-us" },
+      { label: "Pharmacies", href: "/partner-with-us" },
+      { label: "Laboratories", href: "/partner-with-us" },
+      { label: "Hospitals & Clinics", href: "/hospitals" },
+      { label: "Join Medzoos", href: "/provider/register" },
+    ],
+  },
+  {
+    title: "Company",
+    links: [
+      { label: "About", href: "/contact" },
+      { label: "Contact", href: "/contact" },
+      { label: "Help Center", href: "/help" },
+    ],
+  },
+  {
+    title: "Legal",
+    links: [
+      { label: "Privacy Policy", href: "/privacy-policy" },
+      { label: "Terms & Conditions", href: "/terms-and-conditions" },
+      { label: "Medical Disclaimer", href: "#medical-disclaimer" },
+    ],
+  },
+];
+
+export function Footer() {
+  return (
+    <footer className="border-t border-[#102A43]/08 bg-[#102A43] text-white">
+      <div className="landing-container py-14 md:py-16">
+        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-6 lg:gap-8">
+          <div className="lg:col-span-2">
+            <Link href="#top" className="inline-flex items-center gap-2.5">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#087F8C] text-[15px] font-bold text-white">
+                M
+              </span>
+              <span className="text-[1.2rem] font-semibold tracking-tight">Medzoos</span>
+            </Link>
+            <p className="mt-4 max-w-xs text-[14px] leading-relaxed text-white/65">
+              Connecting patients with healthcare services across Pakistan.
+            </p>
+            <p className="mt-5 text-[13px] font-medium text-[#7DD3C7]">
+              Made for healthcare in Pakistan
+            </p>
+          </div>
+
+          {COLUMNS.map((column) => (
+            <div key={column.title}>
+              <h3 className="mb-4 text-[14px] font-semibold text-white">
+                {column.title}
+              </h3>
+              <ul className="space-y-2.5">
+                {column.links.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-[14px] text-white/60 transition-colors hover:text-white"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        <div
+          id="medical-disclaimer"
+          className="mt-12 rounded-2xl border border-white/10 bg-white/5 px-5 py-4"
+        >
+          <p className="text-[12px] leading-relaxed text-white/55 md:text-[13px]">
+            Medzoos is a healthcare connection platform and does not itself provide
+            medical diagnosis or treatment. Healthcare services are provided by
+            independent healthcare providers available through the platform.
+          </p>
+        </div>
+
+        <div className="mt-8 flex flex-col gap-2 border-t border-white/10 pt-6 text-[13px] text-white/45 sm:flex-row sm:items-center sm:justify-between">
+          <p>© {YEAR} Medzoos. All rights reserved.</p>
+          <p>Made for healthcare in Pakistan</p>
+        </div>
+      </div>
+    </footer>
+  );
+}

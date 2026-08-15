@@ -23,8 +23,20 @@ const nextConfig = {
         hostname: "localhost",
       },
       {
+        protocol: "http",
+        hostname: "127.0.0.1",
+      },
+      {
         protocol: "https",
-        hostname: "*.digitaloceanspaces.com",
+        hostname: "medmarket.asrar.dev",
+      },
+      {
+        protocol: "https",
+        hostname: "**.digitaloceanspaces.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.cdn.digitaloceanspaces.com",
       },
     ],
   },

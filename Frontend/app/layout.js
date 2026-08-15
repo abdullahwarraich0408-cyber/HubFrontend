@@ -19,8 +19,23 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata = {
-  title: "Medzoos | Diabetes Care & Psychologist Support",
-  description: "Diabetes care and psychologist support — medicines, consults, and labs focused on diabetes and mental wellness.",
+  title: "Medzoos | Medicines, Doctors & Lab Tests in Pakistan",
+  description:
+    "Medzoos connects patients in Pakistan with healthcare providers for medicines, doctor consultations, appointments and laboratory services through one convenient platform.",
+  openGraph: {
+    title: "Medzoos | Medicines, Doctors & Lab Tests in Pakistan",
+    description:
+      "Medzoos connects patients in Pakistan with healthcare providers for medicines, doctor consultations, appointments and laboratory services through one convenient platform.",
+    type: "website",
+    locale: "en_PK",
+    siteName: "Medzoos",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Medzoos | Medicines, Doctors & Lab Tests in Pakistan",
+    description:
+      "Medzoos connects patients in Pakistan with healthcare providers for medicines, doctor consultations, appointments and laboratory services through one convenient platform.",
+  },
 };
 
 export default function RootLayout({ children }) {

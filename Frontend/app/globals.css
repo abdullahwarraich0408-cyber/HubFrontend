@@ -432,4 +432,55 @@
     border-radius: 999px;
     background: transparent;
   }
+
+  /* Medzoos marketing landing */
+  .landing-page {
+    --landing-primary: #087f8c;
+    --landing-primary-dark: #075e68;
+    --landing-secondary: #16a085;
+    --landing-accent: #3b82f6;
+    --landing-light: #eaf8f7;
+    --landing-bg: #f7fafc;
+    --landing-heading: #102a43;
+    --landing-body: #52606d;
+    color: var(--landing-heading);
+  }
+
+  .landing-container {
+    width: 100%;
+    max-width: 1200px;
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    .landing-container {
+      max-width: 1240px;
+      padding-inline: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .landing-container {
+      max-width: 1280px;
+      padding-inline: 2rem;
+    }
+  }
+
+  /* Logged-in patient chrome sticky offset */
+  :root {
+    --patient-header-offset: 124px;
+  }
+
+  @media (min-width: 768px) {
+    :root {
+      --patient-header-offset: 72px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .landing-page * {
+      scroll-behavior: auto !important;
+    }
+  }
 }

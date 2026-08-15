@@ -1,9 +1,55 @@
 export const DEFAULT_DOCTOR_PHOTO =
-  "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=400";
+  "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=400";
+
+/** Known-good secondary portrait if a provider photo URL is broken. */
+export const FALLBACK_DOCTOR_PHOTO =
+  "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=400";
+
+function backendOrigin() {
+  const raw =
+    process.env.NEXT_PUBLIC_BACKEND_URL ||
+    process.env.BACKEND_URL ||
+    "";
+  return String(raw).replace(/\/$/, "");
+}
+
+/** Normalize doctor photo URLs; returns null when unusable. */
+export function resolveDoctorPhotoUrl(photoUrl) {
+  const value = photoUrl != null ? String(photoUrl).trim() : "";
+  if (!value || value === "null" || value === "undefined") return null;
+
+  // Retired / 404 Unsplash seed URLs still present in some environments
+  if (value.includes("photo-1537368910022-7914809a2a3c")) {
+    return DEFAULT_DOCTOR_PHOTO;
+  }
+
+  if (
+    value.startsWith("https://") ||
+    value.startsWith("http://") ||
+    value.startsWith("data:") ||
+    value.startsWith("blob:")
+  ) {
+    return value;
+  }
+
+  if (value.startsWith("//")) {
+    return `https:${value}`;
+  }
+
+  const origin = backendOrigin();
+  if (value.startsWith("/") && origin) {
+    return `${origin}${value}`;
+  }
+
+  if (origin && !value.includes("://")) {
+    return `${origin}/${value.replace(/^\.\//, "")}`;
+  }
+
+  return null;
+}
 
 export function getDoctorPhoto(photoUrl) {
-  const value = photoUrl && String(photoUrl).trim();
-  return value || DEFAULT_DOCTOR_PHOTO;
+  return resolveDoctorPhotoUrl(photoUrl) || DEFAULT_DOCTOR_PHOTO;
 }
 
 function flattenDoctorSlots(slots) {

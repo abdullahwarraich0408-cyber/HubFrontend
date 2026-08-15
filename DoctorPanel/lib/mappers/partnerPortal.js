@@ -31,6 +31,7 @@ export function mapDoctorProfileFromApi(doctor) {
       ? doctor.languages.join(", ")
       : doctor.languages || "",
     bio: doctor.about || "",
+    photo: doctor.photo_url || "",
     slots: doctor.slots || [],
     online: doctor.online,
     notifications,
@@ -47,6 +48,7 @@ export function mapDoctorProfileToApi(profile) {
     fee: profile.consultationFee,
     experience_years: profile.experience,
     languages: profile.languages,
+    photo_url: profile.photo || profile.photo_url || undefined,
     notification_preferences: profile.notifications,
   };
 }

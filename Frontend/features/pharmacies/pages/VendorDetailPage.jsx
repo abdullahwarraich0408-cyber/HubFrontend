@@ -17,8 +17,6 @@ import {
   MapTrifold,
   ShareNetwork,
   Heart,
-  SealCheck,
-  Lock,
 } from "@phosphor-icons/react";
 import { Button } from "@/shared/components/Button";
 import { useVendorBySlug, useVendorProducts } from "@/lib/hooks/useApi";
@@ -27,10 +25,10 @@ import { STORE_CATEGORIES, filterStoreProducts } from "../data/mockStoreProducts
 import { StoreProductCard } from "../components/StoreProductCard";
 
 const WHY_CHOOSE = [
-  "100% Genuine Medicines",
-  "Licensed Pharmacist on Duty",
-  "Secure & Hygienic Packaging",
-  "Same-day Delivery Available",
+  "Partner pharmacy on Medzoos",
+  "Order medicines from this store",
+  "Upload prescriptions when needed",
+  "Track your order in the app",
 ];
 
 function SidebarCard({ title, children, className = "" }) {
@@ -98,15 +96,15 @@ export function VendorDetailPage() {
 
   if (vendorLoading) {
     return (
-      <div className="w-full bg-[#F5F6F8] min-h-screen py-8 md:py-10">
-        <div className="w-full store-container mx-auto px-4">
+      <div className="min-h-screen w-full bg-[#F0F4F8] py-8 md:py-10">
+        <div className="home-container mx-auto px-4">
           <div className="animate-pulse space-y-6">
-            <div className="h-4 w-48 bg-[var(--color-neutral-200)] rounded" />
-            <div className="h-48 bg-white rounded-[14px] border border-[var(--color-neutral-200)]" />
-            <div className="h-12 bg-white rounded-[14px] border border-[var(--color-neutral-200)]" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="h-4 w-48 rounded bg-[#D7E2EA]" />
+            <div className="h-48 rounded-[28px] bg-[#D7E2EA]" />
+            <div className="h-12 rounded-[14px] bg-[#D7E2EA]" />
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="h-64 bg-white rounded-[12px] border border-[var(--color-neutral-200)]" />
+                <div key={i} className="h-64 rounded-[12px] bg-[#D7E2EA]" />
               ))}
             </div>
           </div>
@@ -117,14 +115,17 @@ export function VendorDetailPage() {
 
   if (vendorError || !pharmacy) {
     return (
-      <div className="w-full bg-[#F5F6F8] min-h-screen py-16">
-        <div className="w-full store-container mx-auto px-4 text-center">
-          <h1 className="text-[22px] font-bold text-[var(--color-ink-headline)] mb-2">Pharmacy not found</h1>
-          <p className="text-[14px] text-[var(--color-neutral-500)] mb-6">
+      <div className="min-h-screen w-full bg-[#F0F4F8] py-16">
+        <div className="home-container mx-auto px-4 text-center">
+          <h1 className="text-[22px] font-bold text-[#102A43]">Pharmacy not found</h1>
+          <p className="mt-2 text-[14px] text-[#627D98]">
             This pharmacy may no longer be available or the link is incorrect.
           </p>
-          <Link href="/pharmacies">
-            <Button variant="primary">Browse Pharmacies</Button>
+          <Link
+            href="/vendors"
+            className="mt-6 inline-flex rounded-full bg-[#062F3D] px-5 py-2.5 text-[13px] font-bold text-white"
+          >
+            Browse Pharmacies
           </Link>
         </div>
       </div>
@@ -140,33 +141,42 @@ export function VendorDetailPage() {
     { id: "store", label: "Store" },
     { id: "medicines", label: "Medicines" },
     { id: "healthcare", label: "Healthcare" },
-    { id: "reviews", label: `Reviews (${pharmacy.reviews})` },
+    { id: "reviews", label: `Reviews${pharmacy.reviews ? ` (${pharmacy.reviews})` : ""}` },
     { id: "about", label: "About" },
   ];
 
   return (
-    <div className="w-full bg-[#F5F6F8] min-h-screen py-8 md:py-10">
-      <div className="w-full store-container mx-auto">
-        <nav className="flex items-center gap-1.5 text-[13px] text-[var(--color-neutral-500)] mb-5">
-          <Link href="/pharmacies" className="hover:text-[var(--color-brand-primary)]">Pharmacies</Link>
+    <div className="min-h-screen w-full bg-[#F0F4F8] py-8 md:py-10">
+      <div className="home-container mx-auto">
+        <nav className="mb-5 flex items-center gap-1.5 text-[13px] text-[#627D98]">
+          <Link href="/vendors" className="font-semibold hover:text-[#0B6E99]">
+            Pharmacies
+          </Link>
           <CaretRight size={12} />
-          <span className="font-semibold text-[var(--color-ink-headline)]">{pharmacy.name}</span>
+          <span className="font-semibold text-[#102A43]">{pharmacy.name}</span>
         </nav>
 
-        {/* Store profile header */}
-        <div className="relative bg-white rounded-[14px] border border-[var(--color-neutral-200)] shadow-[var(--shadow-card)] p-6 md:p-7 mb-0">
-          <div className="absolute top-4 right-4 flex items-center gap-2">
-            <button type="button" className="h-[34px] px-3 rounded-[8px] border border-[var(--color-neutral-200)] bg-white text-[12px] font-semibold text-[var(--color-neutral-600)] hover:border-[var(--color-brand-primary)]/30 flex items-center gap-1.5">
+        {/* Store profile — Gen-Z navy hero */}
+        <div className="relative mb-0 overflow-hidden rounded-t-[28px] bg-[#0B6E99] px-6 py-8 text-white md:rounded-t-[32px] md:px-8 md:py-10">
+          <div
+            className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-[#7DD3C7]/20 blur-3xl"
+            aria-hidden
+          />
+          <div className="absolute right-4 top-4 z-10 flex items-center gap-2 md:right-6 md:top-6">
+            <button
+              type="button"
+              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 text-[12px] font-bold text-white hover:bg-white/15"
+            >
               <ShareNetwork size={15} />
               Share
             </button>
             <button
               type="button"
               onClick={() => setSaved((s) => !s)}
-              className={`h-[34px] px-3 rounded-[8px] border text-[12px] font-semibold flex items-center gap-1.5 transition-colors ${
+              className={`inline-flex h-9 items-center gap-1.5 rounded-full border px-3 text-[12px] font-bold transition-colors ${
                 saved
-                  ? "border-[var(--color-status-danger)]/30 bg-red-50 text-[var(--color-status-danger)]"
-                  : "border-[var(--color-neutral-200)] bg-white text-[var(--color-neutral-600)] hover:border-[var(--color-brand-primary)]/30"
+                  ? "border-[#7DD3C7]/40 bg-[#7DD3C7]/20 text-[#7DD3C7]"
+                  : "border-white/15 bg-white/10 text-white hover:bg-white/15"
               }`}
             >
               <Heart size={15} weight={saved ? "fill" : "regular"} />
@@ -174,78 +184,93 @@ export function VendorDetailPage() {
             </button>
           </div>
 
-          <div className="flex flex-col lg:flex-row gap-6 lg:gap-10 pr-0 lg:pr-[180px]">
-            <div className="relative w-full lg:w-[200px] h-[140px] lg:h-[120px] shrink-0 rounded-[12px] overflow-hidden">
-              <Image src={pharmacy.bgImage} alt={pharmacy.name} fill className="object-cover" sizes="200px" priority />
+          <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:gap-8">
+            <div className="relative h-[140px] w-full shrink-0 overflow-hidden rounded-[18px] bg-white/10 sm:w-[200px] lg:h-[160px]">
+              <Image
+                src={pharmacy.bgImage}
+                alt={pharmacy.name}
+                fill
+                className="object-cover"
+                sizes="200px"
+                priority
+              />
             </div>
 
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap mb-2">
-                <h1 className="text-[22px] md:text-[26px] font-bold text-[var(--color-ink-headline)]">{pharmacy.name}</h1>
-                {pharmacy.verified && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-[4px] bg-[var(--color-brand-mist)] text-[11px] font-bold text-[var(--color-brand-primary)]">
+            <div className="min-w-0 flex-1 pr-0 md:pr-36">
+              <p className="inline-flex max-w-full truncate rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-white backdrop-blur-sm">
+                {pharmacy.name}
+              </p>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <h1 className="text-[clamp(1.6rem,3vw,2.4rem)] font-bold leading-tight tracking-tight text-white">
+                  {pharmacy.name}
+                </h1>
+                {pharmacy.verified ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[#16A9E0]/25 px-2.5 py-1 text-[11px] font-bold text-[#7DD3C7]">
                     <ShieldCheck size={12} weight="fill" />
                     Verified
                   </span>
-                )}
+                ) : null}
               </div>
 
-              <div className="flex items-center flex-wrap gap-x-5 gap-y-2 text-[13px] text-[var(--color-neutral-600)] mb-4">
-                <span className="inline-flex items-center gap-1">
-                  <Star size={14} weight="fill" className="text-[var(--color-rating)]" />
-                  <strong className="text-[var(--color-ink-headline)]">{pharmacy.rating}</strong>
-                  <span className="text-[var(--color-neutral-500)]">({pharmacy.reviews})</span>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <span
+                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-bold ${
+                    isOpen
+                      ? "bg-[#7DD3C7]/25 text-[#7DD3C7]"
+                      : "bg-white/10 text-white/70"
+                  }`}
+                >
+                  <span
+                    className={`h-1.5 w-1.5 rounded-full ${
+                      isOpen ? "bg-[#7DD3C7]" : "bg-white/40"
+                    }`}
+                  />
+                  {isOpen ? "Open now" : "Closed"}
                 </span>
-                <span className="text-[var(--color-neutral-400)]">|</span>
-                <span><strong className="text-[var(--color-ink-headline)]">{pharmacy.orders ?? 2300}+</strong> Orders</span>
+                {pharmacy.rating != null ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1.5 text-[12px] font-semibold text-white/85">
+                    <Star size={13} weight="fill" className="text-[#7DD3C7]" />
+                    {Number(pharmacy.rating).toFixed(1)}
+                    {pharmacy.reviews ? (
+                      <span className="text-white/50">({pharmacy.reviews})</span>
+                    ) : null}
+                  </span>
+                ) : null}
+                {pharmacy.deliveryTime ? (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-[12px] font-semibold text-white/85">
+                    <Clock size={13} weight="fill" />
+                    Delivery {pharmacy.deliveryTime}
+                  </span>
+                ) : null}
+                {pharmacy.minOrder != null ? (
+                  <span className="rounded-full bg-white/10 px-3 py-1.5 text-[12px] font-semibold text-white/85">
+                    Min PKR {Number(pharmacy.minOrder).toLocaleString()}
+                  </span>
+                ) : null}
               </div>
 
-              <div className="flex flex-wrap gap-4 mb-4 text-[12px] text-[var(--color-neutral-600)]">
-                <span className="inline-flex items-center gap-1"><SealCheck size={15} className="text-[var(--color-brand-primary)]" weight="fill" /> Licensed Pharmacy</span>
-                <span className="inline-flex items-center gap-1"><ShieldCheck size={15} className="text-[var(--color-brand-primary)]" weight="fill" /> 100% Authentic</span>
-                <span className="inline-flex items-center gap-1"><Lock size={15} className="text-[var(--color-brand-primary)]" weight="fill" /> Secure Packaging</span>
-              </div>
-
-              <p className="flex items-start gap-1.5 text-[13px] text-[var(--color-neutral-500)]">
-                <MapPin size={15} className="text-[var(--color-brand-primary)] shrink-0 mt-0.5" weight="fill" />
-                {pharmacy.address}
-              </p>
-            </div>
-
-            <div className="lg:w-[200px] shrink-0 lg:border-l lg:border-[var(--color-neutral-200)] lg:pl-8">
-              <div className="flex items-center gap-2 mb-1">
-                <span className={`w-2 h-2 rounded-full ${isOpen ? "bg-[var(--color-status-success)]" : "bg-[var(--color-neutral-400)]"}`} />
-                <p className={`text-[14px] font-bold ${isOpen ? "text-[var(--color-status-success)]" : "text-[var(--color-neutral-500)]"}`}>
-                  {isOpen ? "Open Now" : "Closed"}
+              {pharmacy.address ? (
+                <p className="mt-4 flex items-start gap-1.5 text-[13px] text-white/65">
+                  <MapPin size={15} className="mt-0.5 shrink-0 text-[#7DD3C7]" weight="fill" />
+                  {pharmacy.address}
                 </p>
-              </div>
-              {isOpen && <p className="text-[12px] text-[var(--color-neutral-500)] mb-3">Closes at 11:00 PM</p>}
-              <div className="space-y-2 text-[13px] text-[var(--color-neutral-600)]">
-                <p className="flex items-center gap-1.5">
-                  <Clock size={15} className="text-[var(--color-brand-primary)]" weight="fill" />
-                  Delivery in {pharmacy.deliveryTime}
-                </p>
-                <p>
-                  <span className="text-[var(--color-neutral-500)]">Minimum Order </span>
-                  <strong className="text-[var(--color-ink-headline)]">PKR {(pharmacy.minOrder ?? 500).toLocaleString()}</strong>
-                </p>
-              </div>
+              ) : null}
             </div>
           </div>
         </div>
 
         {/* Sub-navigation tabs */}
-        <div className="bg-white border-x border-b border-[var(--color-neutral-200)] rounded-b-[14px] shadow-[var(--shadow-card)] mb-7 px-6 md:px-7">
+        <div className="mb-7 rounded-b-[28px] border border-t-0 border-[#102A43]/08 bg-white px-6 shadow-[0_8px_28px_rgba(16,42,67,0.06)] md:rounded-b-[32px] md:px-8">
           <div className="flex items-center gap-8 overflow-x-auto scrollbar-hide">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`py-4 text-[14px] font-semibold whitespace-nowrap border-b-2 transition-colors ${
+                className={`whitespace-nowrap border-b-2 py-4 text-[14px] font-semibold transition-colors ${
                   activeTab === tab.id
-                    ? "border-[var(--color-brand-primary)] text-[var(--color-brand-primary)]"
-                    : "border-transparent text-[var(--color-neutral-500)] hover:text-[var(--color-ink-headline)]"
+                    ? "border-[#16A9E0] text-[#0B6E99]"
+                    : "border-transparent text-[#627D98] hover:text-[#102A43]"
                 }`}
               >
                 {tab.label}

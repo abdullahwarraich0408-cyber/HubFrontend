@@ -1,5 +1,10 @@
+import { Suspense } from "react";
 import { LabTestsPage } from "@/features/lab-tests/pages/LabTestsPage";
 
 export default function Page() {
-  return <LabTestsPage />;
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LabTestsPage />
+    </Suspense>
+  );
 }

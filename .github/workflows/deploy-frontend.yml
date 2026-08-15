@@ -79,8 +79,9 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT }}
           script: |
-            rm -rf ${{ secrets.VPS_PROJECT_PATH }}
-            mkdir -p ${{ secrets.VPS_PROJECT_PATH }}
+            sudo rm -rf ${{ secrets.VPS_PROJECT_PATH }}
+            sudo mkdir -p ${{ secrets.VPS_PROJECT_PATH }}
+            sudo chown -R $USER:$USER ${{ secrets.VPS_PROJECT_PATH }}
 
       - name: Copy Built Project to VPS
         uses: appleboy/scp-action@v0.1.7

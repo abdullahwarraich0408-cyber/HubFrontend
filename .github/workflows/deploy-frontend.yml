@@ -2,7 +2,6 @@ name: Deploy Frontend to VPS
 on:
   push:
     branches:
-    
       - main
     # Only trigger when changes are made inside the Frontend directory or this workflow file itself
     paths:

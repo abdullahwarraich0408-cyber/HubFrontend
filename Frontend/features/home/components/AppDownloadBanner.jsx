@@ -1,6 +1,8 @@
 "use client";
 
 import { CheckCircle, DeviceMobile, QrCode } from "@phosphor-icons/react";
+import { useQuery } from "@tanstack/react-query";
+import { publicContentApi } from "@/lib/api/index";
 
 const APP_FEATURES = [
   "Track diabetes orders",
@@ -9,6 +11,15 @@ const APP_FEATURES = [
 ];
 
 export function AppDownloadBanner() {
+  const { data } = useQuery({
+    queryKey: ["content", "settings", "website"],
+    queryFn: () => publicContentApi.get(undefined, "website"),
+    staleTime: 5 * 60 * 1000,
+  });
+  const settings = data?.settings || {};
+  const playStore = settings.play_store_url;
+  const appStore = settings.app_store_url;
+
   return (
     <section className="relative rounded-[12px] bg-hero-gradient overflow-hidden shadow-[var(--shadow-card)]">
       <div className="absolute inset-0 hero-mesh opacity-30" aria-hidden="true" />
@@ -25,7 +36,8 @@ export function AppDownloadBanner() {
         <div className="text-white min-w-0">
           <h2 className="text-[22px] md:text-[26px] font-bold mb-2">Get the Medzoos App</h2>
           <p className="text-[14px] text-white/75 mb-5 max-w-[420px]">
-            Diabetes care and psychologist support — medicines, consults, and labs in one place.
+            {settings.tagline ||
+              "Diabetes care and psychologist support — medicines, consults, and labs in one place."}
           </p>
           <ul className="space-y-2.5">
             {APP_FEATURES.map((feature) => (
@@ -44,18 +56,40 @@ export function AppDownloadBanner() {
             </div>
           </div>
           <div className="flex flex-col gap-2.5 w-full sm:w-auto">
-            <button
-              type="button"
-              className="h-[42px] px-5 rounded-[8px] bg-white text-[var(--color-ink-headline)] text-[12px] font-bold hover:bg-[var(--color-brand-mist)] transition-colors whitespace-nowrap"
-            >
-              GET IT ON Google Play
-            </button>
-            <button
-              type="button"
-              className="h-[42px] px-5 rounded-[8px] bg-white/10 border border-white/30 text-white text-[12px] font-bold hover:bg-white/15 transition-colors whitespace-nowrap"
-            >
-              Download on the App Store
-            </button>
+            {playStore ? (
+              <a
+                href={playStore}
+                target="_blank"
+                rel="noreferrer"
+                className="h-[42px] px-5 rounded-[8px] bg-white text-[var(--color-ink-headline)] text-[12px] font-bold hover:bg-[var(--color-brand-mist)] transition-colors whitespace-nowrap inline-flex items-center justify-center"
+              >
+                GET IT ON Google Play
+              </a>
+            ) : (
+              <button
+                type="button"
+                className="h-[42px] px-5 rounded-[8px] bg-white text-[var(--color-ink-headline)] text-[12px] font-bold hover:bg-[var(--color-brand-mist)] transition-colors whitespace-nowrap"
+              >
+                GET IT ON Google Play
+              </button>
+            )}
+            {appStore ? (
+              <a
+                href={appStore}
+                target="_blank"
+                rel="noreferrer"
+                className="h-[42px] px-5 rounded-[8px] bg-white/10 border border-white/30 text-white text-[12px] font-bold hover:bg-white/15 transition-colors whitespace-nowrap inline-flex items-center justify-center"
+              >
+                Download on the App Store
+              </a>
+            ) : (
+              <button
+                type="button"
+                className="h-[42px] px-5 rounded-[8px] bg-white/10 border border-white/30 text-white text-[12px] font-bold hover:bg-white/15 transition-colors whitespace-nowrap"
+              >
+                Download on the App Store
+              </button>
+            )}
           </div>
         </div>
       </div>

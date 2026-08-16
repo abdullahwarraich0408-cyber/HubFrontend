@@ -29,6 +29,20 @@ export function resolveDoctorPhotoUrl(photoUrl) {
     value.startsWith("data:") ||
     value.startsWith("blob:")
   ) {
+    // Rewrite local absolute upload URLs so the browser can still load them
+    // when NEXT_PUBLIC_BACKEND_URL points at the same machine.
+    try {
+      const parsed = new URL(value);
+      if (
+        (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1") &&
+        parsed.pathname.startsWith("/uploads/")
+      ) {
+        const origin = backendOrigin();
+        if (origin) return `${origin}${parsed.pathname}`;
+      }
+    } catch {
+      /* keep original */
+    }
     return value;
   }
 

@@ -2,8 +2,16 @@
 
 import Link from "next/link";
 import { FirstAidKit, FacebookLogo, InstagramLogo, TwitterLogo, LinkedinLogo, Envelope, Phone, MapPin } from "@phosphor-icons/react";
+import { useQuery } from "@tanstack/react-query";
+import { publicContentApi } from "@/lib/api/index";
 
 export function Footer() {
+  const { data } = useQuery({
+    queryKey: ["content", "settings", "website"],
+    queryFn: () => publicContentApi.get(undefined, "website"),
+    staleTime: 5 * 60 * 1000,
+  });
+  const settings = data?.settings || {};
   return (
       <footer className="bg-ink-900 pt-16 pb-8 mt-auto">
       <div className="w-full home-container mx-auto">
@@ -20,7 +28,8 @@ export function Footer() {
               </span>
             </Link>
             <p className="text-neutral-500 text-[14px] leading-relaxed max-w-[280px]">
-              Diabetes care and psychologist support — medicines, consults, and labs focused on what matters first.
+              {settings.tagline ||
+                "Diabetes care and psychologist support — medicines, consults, and labs focused on what matters first."}
             </p>
             <div className="flex items-center gap-3">
               <Link href="#" className="w-10 h-10 rounded-md bg-neutral-800 flex items-center justify-center text-neutral-500 hover:bg-brand-primary hover:text-white transition-all" aria-label="Facebook">
@@ -64,15 +73,15 @@ export function Footer() {
             <h4 className="text-white font-bold text-[15px] mb-2">Get in Touch</h4>
             <div className="flex items-start gap-3">
               <Phone size={18} className="text-brand-primary mt-0.5 shrink-0" />
-              <span className="text-neutral-500 text-[14px]">+92 300 123 4567</span>
+              <span className="text-neutral-500 text-[14px]">{settings.contact_phone || "+92 300 123 4567"}</span>
             </div>
             <div className="flex items-start gap-3">
               <Envelope size={18} className="text-brand-primary mt-0.5 shrink-0" />
-              <span className="text-neutral-500 text-[14px]">support@medzoos.pk</span>
+              <span className="text-neutral-500 text-[14px]">{settings.contact_email || "support@medzoos.pk"}</span>
             </div>
             <div className="flex items-start gap-3">
               <MapPin size={18} className="text-brand-primary mt-0.5 shrink-0" />
-              <span className="text-neutral-500 text-[14px]">DHA Phase 6, Karachi, Pakistan</span>
+              <span className="text-neutral-500 text-[14px]">{settings.contact_address || "DHA Phase 6, Karachi, Pakistan"}</span>
             </div>
           </div>
 

@@ -153,6 +153,20 @@ export const marketingApi = {
   getOffers: () => api.get("/admin/marketing/offers"),
 };
 
+export const publicContentApi = {
+  get: (section, channel = "website") => {
+    const params = new URLSearchParams();
+    if (section) params.set("section", section);
+    params.set("channel", channel);
+    return api.get(`/content?${params.toString()}`);
+  },
+};
+
+export const publicHomeSlidesApi = {
+  list: (audience = "first_visit") =>
+    api.get(`/home-slides?audience=${encodeURIComponent(audience)}`),
+};
+
 export const addressesApi = {
   getAll: () => api.get("/addresses"),
   create: (data) => api.post("/addresses", data),

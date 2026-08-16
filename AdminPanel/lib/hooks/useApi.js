@@ -14,6 +14,8 @@ import {
   doctorsApi,
   labTestsApi,
   marketingApi,
+  homeSlidesApi,
+  contentApi,
   uploadApi,
   inventoryApi,
   adminGeneralApi,
@@ -589,6 +591,86 @@ export function useDeleteCoupon(options = {}) {
     mutationFn: marketingApi.deleteCoupon,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["marketing-coupons"] });
+    },
+    ...options,
+  });
+}
+
+export function useAdminHomeSlides(options = {}) {
+  return useQuery({
+    queryKey: ["admin-home-slides"],
+    queryFn: async () => {
+      const data = await homeSlidesApi.list();
+      return data.slides || [];
+    },
+    ...options,
+  });
+}
+
+export function useUpdateHomeSlide(options = {}) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...data }) => homeSlidesApi.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-home-slides"] });
+    },
+    ...options,
+  });
+}
+
+export function useAdminContent(section, options = {}) {
+  return useQuery({
+    queryKey: ["admin-content", section || "all"],
+    queryFn: async () => {
+      const data = await contentApi.list(section);
+      return {
+        items: data.items || [],
+        settings: data.settings || {},
+      };
+    },
+    ...options,
+  });
+}
+
+export function useCreateContentItem(options = {}) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: contentApi.create,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-content"] });
+    },
+    ...options,
+  });
+}
+
+export function useUpdateContentItem(options = {}) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...data }) => contentApi.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-content"] });
+    },
+    ...options,
+  });
+}
+
+export function useDeleteContentItem(options = {}) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: contentApi.remove,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-content"] });
+    },
+    ...options,
+  });
+}
+
+export function useUpdateSiteSettings(options = {}) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: contentApi.updateSettings,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-content"] });
     },
     ...options,
   });

@@ -5,9 +5,17 @@ import { ArrowRight, Heart, Pulse } from "@phosphor-icons/react";
 import { motion, useReducedMotion } from "framer-motion";
 import { LandingImage } from "./LandingImage";
 import { FadeIn } from "./FadeIn";
+import { useQuery } from "@tanstack/react-query";
+import { publicContentApi } from "@/lib/api/index";
 
 export function Hero() {
   const reduceMotion = useReducedMotion();
+  const { data } = useQuery({
+    queryKey: ["content", "settings", "website"],
+    queryFn: () => publicContentApi.get(undefined, "website"),
+    staleTime: 5 * 60 * 1000,
+  });
+  const settings = data?.settings || {};
 
   return (
     <section className="relative overflow-x-clip pb-10 pt-6 md:pb-16 md:pt-10 lg:pb-20 lg:pt-12">
@@ -23,17 +31,14 @@ export function Hero() {
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#087F8C]/20 bg-white/80 px-3.5 py-1.5 shadow-sm backdrop-blur-sm">
               <span className="h-2 w-2 rounded-full bg-[#16A085]" aria-hidden />
               <span className="text-[13px] font-semibold text-[#087F8C]">
-                Healthcare, made simpler
+                {settings.landing_eyebrow || "Healthcare, made simpler"}
               </span>
             </div>
           </FadeIn>
 
           <FadeIn delay={0.05}>
             <h1 className="font-sans text-[clamp(2.375rem,5vw,4.05rem)] font-semibold leading-[1.08] tracking-tight text-[#102A43]">
-              Your{" "}
-              <span className="text-[#087F8C]">Healthcare.</span>
-              <br />
-              One Trusted Platform.
+              {settings.landing_headline || "Your Healthcare. One Trusted Platform."}
             </h1>
           </FadeIn>
 
@@ -45,9 +50,8 @@ export function Hero() {
 
           <FadeIn delay={0.15}>
             <p className="mt-5 max-w-xl text-[17px] leading-relaxed text-[#52606D] md:text-[18px]">
-              Medzoos connects you with healthcare providers across Pakistan,
-              helping you discover medicines, doctors, consultations,
-              appointments and diagnostic services from one convenient platform.
+              {settings.landing_subhead ||
+                "Medzoos connects you with healthcare providers across Pakistan, helping you discover medicines, doctors, consultations, appointments and diagnostic services from one convenient platform."}
             </p>
           </FadeIn>
 
@@ -57,7 +61,7 @@ export function Hero() {
                 href="#services"
                 className="group inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#087F8C] px-6 text-[15px] font-semibold text-white shadow-[0_8px_24px_rgba(8,127,140,0.25)] transition-all hover:bg-[#075E68] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F8C]/40 focus-visible:ring-offset-2 sm:w-auto"
               >
-                Explore Healthcare
+                {settings.landing_cta_secondary || "Explore Healthcare"}
                 <ArrowRight
                   size={18}
                   weight="bold"
@@ -68,7 +72,7 @@ export function Hero() {
                 href="/doctors"
                 className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-[#102A43]/12 bg-white px-6 text-[15px] font-semibold text-[#102A43] transition-all hover:border-[#087F8C]/35 hover:bg-[#EAF8F7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F8C]/40 focus-visible:ring-offset-2 sm:w-auto"
               >
-                Find a Doctor
+                {settings.landing_cta_primary || "Find a Doctor"}
               </Link>
             </div>
           </FadeIn>

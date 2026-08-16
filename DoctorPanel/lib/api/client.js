@@ -4,6 +4,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
 
 const PARTNER_PATH_PREFIXES = [
   "/partners/",
+  "/upload/",
   "/vendors/profile",
   "/vendors/products/mine",
   "/vendors/dashboard/stats",

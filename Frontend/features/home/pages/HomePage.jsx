@@ -15,6 +15,7 @@ import { LabSearchSection } from "../components/patient/LabSearchSection";
 import { PharmacyMarketplace } from "../components/patient/PharmacyMarketplace";
 import { HealthcareActivityRow } from "../components/patient/HealthcareActivityRow";
 import { SpecialtyStrip } from "../components/patient/SpecialtyStrip";
+import { CampaignBanners } from "../components/patient/CampaignBanners";
 import { ClosingBand } from "../components/patient/ClosingBand";
 import { LoggedInFooter } from "../components/patient/LoggedInFooter";
 
@@ -56,6 +57,7 @@ export function HomePage() {
           }
         />
         <SpecialtyStrip />
+        <CampaignBanners />
         <ClosingBand />
       </div>
 

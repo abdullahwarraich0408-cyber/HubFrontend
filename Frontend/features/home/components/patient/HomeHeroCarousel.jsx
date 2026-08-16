@@ -19,8 +19,26 @@ import {
   House,
 } from "@phosphor-icons/react";
 import { cn } from "@/utils/cn";
+import { useQuery } from "@tanstack/react-query";
+import { publicHomeSlidesApi } from "@/lib/api/index";
 
 const AUTOPLAY_MS = 2500;
+
+const ACTION_HREF = {
+  prescription: "/prescriptions/upload",
+  doctors: "/doctors",
+  pharmacy: "/vendors",
+  labs: "/lab-tests",
+  hospitals: "/hospitals",
+};
+
+const ACTION_ICON = {
+  prescription: UploadSimple,
+  doctors: Stethoscope,
+  pharmacy: Pill,
+  labs: Flask,
+  hospitals: House,
+};
 
 export const HERO_SLIDES = [
   {
@@ -142,7 +160,33 @@ export function HomeHeroCarousel() {
   const [direction, setDirection] = useState(1);
   const touchStartX = useRef(null);
   const rootRef = useRef(null);
-  const slideCount = HERO_SLIDES.length;
+  const { data } = useQuery({
+    queryKey: ["home-slides", "first_visit"],
+    queryFn: () => publicHomeSlidesApi.list("first_visit"),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const slides =
+    data?.slides?.length > 0
+      ? data.slides.map((item, i) => {
+          const fallback = HERO_SLIDES[i] || HERO_SLIDES[0];
+          const action = item.action || fallback.id;
+          return {
+            ...fallback,
+            id: item.id,
+            title: item.title || fallback.title,
+            description: item.description || fallback.description,
+            cta: item.cta || fallback.cta,
+            href: item.href || ACTION_HREF[action] || fallback.href,
+            ctaIcon: ACTION_ICON[action] || fallback.ctaIcon,
+            image: item.image_url || fallback.image,
+            badge: item.badge || fallback.badge,
+            bgColor: item.bg || null,
+          };
+        })
+      : HERO_SLIDES;
+
+  const slideCount = slides.length;
 
   const goTo = useCallback(
     (next, dir = 1) => {
@@ -185,7 +229,7 @@ export function HomeHeroCarousel() {
     return () => node.removeEventListener("keydown", onKey);
   }, [next, prev]);
 
-  const slide = HERO_SLIDES[index];
+  const slide = slides[index] || HERO_SLIDES[0];
   const CtaIcon = slide.ctaIcon;
 
   const variants = reduceMotion
@@ -235,6 +279,7 @@ export function HomeHeroCarousel() {
           "h-[540px] sm:h-[520px] md:h-[400px] lg:h-[420px]",
           slide.bg
         )}
+        style={slide.bgColor ? { backgroundColor: slide.bgColor } : undefined}
       >
         <div
           className={cn(
@@ -367,13 +412,13 @@ export function HomeHeroCarousel() {
           />
 
           <div className="flex items-center gap-1.5 rounded-full bg-white/70 px-2.5 py-1.5 backdrop-blur-sm">
-            {HERO_SLIDES.map((item, i) => {
+            {slides.map((item, i) => {
               const active = i === index;
               return (
                 <button
                   key={item.id}
                   type="button"
-                  aria-label={`Go to slide ${i + 1}: ${item.label}`}
+                  aria-label={`Go to slide ${i + 1}: ${item.title}`}
                   aria-current={active ? "true" : undefined}
                   onClick={() => {
                     setPaused(true);

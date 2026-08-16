@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { User, Stethoscope, Bell, Lock, CheckCircle } from "@phosphor-icons/react";
+import { useRef, useState } from "react";
+import { User, Stethoscope, Bell, Lock, CheckCircle, Camera } from "@phosphor-icons/react";
 import { Input } from "@/shared/components/Input";
 import { Button } from "@/shared/components/Button";
 import { cn } from "@/utils/cn";
 import { useDoctorProfile } from "../hooks/useDoctorProfile";
 import { useUpdateDoctorPortalProfile } from "@/lib/hooks/usePartnerPortal";
-import { doctorPortalApi } from "@/lib/api/index";
+import { doctorPortalApi, uploadApi } from "@/lib/api/index";
 import { toast } from "sonner";
 
 const TABS = [
@@ -17,11 +17,29 @@ const TABS = [
   { id: "security", label: "Security", icon: Lock },
 ];
 
+function resolvePhotoUrl(photo) {
+  const value = photo != null ? String(photo).trim() : "";
+  if (!value) return null;
+  if (value.startsWith("http://") || value.startsWith("https://") || value.startsWith("data:")) {
+    return value;
+  }
+  if (value.startsWith("/")) {
+    const origin =
+      process.env.NEXT_PUBLIC_BACKEND_URL ||
+      process.env.BACKEND_URL ||
+      "http://127.0.0.1:5000";
+    return `${String(origin).replace(/\/$/, "")}${value}`;
+  }
+  return value;
+}
+
 export function DoctorSettingsPage() {
   const { profile, initials } = useDoctorProfile();
   const updateProfileMutation = useUpdateDoctorPortalProfile();
+  const fileInputRef = useRef(null);
   const [activeTab, setActiveTab] = useState("profile");
   const [saved, setSaved] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   const showSaved = () => {
     setSaved(true);
@@ -34,6 +52,33 @@ export function DoctorSettingsPage() {
       showSaved();
     } catch (err) {
       toast.error(err.message || "Failed to save changes");
+    }
+  };
+
+  const handlePhotoChange = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please choose a JPG or PNG image.");
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error("Image must be under 8 MB.");
+      return;
+    }
+
+    setUploadingPhoto(true);
+    try {
+      const uploaded = await uploadApi.uploadImage(file);
+      const url = uploaded?.url || uploaded?.data?.url;
+      if (!url) throw new Error("Upload did not return an image URL");
+      await saveProfile({ photo: url, photo_url: url });
+      toast.success("Profile photo updated for patients");
+    } catch (err) {
+      toast.error(err.message || "Could not upload photo");
+    } finally {
+      setUploadingPhoto(false);
     }
   };
 
@@ -92,6 +137,8 @@ export function DoctorSettingsPage() {
     }
   };
 
+  const photoUrl = resolvePhotoUrl(profile.photo);
+
   return (
     <div className="animate-in fade-in zoom-in-95 duration-500 max-w-[960px]">
       <div className="mb-8">
@@ -133,13 +180,44 @@ export function DoctorSettingsPage() {
               <SectionHeader title="Profile Information" description="Update your personal details visible to patients." />
 
               <div className="flex items-center gap-4 pb-6 border-b border-neutral-200">
-                <div className="w-16 h-16 rounded-full bg-brand-light text-brand-primary flex items-center justify-center text-[22px] font-bold">
-                  {initials}
-                </div>
-                <div>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingPhoto}
+                  className="relative group w-20 h-20 rounded-full overflow-hidden bg-brand-light text-brand-primary flex items-center justify-center text-[22px] font-bold shrink-0"
+                >
+                  {photoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={photoUrl} alt={profile.name} className="w-full h-full object-cover" />
+                  ) : (
+                    initials
+                  )}
+                  <span className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <Camera size={22} className="text-white" weight="fill" />
+                  </span>
+                </button>
+                <div className="min-w-0">
                   <p className="text-[16px] font-bold text-ink-headline">{profile.name}</p>
                   <p className="text-[13px] text-neutral-500">{profile.specialty}</p>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingPhoto}
+                    className="mt-2 text-[13px] font-semibold text-brand-primary hover:underline disabled:opacity-60"
+                  >
+                    {uploadingPhoto ? "Uploading..." : "Change profile photo"}
+                  </button>
+                  <p className="text-[12px] text-neutral-400 mt-1">
+                    Shown on patient website and app
+                  </p>
                 </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={handlePhotoChange}
+                />
               </div>
 
               <Input label="Full Name" name="name" defaultValue={profile.name} required />

@@ -143,6 +143,20 @@ export const marketingApi = {
   getOffers: () => api.get("/admin/marketing/offers"),
 };
 
+export const homeSlidesApi = {
+  list: () => api.get("/admin/home-slides"),
+  update: (id, data) => api.patch(`/admin/home-slides/${id}`, data),
+};
+
+export const contentApi = {
+  list: (section) =>
+    api.get(section ? `/admin/content?section=${encodeURIComponent(section)}` : "/admin/content"),
+  create: (data) => api.post("/admin/content", data),
+  update: (id, data) => api.patch(`/admin/content/${id}`, data),
+  remove: (id) => api.delete(`/admin/content/${id}`),
+  updateSettings: (data) => api.put("/admin/content/settings", data),
+};
+
 export const addressesApi = {
   getAll: () => api.get("/addresses"),
   create: (data) => api.post("/addresses", data),

@@ -9,6 +9,7 @@ export const DEFAULT_DOCTOR_PROFILE = {
   consultationFee: "",
   languages: "",
   bio: "",
+  photo: "",
   slots: [],
   online: true,
   notifications: {

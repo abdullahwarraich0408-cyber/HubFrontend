@@ -14,7 +14,13 @@ import {
   Gear,
   SignOut,
   Buildings,
-  ShieldCheck
+  ShieldCheck,
+  Images,
+  SquaresFour,
+  FirstAidKit,
+  Stethoscope,
+  Flag,
+  Globe
 } from "@phosphor-icons/react";
 
 const navGroups = [
@@ -46,6 +52,17 @@ const navGroups = [
     ]
   },
   {
+    title: "App & Website",
+    items: [
+      { name: "Content hub", path: "/admin/content", icon: SquaresFour },
+      { name: "Home posters", path: "/admin/home-posters", icon: Images },
+      { name: "Care shortcuts", path: "/admin/content/care-actions", icon: FirstAidKit },
+      { name: "Specialities", path: "/admin/content/specialties", icon: Stethoscope },
+      { name: "Banners", path: "/admin/content/banners", icon: Flag },
+      { name: "Site details", path: "/admin/content/site", icon: Globe },
+    ]
+  },
+  {
     title: "Configuration",
     items: [
       { name: "Marketing Tools", path: "/admin/marketing", icon: Megaphone },
@@ -58,18 +75,47 @@ const navGroups = [
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 
+function clearAdminSession() {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem("token");
+  localStorage.removeItem("refreshToken");
+  localStorage.removeItem("medzoos_user");
+  localStorage.removeItem("sehat1_user");
+  localStorage.removeItem("pharmahub_user");
+}
+
 export function AdminSidebar() {
   const pathname = usePathname();
 
   const handleLogout = async () => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    const refreshToken =
+      typeof window !== "undefined" ? localStorage.getItem("refreshToken") : null;
+
+    clearAdminSession();
+
     try {
-      await api.auth.logout();
-      toast.success("Signed out successfully");
-      window.location.href = "/portal-access";
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
+      await Promise.race([
+        fetch(`${API_BASE}/auth/logout`, {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token && token !== "cookie-auth-active"
+              ? { Authorization: `Bearer ${token}` }
+              : {}),
+          },
+          body: JSON.stringify({ refreshToken }),
+        }),
+        new Promise((resolve) => setTimeout(resolve, 2000)),
+      ]);
     } catch (err) {
       console.error("Logout error", err);
-      window.location.href = "/portal-access";
     }
+
+    toast.success("Signed out successfully");
+    window.location.href = "/portal-access";
   };
 
   return (

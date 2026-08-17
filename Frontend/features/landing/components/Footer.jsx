@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { BrandLogo } from "@/shared/branding/BrandLogo";
 
 const YEAR = new Date().getFullYear();
 
@@ -49,12 +50,7 @@ export function Footer() {
       <div className="landing-container py-14 md:py-16">
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-6 lg:gap-8">
           <div className="lg:col-span-2">
-            <Link href="#top" className="inline-flex items-center gap-2.5">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#087F8C] text-[15px] font-bold text-white">
-                M
-              </span>
-              <span className="text-[1.2rem] font-semibold tracking-tight">Medzoos</span>
-            </Link>
+            <BrandLogo href="#top" onDark />
             <p className="mt-4 max-w-xs text-[14px] leading-relaxed text-white/65">
               Connecting patients with healthcare services across Pakistan.
             </p>

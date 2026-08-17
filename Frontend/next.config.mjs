@@ -3,7 +3,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const projectRoot = path.dirname(fileURLToPath(import.meta.url));
-const backendUrl = process.env.BACKEND_URL || "https://medmarket.asrar.dev";
+const backendUrl = process.env.BACKEND_URL || "https://backend.medzoos.com";
 
 const nextConfig = {
   turbopack: {
@@ -28,7 +28,7 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "medmarket.asrar.dev",
+        hostname: "backend.medzoos.com",
       },
       {
         protocol: "https",

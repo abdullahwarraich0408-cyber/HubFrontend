@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { FirstAidKit, FacebookLogo, InstagramLogo, TwitterLogo, LinkedinLogo, Envelope, Phone, MapPin } from "@phosphor-icons/react";
+import { FacebookLogo, InstagramLogo, TwitterLogo, LinkedinLogo, Envelope, Phone, MapPin } from "@phosphor-icons/react";
+import { BrandLogo } from "@/shared/branding/BrandLogo";
 import { useQuery } from "@tanstack/react-query";
 import { publicContentApi } from "@/lib/api/index";
 
@@ -19,14 +20,7 @@ export function Footer() {
           
           {/* Column 1: Brand & Social */}
           <div className="flex flex-col gap-6">
-            <Link href="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-brand-light flex items-center justify-center">
-                <FirstAidKit size={24} className="text-brand-primary" weight="fill" />
-              </div>
-              <span className="font-bold text-[20px] text-white tracking-tight">
-                Medzoos
-              </span>
-            </Link>
+            <BrandLogo href="/" onDark />
             <p className="text-neutral-500 text-[14px] leading-relaxed max-w-[280px]">
               {settings.tagline ||
                 "Diabetes care and psychologist support — medicines, consults, and labs focused on what matters first."}

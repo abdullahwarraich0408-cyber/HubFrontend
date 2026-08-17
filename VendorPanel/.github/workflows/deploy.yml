@@ -73,8 +73,8 @@ jobs:
             fi
 
             printf '%s\n' \
-              'NEXT_PUBLIC_API_URL=https://medmarket.asrar.dev/api' \
-              'BACKEND_URL=https://medmarket.asrar.dev' \
+              'NEXT_PUBLIC_API_URL=https://backend.medzoos.com/api' \
+              'BACKEND_URL=https://backend.medzoos.com' \
               'NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_51Tjx1hHDv74QT0tzLgcvgRCDJMO3Q7ET4CorOEDMyVW9C8PKVHSsNrIWDSpVnAgyb8jb4J2u20SG3o3B6NOmWrQF00oQU7hLGZ' \
               > .env.local
 

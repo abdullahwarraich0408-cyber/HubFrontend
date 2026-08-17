@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { List, X, CaretDown } from "@phosphor-icons/react";
+import { BrandLogo } from "@/shared/branding/BrandLogo";
 import { cn } from "@/utils/cn";
 
 const NAV_LINKS = [
@@ -57,18 +58,7 @@ export function Navbar() {
       )}
     >
       <div className="landing-container flex h-[68px] items-center justify-between gap-4 md:h-[76px]">
-        <Link
-          href="#top"
-          className="group flex shrink-0 items-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F8C]/40 focus-visible:ring-offset-2 rounded-lg"
-          aria-label="Medzoos home"
-        >
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#087F8C] text-[15px] font-bold text-white shadow-sm transition-transform group-hover:scale-[1.03]">
-            M
-          </span>
-          <span className="font-sans text-[1.25rem] font-semibold tracking-tight text-[#102A43]">
-            Medzoos
-          </span>
-        </Link>
+        <BrandLogo href="#top" />
 
         <nav
           className="hidden items-center gap-0.5 xl:flex"

@@ -28,8 +28,8 @@ jobs:
           - { name: VendorPanel,  dir: VendorPanel }
     env:
       NODE_OPTIONS: ""
-      NEXT_PUBLIC_API_URL: https://medmarket.asrar.dev/api
-      BACKEND_URL: https://medmarket.asrar.dev
+      NEXT_PUBLIC_API_URL: https://backend.medzoos.com/api
+      BACKEND_URL: https://backend.medzoos.com
       NEXT_PUBLIC_ENABLE_TEST_AUTH: "true"
       NEXT_PUBLIC_FIREBASE_API_KEY: AIzaSyCh_rJUG6PHgRl9TbFwoThqTxC3EZSp1G0
       NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: medcare-a5507.firebaseapp.com

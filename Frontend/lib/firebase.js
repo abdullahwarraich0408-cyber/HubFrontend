@@ -8,6 +8,8 @@ import {
   signInWithCustomToken,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signInWithCredential,
   OAuthProvider,
 } from "firebase/auth";
@@ -66,10 +68,31 @@ export async function verifyWebPhoneOtp(confirmation, code) {
 
 export async function signInWithGooglePopup() {
   const auth = getFirebaseAuth();
-  if (!auth) throw new Error("Firebase is not configured");
+  if (!auth) throw new Error("Google sign-in is not configured.");
 
   const provider = new GoogleAuthProvider();
-  const result = await signInWithPopup(auth, provider);
+  provider.setCustomParameters({ prompt: "select_account" });
+  provider.addScope("email");
+  provider.addScope("profile");
+
+  try {
+    const result = await signInWithPopup(auth, provider);
+    return result.user.getIdToken();
+  } catch (err) {
+    const code = err?.code || "";
+    if (code === "auth/popup-blocked" || code === "auth/operation-not-supported-in-this-environment") {
+      await signInWithRedirect(auth, provider);
+      return null;
+    }
+    throw err;
+  }
+}
+
+export async function getGoogleRedirectIdToken() {
+  const auth = getFirebaseAuth();
+  if (!auth) return null;
+  const result = await getRedirectResult(auth);
+  if (!result?.user) return null;
   return result.user.getIdToken();
 }
 

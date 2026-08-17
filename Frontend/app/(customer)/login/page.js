@@ -1,5 +1,10 @@
-import { redirect } from "next/navigation";
+import { Suspense } from "react";
+import { LoginPage } from "@/features/auth/pages/LoginPage";
 
-export default function LoginRedirect() {
-  redirect("/sign-in");
+export default function Page() {
+  return (
+    <Suspense fallback={<div className="min-h-dvh bg-white" />}>
+      <LoginPage />
+    </Suspense>
+  );
 }

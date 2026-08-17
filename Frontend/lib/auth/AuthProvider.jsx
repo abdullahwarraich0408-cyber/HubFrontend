@@ -22,6 +22,7 @@ import {
   isFirebaseConfigured,
   sendWebPhoneOtp,
   signInWithGooglePopup,
+  getGoogleRedirectIdToken,
   signInWithFirebaseCustomToken,
   verifyWebPhoneOtp,
 } from "@/lib/firebase";
@@ -109,6 +110,28 @@ export function AuthProvider({ children }) {
     [applySession]
   );
 
+  useEffect(() => {
+    let active = true;
+
+    async function finishGoogleRedirect() {
+      try {
+        const idToken = await getGoogleRedirectIdToken();
+        if (!idToken || !active) return;
+        await completeFirebaseLogin(idToken);
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("auth-updated"));
+        }
+      } catch {
+        // No Google redirect in progress.
+      }
+    }
+
+    finishGoogleRedirect();
+    return () => {
+      active = false;
+    };
+  }, [completeFirebaseLogin]);
+
   const startPhoneLogin = useCallback(async (phone) => {
     const normalized = phone.replace(/[\s-]/g, "");
     if (isTestAuthEnabled() && isDevTestPhone(normalized)) {
@@ -154,6 +177,7 @@ export function AuthProvider({ children }) {
 
   const loginWithGoogle = useCallback(async () => {
     const idToken = await signInWithGooglePopup();
+    if (!idToken) return null;
     return completeFirebaseLogin(idToken);
   }, [completeFirebaseLogin]);
 

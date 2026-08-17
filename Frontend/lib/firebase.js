@@ -96,6 +96,27 @@ export async function getGoogleRedirectIdToken() {
   return result.user.getIdToken();
 }
 
+export async function signInWithApplePopup() {
+  const auth = getFirebaseAuth();
+  if (!auth) throw new Error("Apple sign-in is not configured.");
+
+  const provider = new OAuthProvider("apple.com");
+  provider.addScope("email");
+  provider.addScope("name");
+
+  try {
+    const result = await signInWithPopup(auth, provider);
+    return result.user.getIdToken();
+  } catch (err) {
+    const code = err?.code || "";
+    if (code === "auth/popup-blocked" || code === "auth/operation-not-supported-in-this-environment") {
+      await signInWithRedirect(auth, provider);
+      return null;
+    }
+    throw err;
+  }
+}
+
 export async function signInWithAppleWeb(idToken, nonce) {
   const auth = getFirebaseAuth();
   if (!auth) throw new Error("Firebase is not configured");

@@ -13,8 +13,8 @@ export function isNetworkAuthError(err) {
 }
 
 export function friendlyAuthError(err, fallback = "Something went wrong. Please try again.") {
-  if (isNetworkAuthError(err)) {
-    return "We couldn't connect right now. Check your internet connection and try again.";
+  if (isNetworkAuthError(err) || /unable to reach the server|couldn't connect right now/i.test(readMessage(err))) {
+    return "We couldn't connect right now. Please try again in a moment.";
   }
 
   const message = readMessage(err);
@@ -51,8 +51,12 @@ export function friendlyAuthError(err, fallback = "Something went wrong. Please 
     return "Your password must be at least 8 characters.";
   }
 
-  if (/invalid otp|invalid code|wrong code|expired/.test(lower)) {
-    return "That verification code is incorrect or has expired. Please try again.";
+  if (/invalid otp|invalid code|wrong code/.test(lower)) {
+    return "The OTP is incorrect. Please try again.";
+  }
+
+  if (/expired/.test(lower) && /otp|code|verification/.test(lower)) {
+    return "This OTP has expired. Request a new code.";
   }
 
   if (/prisma|stack|sql|internal server|econn|undefined is not/.test(lower)) {

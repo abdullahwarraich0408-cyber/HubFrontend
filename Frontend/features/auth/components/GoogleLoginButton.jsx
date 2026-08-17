@@ -37,7 +37,7 @@ export function GoogleLoginButton({ onSuccess, className = "" }) {
         type="button"
         onClick={handleClick}
         disabled={loading}
-        className="relative z-20 inline-flex h-[52px] w-full cursor-pointer items-center justify-center gap-2 rounded-[14px] border border-[#D9E5EC] bg-white text-[15px] font-semibold text-[#102A43] transition-colors hover:bg-[#F8FBFC] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#16A9E0] disabled:cursor-wait disabled:opacity-60"
+        className="relative z-20 inline-flex h-[54px] w-full cursor-pointer items-center justify-center gap-2 rounded-[14px] border border-[#D7E4EA] bg-white text-[15px] font-semibold text-[#102A43] shadow-[0_1px_2px_rgba(16,42,67,0.04)] transition-all hover:border-[#087F8C]/30 hover:bg-[#F7FBFC] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F8C] disabled:cursor-wait disabled:opacity-60"
       >
         <GoogleLogo size={18} weight="bold" />
         {loading ? "Signing in..." : "Continue with Google"}

@@ -19,7 +19,7 @@ export function AuthInput({
       {label ? (
         <label
           htmlFor={inputId}
-          className="mb-2 block text-[14px] font-semibold text-[#102A43]"
+          className="mb-2 block text-[13px] font-medium text-[#3D4F4E]"
         >
           {label}
         </label>
@@ -36,12 +36,12 @@ export function AuthInput({
           aria-invalid={error ? "true" : "false"}
           aria-describedby={error ? `${inputId}-error` : undefined}
           className={cn(
-            "h-[52px] w-full rounded-[14px] border bg-white px-4 text-[15px] text-[#102A43] outline-none transition-colors duration-200",
-            "placeholder:text-[#8AA0B2]",
-            "border-[#D9E5EC] hover:border-[#B7CBD6]",
-            "focus:border-[#17618E] focus:ring-4 focus:ring-[#16A9E0]/15",
+            "h-[52px] w-full rounded-xl border bg-white px-4 text-[15px] text-[#1A2B2A] outline-none transition-all duration-200",
+            "placeholder:text-[#9AADAB]",
+            "border-[#D5E0DE] hover:border-[#B7C9C6]",
+            "focus:border-[#087F8C] focus:ring-4 focus:ring-[#087F8C]/12",
             leftIcon && "pl-11",
-            error && "border-[#D92D20] focus:border-[#D92D20] focus:ring-[#D92D20]/10",
+            error && "border-[#D92D20] bg-white focus:border-[#D92D20] focus:ring-[#D92D20]/10",
             inputClassName
           )}
           {...props}

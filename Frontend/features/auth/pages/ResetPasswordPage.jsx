@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, CheckCircle, Lock } from "@phosphor-icons/react";
 import { authApi } from "@/lib/api/index";
@@ -11,6 +10,7 @@ import { PasswordInput } from "@/features/auth/components/PasswordInput";
 import { PasswordRequirements } from "@/features/auth/components/PasswordRequirements";
 import { AuthButton } from "@/features/auth/components/AuthButton";
 import { AuthError } from "@/features/auth/components/AuthError";
+import { AuthPageHeader, AuthBackLink } from "@/features/auth/components/AuthChrome";
 
 export function ResetPasswordPage() {
   const params = useParams();
@@ -53,38 +53,30 @@ export function ResetPasswordPage() {
     <AuthLayout variant="recover" compact>
       {success ? (
         <div className="text-center">
-          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[#E4F5ED] text-[#15803D]">
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[#E7F6F1] text-[#15803D]">
             <CheckCircle size={34} weight="fill" />
           </div>
-          <h1 className="font-[var(--font-heading)] text-[30px] leading-tight text-[#102A43] sm:text-[34px]">
-            Password reset successfully
-          </h1>
-          <p className="mt-3 text-[15px] leading-relaxed text-[#627D98]">
-            Your password has been updated. You can now sign in to your Medzoos account.
-          </p>
-          <button
-            type="button"
-            onClick={() => router.push("/login")}
-            className="mt-8 inline-flex h-[52px] w-full items-center justify-center rounded-[14px] bg-[#17618E] text-[15px] font-semibold text-white hover:bg-[#124362]"
-          >
+          <AuthPageHeader
+            title="Password reset successfully"
+            description="Your password has been updated. You can now sign in to your Medzoos account."
+          />
+          <AuthButton type="button" showArrow={false} onClick={() => router.push("/login")}>
             Continue to Sign In
-          </button>
+          </AuthButton>
         </div>
       ) : (
         <>
-          <h1 className="font-[var(--font-heading)] text-[30px] leading-tight text-[#102A43] sm:text-[36px]">
-            Create a new password
-          </h1>
-          <p className="mt-2 text-[15px] leading-relaxed text-[#627D98] sm:text-[16px]">
-            Choose a strong password for your Medzoos account.
-          </p>
+          <AuthPageHeader
+            title="Create a new password"
+            description="Choose a strong password for your Medzoos account."
+          />
 
           <AuthError
             message={error}
             onRetry={isNetworkAuthError({ message: error }) ? () => setError("") : undefined}
           />
 
-          <form onSubmit={handleSubmit} className="mt-7 space-y-5" noValidate>
+          <form onSubmit={handleSubmit} className="space-y-5" noValidate>
             <div>
               <PasswordInput
                 label="New password"
@@ -111,13 +103,10 @@ export function ResetPasswordPage() {
             </AuthButton>
           </form>
 
-          <Link
-            href="/login"
-            className="mt-6 inline-flex items-center gap-2 text-[14px] font-semibold text-[#627D98] hover:text-[#17618E]"
-          >
+          <AuthBackLink>
             <ArrowLeft size={16} />
             Back to Sign In
-          </Link>
+          </AuthBackLink>
         </>
       )}
     </AuthLayout>

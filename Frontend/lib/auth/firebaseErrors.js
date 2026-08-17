@@ -48,8 +48,16 @@ export function formatFirebaseAuthError(error) {
     ].join("\n");
   }
 
+  if (code === "auth/invalid-verification-code" || /invalid-verification-code|invalid otp|incorrect code|wrong code/i.test(message)) {
+    return "The OTP is incorrect. Please try again.";
+  }
+
+  if (code === "auth/code-expired" || code === "auth/session-expired") {
+    return "This OTP has expired. Request a new code.";
+  }
+
   if (code === "auth/invalid-phone-number") {
-    return "Invalid phone format. Use 03361400372 or +923361400372.";
+    return "Please enter a valid mobile number.";
   }
 
   if (code === "auth/too-many-requests") {

@@ -22,6 +22,7 @@ import {
   isFirebaseConfigured,
   sendWebPhoneOtp,
   signInWithGooglePopup,
+  signInWithApplePopup,
   getGoogleRedirectIdToken,
   signInWithFirebaseCustomToken,
   verifyWebPhoneOtp,
@@ -181,6 +182,24 @@ export function AuthProvider({ children }) {
     return completeFirebaseLogin(idToken);
   }, [completeFirebaseLogin]);
 
+  const loginWithApple = useCallback(async () => {
+    const idToken = await signInWithApplePopup();
+    if (!idToken) return null;
+    return completeFirebaseLogin(idToken);
+  }, [completeFirebaseLogin]);
+
+  const updateProfile = useCallback(async (payload) => {
+    const data = await authApi.updateProfile(payload);
+    const sessionUser = data.user;
+    if (!sessionUser) throw new Error("Invalid profile response");
+    persistUser(sessionUser);
+    setUser(sessionUser);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("auth-updated"));
+    }
+    return sessionUser;
+  }, []);
+
   const loginWithEmail = useCallback(
     async (email, password) => {
       const data = await authApi.login({
@@ -257,8 +276,10 @@ export function AuthProvider({ children }) {
       startPhoneLogin,
       completePhoneLogin,
       loginWithGoogle,
+      loginWithApple,
       loginWithEmail,
       registerWithEmail,
+      updateProfile,
       logout,
       logoutAllDevices,
       requireAuth,
@@ -277,8 +298,10 @@ export function AuthProvider({ children }) {
       startPhoneLogin,
       completePhoneLogin,
       loginWithGoogle,
+      loginWithApple,
       loginWithEmail,
       registerWithEmail,
+      updateProfile,
       logout,
       logoutAllDevices,
       requireAuth,

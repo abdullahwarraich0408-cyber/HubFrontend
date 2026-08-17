@@ -3,22 +3,19 @@
 import Link from "next/link";
 
 export function AuthFooter() {
-  const year = new Date().getFullYear();
-
   return (
-    <footer className="px-5 pb-6 pt-2 text-center">
-      <nav className="mb-2 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[13px] text-[#627D98]">
-        <Link href="/privacy" className="hover:text-[#17618E]">
+    <footer className="border-t border-[#EEF3F2] px-5 py-3 text-center lg:px-10">
+      <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-[12px] text-[#8A9E9C]">
+        <Link href="/privacy" className="transition-colors hover:text-[#087F8C]">
           Privacy Policy
         </Link>
-        <Link href="/terms" className="hover:text-[#17618E]">
+        <Link href="/terms" className="transition-colors hover:text-[#087F8C]">
           Terms & Conditions
         </Link>
-        <Link href="/help" className="hover:text-[#17618E]">
+        <Link href="/help" className="transition-colors hover:text-[#087F8C]">
           Help
         </Link>
       </nav>
-      <p className="text-[12px] text-[#8AA0B2]">© {year} Medzoos</p>
     </footer>
   );
 }

@@ -20,9 +20,9 @@ export function AuthButton({
       type={type}
       disabled={busy}
       className={cn(
-        "inline-flex h-[52px] w-full items-center justify-center gap-2 rounded-[14px] bg-[#17618E] px-5 text-[15px] font-semibold text-white transition-colors duration-200",
-        "hover:bg-[#124362]",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#16A9E0] focus-visible:ring-offset-2",
+        "inline-flex h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-[#087F8C] px-5 text-[15px] font-semibold text-white transition-all duration-200",
+        "hover:bg-[#075E5B]",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F8C] focus-visible:ring-offset-2",
         "disabled:cursor-not-allowed disabled:opacity-60",
         "motion-safe:active:scale-[0.99]",
         className

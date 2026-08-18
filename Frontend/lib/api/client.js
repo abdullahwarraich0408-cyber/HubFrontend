@@ -177,7 +177,7 @@ export async function apiClient(path, options = {}) {
   } catch (err) {
     throw new ApiError(
       err?.message === "Failed to fetch"
-        ? "Unable to reach the server. Check that the backend is running."
+        ? "We couldn't connect right now. Please try again in a moment."
         : err?.message || "Network request failed",
       0,
       null

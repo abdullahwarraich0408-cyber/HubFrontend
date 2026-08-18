@@ -14,10 +14,18 @@ export function CustomerShell({ children }) {
   const isMarketingHome = pathname === "/" && (isLoading || !isAuthenticated);
   const isPatientHome =
     isAuthenticated && (pathname === "/" || pathname === "/home");
+  const isAuthPage =
+    pathname === "/login" ||
+    pathname === "/sign-in" ||
+    pathname === "/signup" ||
+    pathname === "/register" ||
+    pathname === "/forgot-password" ||
+    pathname === "/verify-otp" ||
+    pathname?.startsWith("/reset-password");
 
   return (
     <AuthModalProvider>
-      {isMarketingHome ? (
+      {isMarketingHome || isAuthPage ? (
         children
       ) : (
         <>

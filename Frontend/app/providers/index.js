@@ -41,6 +41,11 @@ export function Providers({ children }) {
         <AuthProvider>
           <AuthModalProvider>
             <AuthHydrator>{children}</AuthHydrator>
+            <div
+              id="recaptcha-container"
+              className="pointer-events-none absolute h-px w-px overflow-hidden opacity-0"
+              aria-hidden="true"
+            />
           </AuthModalProvider>
         </AuthProvider>
         <Toaster position="top-right" richColors />

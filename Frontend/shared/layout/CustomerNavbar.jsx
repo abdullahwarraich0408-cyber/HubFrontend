@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import {
-  FirstAidKit,
   MapPin,
   Bell,
   ShoppingCart,
@@ -12,9 +11,9 @@ import {
   Spinner,
   Tag,
 } from "@phosphor-icons/react";
+import { BrandLogo } from "@/shared/branding/BrandLogo";
 import { cartApi } from "@/lib/api/index";
 import { useUserProfile } from "@/lib/hooks/useApi";
-import { useAuthModal } from "@/features/auth/context/AuthModalContext";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { GlobalSearch } from "@/features/home/components/patient/GlobalSearch";
 import { UserMenu } from "@/features/home/components/patient/UserMenu";
@@ -28,7 +27,6 @@ const HIGHLIGHTS = [
 
 export function CustomerNavbar() {
   const pathname = usePathname();
-  const { openSignIn } = useAuthModal();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [cartCount, setCartCount] = useState(0);
   const [currentLocation, setCurrentLocation] = useState("Karachi");
@@ -145,18 +143,7 @@ export function CustomerNavbar() {
       >
         <div className="home-container mx-auto">
           <div className="flex h-[72px] items-center gap-3 md:gap-4">
-            <Link
-              href={isAuthenticated ? "/" : "/"}
-              className="flex shrink-0 items-center gap-2.5"
-              aria-label="Medzoos home"
-            >
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#EAF7F5] text-[#0B6E99]">
-                <FirstAidKit size={20} weight="fill" />
-              </span>
-              <span className="font-extrabold text-[20px] tracking-tight text-[#102A43]">
-                Med<span className="text-[#0B6E99]">zoos</span>
-              </span>
-            </Link>
+            <BrandLogo href="/" />
 
             <div className="mx-auto hidden min-w-0 flex-1 max-w-[560px] md:block">
               <GlobalSearch />
@@ -218,13 +205,12 @@ export function CustomerNavbar() {
               ) : isAuthenticated ? (
                 <UserMenu profile={profile} />
               ) : (
-                <button
-                  type="button"
-                  onClick={() => openSignIn({ redirect: pathname || "/" })}
+                <Link
+                  href={`/login?redirect=${encodeURIComponent(pathname || "/")}`}
                   className="rounded-xl bg-[#0B6E99] px-3.5 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-[#073B4C]"
                 >
                   Log In
-                </button>
+                </Link>
               )}
             </div>
           </div>

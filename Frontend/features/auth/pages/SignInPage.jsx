@@ -1,7 +1,7 @@
 "use client";
 
-import { SignInForm } from "@/features/auth/components/SignInForm";
+import { LoginPage } from "./LoginPage";
 
 export function SignInPage() {
-  return <SignInForm variant="page" />;
+  return <LoginPage />;
 }

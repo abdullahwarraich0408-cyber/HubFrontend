@@ -3,36 +3,44 @@
 import { useState } from "react";
 import { GoogleLogo } from "@phosphor-icons/react";
 import { useAuth } from "@/lib/auth/AuthProvider";
+import { friendlyAuthError } from "@/lib/auth/friendlyAuthError";
+import { formatFirebaseAuthError } from "@/lib/auth/firebaseErrors";
 
 export function GoogleLoginButton({ onSuccess, className = "" }) {
   const { loginWithGoogle } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleClick = async () => {
+  const handleClick = async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
     setError("");
     setLoading(true);
     try {
-      await loginWithGoogle();
-      onSuccess?.();
+      const user = await loginWithGoogle();
+      if (user) onSuccess?.();
     } catch (err) {
-      setError(err.message || "Google sign-in failed");
+      const firebaseMessage = err?.code ? formatFirebaseAuthError(err) : "";
+      setError(
+        firebaseMessage ||
+          friendlyAuthError(err, "Google sign-in could not be completed. Please try again.")
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className={className}>
-      {error ? <p className="text-xs text-red-600 mb-2">{error}</p> : null}
+    <div className={`relative z-20 ${className}`}>
+      {error ? <p className="mb-2 text-[13px] leading-5 text-[#D92D20]">{error}</p> : null}
       <button
         type="button"
         onClick={handleClick}
         disabled={loading}
-        className="w-full h-11 flex items-center justify-center gap-2 border rounded-xl font-semibold text-sm hover:bg-neutral-50 disabled:opacity-60"
+        className="relative z-20 inline-flex h-[54px] w-full cursor-pointer items-center justify-center gap-2 rounded-[14px] border border-[#D7E4EA] bg-white text-[15px] font-semibold text-[#102A43] shadow-[0_1px_2px_rgba(16,42,67,0.04)] transition-all hover:border-[#087F8C]/30 hover:bg-[#F7FBFC] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F8C] disabled:cursor-wait disabled:opacity-60"
       >
         <GoogleLogo size={18} weight="bold" />
-        {loading ? "Signing in…" : "Continue with Google"}
+        {loading ? "Signing in..." : "Continue with Google"}
       </button>
     </div>
   );

@@ -11,6 +11,22 @@ export function formatFirebaseAuthError(error) {
   const code = error?.code || "";
   const message = error?.message || String(error || "Authentication failed");
 
+  if (code === "auth/unauthorized-domain" || /unauthorized-domain|domain is not authorized/i.test(message)) {
+    return "This website domain is not authorized for Google sign-in in the Firebase project the live site uses. Add medzoos.com and www.medzoos.com under Authentication → Settings → Authorized domains for project medcare-a5507.";
+  }
+
+  if (code === "auth/operation-not-allowed" && /google/i.test(message)) {
+    return "Google sign-in is not enabled yet. In Firebase, open Authentication → Sign-in method and enable Google.";
+  }
+
+  if (code === "auth/popup-blocked") {
+    return "Your browser blocked the Google window. Allow popups for this site and try again.";
+  }
+
+  if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") {
+    return "Google sign-in was cancelled. Please try again.";
+  }
+
   if (code === "auth/operation-not-allowed" || message.includes("region enabled")) {
     if (isTestAuthEnabled()) {
       return [
@@ -32,8 +48,16 @@ export function formatFirebaseAuthError(error) {
     ].join("\n");
   }
 
+  if (code === "auth/invalid-verification-code" || /invalid-verification-code|invalid otp|incorrect code|wrong code/i.test(message)) {
+    return "The OTP is incorrect. Please try again.";
+  }
+
+  if (code === "auth/code-expired" || code === "auth/session-expired") {
+    return "This OTP has expired. Request a new code.";
+  }
+
   if (code === "auth/invalid-phone-number") {
-    return "Invalid phone format. Use 03361400372 or +923361400372.";
+    return "Please enter a valid mobile number.";
   }
 
   if (code === "auth/too-many-requests") {

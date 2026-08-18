@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FirstAidKit } from "@phosphor-icons/react";
+import { BrandLogo } from "@/shared/branding/BrandLogo";
 
 const YEAR = new Date().getFullYear();
 
@@ -11,14 +11,7 @@ export function LoggedInFooter() {
       <div className="home-container mx-auto py-12 md:py-14">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <Link href="/" className="inline-flex items-center gap-2.5">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-[#7DD3C7]">
-                <FirstAidKit size={18} weight="fill" />
-              </span>
-              <span className="text-[18px] font-bold tracking-tight">
-                Med<span className="text-[#7DD3C7]">zoos</span>
-              </span>
-            </Link>
+            <BrandLogo href="/" onDark />
             <p className="mt-3 max-w-xs text-[14px] leading-relaxed text-white/55">
               Healthcare services, connected.
             </p>

@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
-import { OtpModal } from "@/features/auth/components/OtpModal";
+import { EmailSignInModal } from "@/features/auth/components/EmailSignInModal";
 import { AUTH_SIGN_IN_EVENT } from "@/lib/authModalEvents";
 
 const AuthModalContext = createContext(null);
@@ -42,10 +42,11 @@ export function AuthModalProvider({ children }) {
   return (
     <AuthModalContext.Provider value={{ openSignIn, closeSignIn, signInOpen }}>
       {children}
-      <OtpModal
+      <EmailSignInModal
         open={signInOpen}
         onClose={closeSignIn}
         onSuccess={handleSuccess}
+        redirectTo={redirectTo}
       />
       {expired && signInOpen ? (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[140] text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 shadow">

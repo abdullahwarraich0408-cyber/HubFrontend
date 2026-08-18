@@ -22,6 +22,16 @@ export const metadata = {
   title: "Medzoos | Medicines, Doctors & Lab Tests in Pakistan",
   description:
     "Medzoos connects patients in Pakistan with healthcare providers for medicines, doctor consultations, appointments and laboratory services through one convenient platform.",
+  applicationName: "Medzoos",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "48x48" },
+      { url: "/favicon-32.png", type: "image/png", sizes: "32x32" },
+      { url: "/icon.png", type: "image/png", sizes: "512x512" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+  },
   openGraph: {
     title: "Medzoos | Medicines, Doctors & Lab Tests in Pakistan",
     description:

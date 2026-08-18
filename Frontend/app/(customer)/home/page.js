@@ -11,7 +11,7 @@ export default function HomeRoutePage() {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.replace("/sign-in?redirect=/home");
+      router.replace("/login?redirect=/home");
     }
   }, [isAuthenticated, isLoading, router]);
 

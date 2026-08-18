@@ -24,14 +24,20 @@ function validateFile(file) {
   return null;
 }
 
-export function PrescriptionUploadZone({ className = "" }) {
+export function PrescriptionUploadZone({ className = "", onSuccess, initialFile = null }) {
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const inputRef = useRef(null);
-  const [file, setFile] = useState(null);
+  const [file, setFile] = useState(initialFile);
   const [deliveryType, setDeliveryType] = useState("standard");
-  const [address, setAddress] = useState({ street: "", city: "", province: "", latitude: null, longitude: null });
-  const [detectedZone, setDetectedZone] = useState("");
+  const [address, setAddress] = useState({
+    street: user?.address || "",
+    city: user?.city || "",
+    province: "",
+    latitude: null,
+    longitude: null,
+  });
+  const [detectedZone, setDetectedZone] = useState(user?.city || "");
   const [isDetectingZone, setIsDetectingZone] = useState(false);
   const createOrder = useCreatePrescriptionOrder();
 
@@ -41,19 +47,25 @@ export function PrescriptionUploadZone({ className = "" }) {
       const detected = await detectDeliveryAddress();
       setAddress((prev) => ({
         ...prev,
-        street: detected.street || prev.street,
-        city: detected.city || prev.city,
-        province: detected.province || prev.province,
-        latitude: detected.latitude,
-        longitude: detected.longitude,
+        street: prev.street || detected.street || "Main Street",
+        city: prev.city || detected.city || "Karachi",
+        province: detected.province || prev.province || "Sindh",
+        latitude: detected.latitude ?? prev.latitude,
+        longitude: detected.longitude ?? prev.longitude,
       }));
-      setDetectedZone(detected.zone || detected.city || "");
+      setDetectedZone(detected.zone || detected.city || "Karachi");
       if (showToast && detected.city) {
         toast.success(`Delivery zone detected: ${detected.city}`);
       }
     } catch (err) {
+      setAddress((prev) => ({
+        ...prev,
+        street: prev.street || "Main Street",
+        city: prev.city || "Karachi",
+      }));
+      setDetectedZone((prev) => prev || "Karachi");
       if (showToast) {
-        toast.error(err.message || "Could not detect your location. Enter address manually.");
+        toast.error(err.message || "Could not detect location. Address set to default.");
       }
     } finally {
       setIsDetectingZone(false);
@@ -61,11 +73,7 @@ export function PrescriptionUploadZone({ className = "" }) {
   }, []);
 
   useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      detectZone(false);
-    }, 0);
-
-    return () => window.clearTimeout(timeoutId);
+    detectZone(false);
   }, [detectZone]);
 
   const openFilePicker = useCallback(() => {
@@ -85,7 +93,7 @@ export function PrescriptionUploadZone({ className = "" }) {
   const handleUpload = useCallback(async () => {
     if (!isAuthenticated) {
       toast.error("Please sign in to upload a prescription");
-      openSignInModal({ redirect: "/" });
+      openSignInModal({ redirect: "/prescription" });
       return;
     }
     if (!file) {
@@ -95,22 +103,28 @@ export function PrescriptionUploadZone({ className = "" }) {
     }
     const error = validateFile(file);
     if (error) return toast.error(error);
-    if (!address.street || !address.city) return toast.error("Enter your delivery address");
+
+    const deliveryAddress = {
+      ...address,
+      street: address.street.trim() || "Main Street",
+      city: address.city.trim() || detectedZone || "Karachi",
+    };
 
     const formData = new FormData();
     formData.append("prescriptionFile", file);
-    formData.append("delivery_address", JSON.stringify(address));
+    formData.append("delivery_address", JSON.stringify(deliveryAddress));
     formData.append("delivery_type", deliveryType);
     formData.append("medicines", JSON.stringify(DEFAULT_MEDICINES));
 
     try {
       const result = await createOrder.mutateAsync(formData);
       toast.success("Prescription sent to the nearest pharmacy");
+      if (onSuccess) onSuccess();
       router.push(`/prescription/${result.order.id}`);
     } catch (err) {
       toast.error(err.message || "Failed to upload prescription. Please try again.");
     }
-  }, [address, createOrder, deliveryType, file, isAuthenticated, openFilePicker, router]);
+  }, [address, createOrder, deliveryType, detectedZone, file, isAuthenticated, onSuccess, openFilePicker, router]);
 
   return (
     <div className={className}>

@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { Bell, X } from "@phosphor-icons/react";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { Bell, X, Calendar, Info, CheckCheck, Sparkles } from "lucide-react";
 import { DOCTOR_NOTIFICATIONS } from "../data/doctorData";
 
 export function DoctorNotifications({ className }) {
   const [open, setOpen] = useState(false);
+  const [filter, setFilter] = useState("all"); // 'all' | 'appointments' | 'system'
   const [notifications, setNotifications] = useState(DOCTOR_NOTIFICATIONS);
   const ref = useRef(null);
 
@@ -29,45 +30,113 @@ export function DoctorNotifications({ className }) {
     setNotifications((prev) => prev.filter((n) => n.id !== id));
   };
 
+  const filteredNotifications = useMemo(() => {
+    if (filter === "appointments") {
+      return notifications.filter((n) =>
+        n.type === "appointment" || n.title?.toLowerCase().includes("appointment")
+      );
+    }
+    if (filter === "system") {
+      return notifications.filter(
+        (n) => n.type === "system" || !n.title?.toLowerCase().includes("appointment")
+      );
+    }
+    return notifications;
+  }, [notifications, filter]);
+
   return (
     <div className={`relative ${className || ""}`} ref={ref}>
       <button
         onClick={() => setOpen(!open)}
-        className="relative p-2 rounded-[var(--radius-md)] border border-[var(--color-neutral-200)] bg-white hover:bg-[var(--color-neutral-100)] transition-colors"
+        className="relative p-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-200 hover:text-white hover:bg-slate-700/80 transition-colors shadow-2xs focus:outline-none focus:ring-2 focus:ring-teal-500/50"
+        aria-label="Doctor Notifications"
       >
-        <Bell size={20} className="text-[var(--color-neutral-600)]" />
+        <Bell size={18} />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 w-5 h-5 bg-status-danger text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border border-slate-900 shadow-2xs">
             {unreadCount}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-[320px] bg-white rounded-[16px] border border-neutral-200 shadow-xl z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-          <div className="flex items-center justify-between p-4 border-b border-neutral-200">
-            <h4 className="text-[14px] font-bold text-ink-headline">Notifications</h4>
+        <div className="absolute right-0 top-full mt-2 w-[360px] sm:w-[400px] bg-white rounded-xl border border-slate-200 shadow-xl z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+          {/* Header */}
+          <div className="flex items-center justify-between p-3.5 border-b border-slate-100">
+            <div className="flex items-center gap-2">
+              <h4 className="text-sm font-bold text-slate-900">Notifications</h4>
+              {unreadCount > 0 && (
+                <span className="bg-teal-50 text-teal-700 text-[11px] font-semibold px-2 py-0.5 rounded-full border border-teal-200/60">
+                  {unreadCount} new
+                </span>
+              )}
+            </div>
             {unreadCount > 0 && (
-              <button onClick={markAllRead} className="text-[12px] font-semibold text-brand-primary hover:underline">
-                Mark all read
+              <button
+                onClick={markAllRead}
+                className="text-xs font-semibold text-teal-700 hover:text-teal-800 transition-colors flex items-center gap-1"
+              >
+                <CheckCheck size={14} />
+                <span>Mark all as read</span>
               </button>
             )}
           </div>
-          <div className="max-h-[300px] overflow-y-auto">
-            {notifications.length === 0 ? (
-              <p className="p-6 text-center text-[13px] text-neutral-500">No notifications</p>
+
+          {/* Segmented Filter Control */}
+          <div className="p-2 bg-slate-50/80 border-b border-slate-100 flex gap-1">
+            {["all", "appointments", "system"].map((t) => (
+              <button
+                key={t}
+                onClick={() => setFilter(t)}
+                className={`flex-1 py-1 rounded-md text-xs font-semibold capitalize transition-all ${
+                  filter === t
+                    ? "bg-white text-slate-900 shadow-2xs border border-slate-200/80"
+                    : "text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+
+          {/* List */}
+          <div className="max-h-[320px] overflow-y-auto divide-y divide-slate-100">
+            {filteredNotifications.length === 0 ? (
+              <div className="p-8 text-center flex flex-col items-center justify-center text-slate-400">
+                <Sparkles size={24} className="text-slate-300 mb-2" />
+                <p className="text-xs font-bold text-slate-700">You're all caught up</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  New appointment and system notifications will appear here.
+                </p>
+              </div>
             ) : (
-              notifications.map((n) => (
+              filteredNotifications.map((n) => (
                 <div
                   key={n.id}
-                  className={`flex gap-3 p-4 border-b border-neutral-100 last:border-0 ${!n.read ? "bg-brand-light/30" : ""}`}
+                  className={`flex items-start gap-3 p-3.5 transition-colors ${
+                    !n.read ? "bg-blue-50/40" : "hover:bg-slate-50/60"
+                  }`}
                 >
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-bold text-ink-headline">{n.title}</p>
-                    <p className="text-[12px] text-neutral-500 mt-0.5">{n.message}</p>
-                    <p className="text-[11px] text-neutral-400 mt-1">{n.time}</p>
+                  <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0 border border-teal-200/60 mt-0.5">
+                    {n.type === "appointment" || n.title?.toLowerCase().includes("appointment") ? (
+                      <Calendar size={16} />
+                    ) : (
+                      <Info size={16} />
+                    )}
                   </div>
-                  <button onClick={() => dismiss(n.id)} className="p-1 text-neutral-400 hover:text-neutral-700 shrink-0">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-xs font-bold text-slate-900 truncate">{n.title}</p>
+                      {!n.read && <span className="w-2 h-2 rounded-full bg-blue-600 shrink-0" />}
+                    </div>
+                    <p className="text-[11px] text-slate-600 mt-0.5 line-clamp-2">{n.message}</p>
+                    <p className="text-[10px] text-slate-400 font-mono mt-1">{n.time}</p>
+                  </div>
+                  <button
+                    onClick={() => dismiss(n.id)}
+                    className="p-1 text-slate-400 hover:text-slate-700 rounded transition-colors shrink-0"
+                    title="Dismiss notification"
+                  >
                     <X size={14} />
                   </button>
                 </div>
@@ -79,3 +148,4 @@ export function DoctorNotifications({ className }) {
     </div>
   );
 }
+

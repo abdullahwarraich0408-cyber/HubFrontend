@@ -44,17 +44,37 @@ export async function reverseGeocode(latitude, longitude) {
 }
 
 export async function detectDeliveryAddress() {
-  const position = await getCurrentPosition();
-  const { latitude, longitude } = position.coords;
-  const data = await reverseGeocode(latitude, longitude);
+  let latitude = null;
+  let longitude = null;
+  let data = null;
 
-  const city = data.city || data.locality || "";
-  const province = data.principalSubdivision || "";
+  try {
+    const position = await getCurrentPosition();
+    latitude = position.coords.latitude;
+    longitude = position.coords.longitude;
+    data = await reverseGeocode(latitude, longitude);
+  } catch (gpsErr) {
+    // Fallback to IP-based geocoding if browser GPS fails or permission is denied
+    try {
+      const response = await fetch(
+        "https://api.bigdatacloud.net/data/reverse-geocode-client?localityLanguage=en"
+      );
+      if (response.ok) {
+        data = await response.json();
+        latitude = data.latitude || null;
+        longitude = data.longitude || null;
+      }
+    } catch {
+      // Ignore network fallback error
+    }
+  }
+
+  const city = data?.city || data?.locality || "Karachi";
+  const province = data?.principalSubdivision || "Sindh";
   const street =
-    data.street ||
-    data.localityInfo?.informative?.find((item) => item.description?.includes("road"))?.name ||
-    data.locality ||
-    city;
+    data?.street ||
+    data?.localityInfo?.informative?.find((item) => item.description?.includes("road"))?.name ||
+    (data?.locality ? `${data.locality} Street` : "Main City Street");
 
   return {
     street,

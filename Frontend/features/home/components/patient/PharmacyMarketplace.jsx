@@ -13,6 +13,7 @@ import {
   Leaf,
   FirstAidKit,
 } from "@phosphor-icons/react";
+import { usePrescriptionModal } from "@/features/prescription/context/PrescriptionModalContext";
 
 const CATEGORIES = [
   {
@@ -42,6 +43,7 @@ const CATEGORIES = [
 ];
 
 export function PharmacyMarketplace() {
+  const { openPrescriptionModal } = usePrescriptionModal();
   const router = useRouter();
   const [query, setQuery] = useState("");
 
@@ -152,12 +154,13 @@ export function PharmacyMarketplace() {
             </div>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row">
-              <Link
-                href="/prescriptions/upload"
-                className="inline-flex h-12 items-center justify-center rounded-[12px] bg-white px-5 text-[14px] font-semibold text-[#073B4C] hover:bg-[#EAF7F5]"
+              <button
+                type="button"
+                onClick={openPrescriptionModal}
+                className="inline-flex h-12 items-center justify-center rounded-[12px] bg-white px-5 text-[14px] font-semibold text-[#073B4C] hover:bg-[#EAF7F5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
               >
                 Upload Prescription
-              </Link>
+              </button>
               <Link
                 href="/browse"
                 className="group inline-flex h-12 items-center justify-center gap-1.5 rounded-[12px] border border-white/25 px-5 text-[14px] font-semibold text-white hover:bg-white/10"

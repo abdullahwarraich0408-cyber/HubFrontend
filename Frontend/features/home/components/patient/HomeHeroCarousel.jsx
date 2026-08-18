@@ -22,6 +22,8 @@ import { cn } from "@/utils/cn";
 import { useQuery } from "@tanstack/react-query";
 import { publicHomeSlidesApi } from "@/lib/api/index";
 
+import { usePrescriptionModal } from "@/features/prescription/context/PrescriptionModalContext";
+
 const AUTOPLAY_MS = 2500;
 
 const ACTION_HREF = {
@@ -154,6 +156,7 @@ function NavArrow({ direction, onClick, label }) {
 }
 
 export function HomeHeroCarousel() {
+  const { openPrescriptionModal } = usePrescriptionModal();
   const reduceMotion = useReducedMotion();
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -336,18 +339,34 @@ export function HomeHeroCarousel() {
                 </div>
 
                 <div className="mt-4 flex min-h-[48px] flex-col gap-2.5 sm:flex-row sm:items-center">
-                  <Link
-                    href={slide.href}
-                    className="group inline-flex h-12 w-full items-center justify-center gap-2 rounded-[14px] bg-[#0B6E99] px-5 text-[14px] font-semibold text-white transition-colors hover:bg-[#073B4C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B6E99]/40 focus-visible:ring-offset-2 sm:w-auto"
-                  >
-                    <CtaIcon size={17} weight="bold" />
-                    {slide.cta}
-                    <ArrowRight
-                      size={15}
-                      weight="bold"
-                      className="transition-transform group-hover:translate-x-[3px]"
-                    />
-                  </Link>
+                  {slide.id === "prescription" || slide.cta === "Upload Prescription" ? (
+                    <button
+                      type="button"
+                      onClick={() => openPrescriptionModal()}
+                      className="group inline-flex h-12 w-full items-center justify-center gap-2 rounded-[14px] bg-[#0B6E99] px-5 text-[14px] font-semibold text-white transition-colors hover:bg-[#073B4C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B6E99]/40 focus-visible:ring-offset-2 sm:w-auto"
+                    >
+                      <CtaIcon size={17} weight="bold" />
+                      {slide.cta}
+                      <ArrowRight
+                        size={15}
+                        weight="bold"
+                        className="transition-transform group-hover:translate-x-[3px]"
+                      />
+                    </button>
+                  ) : (
+                    <Link
+                      href={slide.href}
+                      className="group inline-flex h-12 w-full items-center justify-center gap-2 rounded-[14px] bg-[#0B6E99] px-5 text-[14px] font-semibold text-white transition-colors hover:bg-[#073B4C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B6E99]/40 focus-visible:ring-offset-2 sm:w-auto"
+                    >
+                      <CtaIcon size={17} weight="bold" />
+                      {slide.cta}
+                      <ArrowRight
+                        size={15}
+                        weight="bold"
+                        className="transition-transform group-hover:translate-x-[3px]"
+                      />
+                    </Link>
+                  )}
                   {slide.secondaryCta && slide.secondaryHref ? (
                     <Link
                       href={slide.secondaryHref}

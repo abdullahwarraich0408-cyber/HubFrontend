@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -10,6 +11,9 @@ import { slugifyVendorName } from "@/lib/mappers/vendor";
 
 export function MedicineCard({ medicine }) {
   const addToCart = useAddToCart();
+  const [imgSrc, setImgSrc] = useState(
+    medicine.image || "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=600&auto=format&fit=crop"
+  );
   const outOfStock = medicine.stock === 0;
   const price =
     typeof medicine.price === "number" && !Number.isNaN(medicine.price)
@@ -67,11 +71,12 @@ export function MedicineCard({ medicine }) {
     <article className="group relative flex h-full flex-col overflow-hidden rounded-[14px] border border-[#0B6E99]/10 bg-white transition-all duration-200 hover:border-[#0B6E99]/30 hover:shadow-[0_8px_24px_rgba(11,110,153,0.1)]">
       <Link href={`/product/${medicine.id}`} className="relative block aspect-square overflow-hidden bg-[#F3F8FB]">
         <Image
-          src={medicine.image}
+          src={imgSrc}
           alt={medicine.name}
           fill
           className="object-cover object-center transition-transform duration-400 group-hover:scale-[1.05]"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
+          onError={() => setImgSrc("https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=600&auto=format&fit=crop")}
         />
 
         <div className="absolute left-2 top-2 flex flex-col gap-1">

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { MagnifyingGlass } from "@phosphor-icons/react";
+import { MagnifyingGlass, X } from "@phosphor-icons/react";
 
 /**
  * Shared page poster — matches Pharmacies hero color scheme:
@@ -56,6 +56,16 @@ export function PageHero({
                   className="min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-[#627D98]"
                   aria-label={searchAriaLabel}
                 />
+                {search ? (
+                  <button
+                    type="button"
+                    onClick={() => onSearchChange("")}
+                    className="shrink-0 p-1 text-[#627D98] hover:text-[#102A43] transition-colors"
+                    aria-label="Clear search"
+                  >
+                    <X size={16} weight="bold" />
+                  </button>
+                ) : null}
               </div>
               {actions}
             </div>

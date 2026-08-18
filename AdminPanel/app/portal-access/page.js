@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LockKey, Envelope, ShieldCheck, ArrowRight } from "@phosphor-icons/react";
-import { api } from "@/lib/api";
+import { api, post } from "@/lib/api/client";
 import { toast } from "sonner";
 
 export default function AdminLoginPage() {
@@ -17,20 +17,36 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     try {
-      // 1. Authenticate with backend
-      const response = await api.auth.login(email, password);
+      // 1. Authenticate with backend directly via post helper
+      const response = await post("/auth/login", { email, password });
       
+      const user = response?.user || response?.data?.user;
+      const tokens = response?.tokens || response?.data?.tokens;
+
       // 2. Check if the logged-in user actually has admin privileges
-      // Depending on your API, the role might be in response.data.user.role
-      if (response?.user?.role !== 'admin' && response?.data?.user?.role !== 'admin') {
-        // If not an admin, we log them out and reject access
-        await api.auth.logout();
+      if (!user || user.role !== 'admin') {
+        try { await post("/auth/logout"); } catch (_) {}
         throw new Error("Access Denied: You do not have administrator privileges.");
+      }
+
+      // 3. Store tokens and session info in localStorage
+      if (tokens?.accessToken) {
+        localStorage.setItem("token", tokens.accessToken);
+      }
+      if (tokens?.refreshToken) {
+        localStorage.setItem("refreshToken", tokens.refreshToken);
+      }
+      if (user) {
+        localStorage.setItem("medzoos_user", JSON.stringify(user));
+      }
+
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("auth-updated"));
       }
 
       toast.success("Admin access granted. Welcome to the portal.");
       
-      // 3. Redirect to the admin dashboard (HARD RELOAD to clear React Query cache)
+      // 4. Redirect to the admin dashboard (HARD RELOAD to clear React Query cache)
       window.location.href = "/admin";
       
     } catch (err) {

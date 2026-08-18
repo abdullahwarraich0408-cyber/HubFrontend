@@ -9,6 +9,8 @@ import { hydrateAuth } from "../store/authSlice";
 import { AuthProvider } from "@/lib/auth/AuthProvider";
 import { AuthModalProvider } from "@/features/auth/context/AuthModalContext";
 
+import { PrescriptionModalProvider } from "@/features/prescription/context/PrescriptionModalContext";
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -40,12 +42,14 @@ export function Providers({ children }) {
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <AuthModalProvider>
-            <AuthHydrator>{children}</AuthHydrator>
-            <div
-              id="recaptcha-container"
-              className="pointer-events-none absolute h-px w-px overflow-hidden opacity-0"
-              aria-hidden="true"
-            />
+            <PrescriptionModalProvider>
+              <AuthHydrator>{children}</AuthHydrator>
+              <div
+                id="recaptcha-container"
+                className="pointer-events-none absolute h-px w-px overflow-hidden opacity-0"
+                aria-hidden="true"
+              />
+            </PrescriptionModalProvider>
           </AuthModalProvider>
         </AuthProvider>
         <Toaster position="top-right" richColors />

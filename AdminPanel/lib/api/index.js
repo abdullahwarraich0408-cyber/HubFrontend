@@ -1,4 +1,5 @@
-import { api } from "./client";
+import { api, post, get } from "./client";
+export { api, post, get };
 import { setPartnerSession, clearPartnerSession } from "../partnerAuth";
 
 export const partnerAuthApi = {

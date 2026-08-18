@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Buildings, PencilSimple, Trash } from "@phosphor-icons/react";
+import { Building2, Edit2, Trash2, Plus, X, Clock, MapPin, Check, Calendar } from "lucide-react";
 import { Button } from "@/shared/components/Button";
 import { Input } from "@/shared/components/Input";
 import {
@@ -34,6 +34,7 @@ export function HospitalScheduleManager() {
 
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const toggleDay = (day) => {
     setForm((prev) => ({
@@ -45,6 +46,7 @@ export function HospitalScheduleManager() {
   const resetForm = () => {
     setForm({ ...emptyForm, fee: profile?.fee ? String(profile.fee) : "" });
     setEditingId(null);
+    setDrawerOpen(false);
   };
 
   const startEdit = (location) => {
@@ -55,6 +57,7 @@ export function HospitalScheduleManager() {
       days: location.days || [],
       slots: location.schedule?.find((entry) => entry.slots?.length)?.slots?.[0] || DEFAULT_SLOT,
     });
+    setDrawerOpen(true);
   };
 
   const handleSubmit = async (e) => {
@@ -90,11 +93,11 @@ export function HospitalScheduleManager() {
   };
 
   const handleDelete = async (locationId) => {
-    if (!confirm("Remove this hospital from your schedule?")) return;
+    if (!confirm("Remove this hospital from your practice schedule?")) return;
     try {
       await deleteLocation.mutateAsync(locationId);
       if (editingId === locationId) resetForm();
-      toast.success("Location removed");
+      toast.success("Hospital location removed");
     } catch (error) {
       toast.error(error.message || "Could not remove location");
     }
@@ -103,71 +106,125 @@ export function HospitalScheduleManager() {
   const isSaving = createLocation.isPending || updateLocation.isPending;
 
   if (locationsLoading || hospitalsLoading) {
-    return <p className="text-sm text-neutral-500">Loading hospital schedules...</p>;
+    return <p className="text-xs text-slate-500 py-6 text-center">Loading practice locations...</p>;
   }
 
   return (
-    <div className="space-y-6">
-      <div className="p-4 rounded-[12px] bg-brand-light/60 border border-brand-primary/15 text-[13px] text-neutral-600">
-        Add each hospital where you see patients in person. Pick the days you work there — for example,
-        Monday at Cheema Heart and Tuesday at National Hospital. Patients will only see slots on those days
-        for that hospital.
+    <div className="space-y-6 animate-in fade-in duration-200">
+      {/* Top Banner & Trigger */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 text-white p-4 sm:p-5 rounded-xl border border-slate-800 shadow-2xs">
+        <div>
+          <div className="flex items-center gap-2 text-teal-400 text-xs font-semibold uppercase tracking-wider mb-1">
+            <Building2 size={15} />
+            <span>Hospital Affiliations</span>
+          </div>
+          <h2 className="text-base font-bold text-white">In-Person Practice Locations</h2>
+          <p className="text-xs text-slate-400 mt-0.5 max-w-xl">
+            Configure specific practice days, consultation fees (PKR), and clinic hours per hospital location.
+          </p>
+        </div>
+        <button
+          onClick={() => {
+            resetForm();
+            setDrawerOpen(true);
+          }}
+          className="px-4 py-2.5 bg-teal-600 hover:bg-teal-500 text-white rounded-lg text-xs font-semibold transition-colors flex items-center justify-center gap-2 shadow-xs shrink-0"
+        >
+          <Plus size={16} />
+          <span>Add Practice Location</span>
+        </button>
       </div>
 
-      <div>
-        <h2 className="text-[16px] font-bold text-ink-headline mb-3 flex items-center gap-2">
-          <Buildings size={18} className="text-brand-primary" />
-          Your hospital locations
-        </h2>
+      {/* Clean Table/List View with Thin Dividers */}
+      <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
+        <div className="p-4 border-b border-slate-200/80 flex items-center justify-between bg-slate-50/80">
+          <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider text-slate-500">
+            Active Practice Locations ({locations.length})
+          </h3>
+        </div>
 
         {locations.length === 0 ? (
-          <p className="text-sm text-neutral-500 p-5 rounded-[12px] border border-dashed border-neutral-200">
-            No hospital locations yet. Add your first one below.
-          </p>
+          <div className="p-12 text-center text-slate-500">
+            <Building2 size={28} className="mx-auto text-slate-300 mb-2" />
+            <p className="text-xs font-bold text-slate-800">No hospital practice locations added yet</p>
+            <p className="text-[11px] text-slate-500 mt-1 max-w-sm mx-auto">
+              Add your affiliated hospitals so patients can book physical in-person appointments on your active days.
+            </p>
+            <button
+              onClick={() => {
+                resetForm();
+                setDrawerOpen(true);
+              }}
+              className="mt-4 px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-2xs transition-colors"
+            >
+              Add First Location
+            </button>
+          </div>
         ) : (
-          <div className="space-y-3">
+          <div className="divide-y divide-slate-100 text-xs">
             {locations.map((location) => (
               <div
                 key={location.id}
-                className={`p-4 rounded-[14px] border bg-white ${
-                  editingId === location.id
-                    ? "border-brand-primary shadow-sm"
-                    : "border-neutral-200"
-                }`}
+                className="p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-50/60 transition-colors"
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="font-bold text-ink-headline">{location.title}</p>
-                    {location.address && (
-                      <p className="text-xs text-neutral-500 mt-0.5">{location.address}</p>
-                    )}
-                    <p className="text-xs font-semibold text-brand-primary mt-2">
-                      {location.days?.join(" ") || "No days set"}
-                    </p>
-                    <p className="text-xs text-neutral-500 mt-1">{location.availability}</p>
+                <div className="space-y-1.5 min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <Building2 size={16} className="text-teal-600 shrink-0" />
+                    <h4 className="font-bold text-slate-900 text-sm truncate">{location.title}</h4>
                   </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-sm font-bold text-ink-headline">
-                      PKR {(location.fee || 0).toLocaleString()}
-                    </p>
-                    <div className="flex items-center justify-end gap-2 mt-2">
-                      <button
-                        type="button"
-                        onClick={() => startEdit(location)}
-                        className="p-1.5 rounded-md text-neutral-500 hover:text-brand-primary hover:bg-brand-light"
-                        title="Edit"
-                      >
-                        <PencilSimple size={16} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(location.id)}
-                        className="p-1.5 rounded-md text-status-danger hover:bg-status-danger/10"
-                        title="Remove"
-                      >
-                        <Trash size={16} />
-                      </button>
+                  {location.address && (
+                    <div className="flex items-center gap-1.5 text-slate-500 text-xs">
+                      <MapPin size={13} className="shrink-0" />
+                      <span className="truncate">{location.address}</span>
                     </div>
+                  )}
+
+                  {/* Active Days Pills */}
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                    {WEEKDAYS.map((day) => {
+                      const isWorking = location.days?.includes(day);
+                      return (
+                        <span
+                          key={day}
+                          className={`px-2 py-0.5 rounded-md text-[10px] font-semibold border ${
+                            isWorking
+                              ? "bg-teal-50 text-teal-700 border-teal-200/80"
+                              : "bg-slate-50 text-slate-400 border-slate-200/60 opacity-60"
+                          }`}
+                        >
+                          {day.slice(0, 3)}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between md:justify-end gap-6 border-t md:border-t-0 pt-3 md:pt-0 border-slate-100 shrink-0">
+                  <div className="text-right">
+                    <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
+                      Consultation Fee
+                    </span>
+                    <span className="text-sm font-bold text-slate-900 font-mono">
+                      PKR {Number(location.fee || 0).toLocaleString()}
+                    </span>
+                    <span className="text-[10px] text-slate-500 block">{location.availability || DEFAULT_SLOT}</span>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => startEdit(location)}
+                      className="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+                      title="Edit Schedule"
+                    >
+                      <Edit2 size={15} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(location.id)}
+                      className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                      title="Delete Location"
+                    >
+                      <Trash2 size={15} />
+                    </button>
                   </div>
                 </div>
               </div>
@@ -176,84 +233,132 @@ export function HospitalScheduleManager() {
         )}
       </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="p-5 rounded-[16px] border border-brand-primary/20 bg-brand-light/30 space-y-4"
-      >
-        <h3 className="text-[15px] font-bold text-ink-headline">
-          {editingId ? "Edit hospital schedule" : "Add hospital location"}
-        </h3>
-
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-semibold text-neutral-600 mb-1.5">Hospital</label>
-            <select
-              required
-              value={form.hospital_id}
-              onChange={(e) => setForm({ ...form, hospital_id: e.target.value })}
-              disabled={Boolean(editingId)}
-              className="w-full h-10 px-3 rounded-lg border border-neutral-200 text-sm bg-white outline-none focus:border-brand-primary disabled:bg-neutral-50"
-            >
-              <option value="">Select hospital</option>
-              {hospitals.map((hospital) => (
-                <option key={hospital.id} value={hospital.id}>
-                  {hospital.name}
-                  {hospital.city ? ` (${hospital.city})` : ""}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-neutral-600 mb-1.5">Fee at this hospital (PKR)</label>
-            <Input
-              type="number"
-              value={form.fee}
-              onChange={(e) => setForm({ ...form, fee: e.target.value })}
-              placeholder={profile?.fee ? String(profile.fee) : "2500"}
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-neutral-600 mb-2">Days you work here</label>
-          <div className="flex flex-wrap gap-2">
-            {WEEKDAYS.map((day) => (
+      {/* LOCATION ADD / EDIT SIDE DRAWER */}
+      {drawerOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-end transition-opacity duration-200"
+          onClick={() => setDrawerOpen(false)}
+        >
+          <div
+            className="bg-white h-full w-full max-w-md shadow-2xl flex flex-col border-l border-slate-200 animate-in slide-in-from-right duration-200 overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Drawer Header */}
+            <div className="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+              <div className="flex items-center gap-2">
+                <Building2 size={18} className="text-teal-600" />
+                <h3 className="font-bold text-sm text-slate-900">
+                  {editingId ? "Edit Hospital Schedule" : "Add Practice Location"}
+                </h3>
+              </div>
               <button
-                key={day}
-                type="button"
-                onClick={() => toggleDay(day)}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
-                  form.days.includes(day)
-                    ? "bg-brand-primary text-white border-brand-primary"
-                    : "bg-white text-neutral-600 border-neutral-200 hover:border-brand-primary/40"
-                }`}
+                onClick={() => setDrawerOpen(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-200/60 transition-colors"
               >
-                {day.slice(0, 3)}
+                <X size={18} />
               </button>
-            ))}
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-5">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Select Hospital / Medical Center *
+                </label>
+                <select
+                  required
+                  value={form.hospital_id}
+                  onChange={(e) => setForm({ ...form, hospital_id: e.target.value })}
+                  disabled={Boolean(editingId)}
+                  className="w-full h-10 px-3 rounded-lg border border-slate-200 text-xs bg-slate-50 text-slate-900 focus:outline-none focus:border-teal-500 focus:bg-white disabled:opacity-60"
+                >
+                  <option value="">Choose hospital...</option>
+                  {hospitals.map((hospital) => (
+                    <option key={hospital.id} value={hospital.id}>
+                      {hospital.name} {hospital.city ? `(${hospital.city})` : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Consultation Fee (PKR) *
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
+                    PKR
+                  </span>
+                  <input
+                    type="number"
+                    required
+                    value={form.fee}
+                    onChange={(e) => setForm({ ...form, fee: e.target.value })}
+                    placeholder={profile?.fee ? String(profile.fee) : "2500"}
+                    className="w-full h-10 pl-12 pr-3 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:border-teal-500 focus:bg-white"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-2">
+                  Working Days *
+                </label>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {WEEKDAYS.map((day) => {
+                    const isSelected = form.days.includes(day);
+                    return (
+                      <button
+                        key={day}
+                        type="button"
+                        onClick={() => toggleDay(day)}
+                        className={`py-2 px-2 rounded-lg text-xs font-semibold border transition-all ${
+                          isSelected
+                            ? "bg-teal-700 text-white border-teal-700 shadow-2xs"
+                            : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
+                        }`}
+                      >
+                        {day.slice(0, 3)}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Practice Hours (Time Window)
+                </label>
+                <input
+                  type="text"
+                  value={form.slots}
+                  onChange={(e) => setForm({ ...form, slots: e.target.value })}
+                  placeholder="e.g. 09:00 AM - 01:00 PM"
+                  className="w-full h-10 px-3 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:border-teal-500 focus:bg-white"
+                />
+              </div>
+
+              <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setDrawerOpen(false)}
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg text-xs font-semibold transition-colors shadow-2xs disabled:opacity-60"
+                >
+                  {isSaving ? "Saving..." : editingId ? "Save Changes" : "Add Location"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-neutral-600 mb-1.5">Hours (time range)</label>
-          <Input
-            value={form.slots}
-            onChange={(e) => setForm({ ...form, slots: e.target.value })}
-            placeholder="09:00 AM - 01:00 PM"
-          />
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          <Button type="submit" disabled={isSaving}>
-            {isSaving ? "Saving..." : editingId ? "Save changes" : "Add hospital schedule"}
-          </Button>
-          {editingId && (
-            <Button type="button" variant="secondary" onClick={resetForm}>
-              Cancel edit
-            </Button>
-          )}
-        </div>
-      </form>
+      )}
     </div>
   );
 }
+

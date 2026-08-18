@@ -10,11 +10,13 @@ import {
   CaretDown,
   Spinner,
   Tag,
+  FileArrowUp,
 } from "@phosphor-icons/react";
 import { BrandLogo } from "@/shared/branding/BrandLogo";
 import { cartApi } from "@/lib/api/index";
 import { useUserProfile } from "@/lib/hooks/useApi";
 import { useAuth } from "@/lib/auth/AuthProvider";
+import { usePrescriptionModal } from "@/features/prescription/context/PrescriptionModalContext";
 import { GlobalSearch } from "@/features/home/components/patient/GlobalSearch";
 import { UserMenu } from "@/features/home/components/patient/UserMenu";
 import { cn } from "@/utils/cn";
@@ -28,6 +30,7 @@ const HIGHLIGHTS = [
 export function CustomerNavbar() {
   const pathname = usePathname();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { openPrescriptionModal } = usePrescriptionModal();
   const [cartCount, setCartCount] = useState(0);
   const [currentLocation, setCurrentLocation] = useState("Karachi");
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
@@ -163,6 +166,16 @@ export function CustomerNavbar() {
                 )}
                 <span className="max-w-[110px] truncate font-medium">{currentLocation}</span>
                 <CaretDown size={12} />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => openPrescriptionModal()}
+                className="hidden items-center gap-1.5 rounded-xl border border-[#0B6E99]/20 bg-[#EAF7F5] px-3 py-1.5 text-[12px] font-bold text-[#0B6E99] transition-colors hover:bg-[#0B6E99] hover:text-white sm:inline-flex"
+                aria-label="Upload Prescription"
+              >
+                <FileArrowUp size={16} weight="bold" />
+                Upload Rx
               </button>
 
               <Link

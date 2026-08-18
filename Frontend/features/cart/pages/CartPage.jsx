@@ -124,15 +124,29 @@ export function CartPage() {
     if (!promoCode.trim()) return;
     setIsApplyingPromo(true);
     try {
-      // Temporary mock validation
-      if (promoCode.trim().toUpperCase() === "SAVE10") {
-        setDiscount(subtotal * 0.1);
-        toast.success("Coupon applied");
+      const res = await cartApi.validatePromoCode ? cartApi.validatePromoCode(promoCode.trim()) : null;
+      // Fetch validation from backend API endpoint /api/offers/validate-code
+      const response = await fetch("/api/offers/validate-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          promoCode: promoCode.trim(),
+          subtotal,
+          deliveryFee: shipping,
+          items: cartItems,
+        }),
+      });
+      const data = await response.json();
+
+      if (response.ok && data.status === "success") {
+        setDiscount(data.data?.discountAmount || 0);
+        toast.success(`Promo code ${data.data?.promoCode || promoCode} applied! Saved PKR ${data.data?.discountAmount}`);
       } else {
-        toast.error("Invalid coupon");
+        toast.error(data.message || "Invalid promo code");
+        setDiscount(0);
       }
     } catch (error) {
-      toast.error("Invalid coupon");
+      toast.error(error.message || "Could not validate promo code");
       setDiscount(0);
     } finally {
       setIsApplyingPromo(false);

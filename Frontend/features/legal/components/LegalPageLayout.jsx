@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { 
   ShieldCheck, 
   FileText, 
@@ -83,35 +84,26 @@ export function LegalPageLayout({
     switch (type) {
       case "terms":
         return {
-          glowGradient: "from-indigo-950/90 via-slate-900/95 to-neutral-950",
-          accentBorder: "border-indigo-500/30",
-          accentBadgeBg: "bg-indigo-500/20 text-indigo-300 border-indigo-500/30",
-          iconColor: "text-indigo-400",
-          iconBg: "bg-indigo-500/15 border border-indigo-400/30 shadow-[0_0_35px_rgba(99,102,241,0.25)]",
-          complianceLabel: "Legally Binding User & Partner Agreement",
+          badgeText: "User & Partner Terms",
+          complianceLabel: "Legally Binding Telehealth Standard",
           docRef: "DOC-MEDZOOS-TOS-2026",
+          heroImage: "/images/auth-medzoos-healthcare.png",
           IconComponent: FileText,
         };
       case "cookies":
         return {
-          glowGradient: "from-amber-950/90 via-slate-900/95 to-neutral-950",
-          accentBorder: "border-amber-500/30",
-          accentBadgeBg: "bg-amber-500/20 text-amber-300 border-amber-500/30",
-          iconColor: "text-amber-400",
-          iconBg: "bg-amber-500/15 border border-amber-400/30 shadow-[0_0_35px_rgba(245,158,11,0.25)]",
-          complianceLabel: "ePrivacy & Transparent Tracking Standard",
+          badgeText: "Cookie & Tracking Policy",
+          complianceLabel: "ePrivacy Protection Standard",
           docRef: "DOC-MEDZOOS-COOKIES-2026",
+          heroImage: "/images/medzoos-hero.png",
           IconComponent: Cookie,
         };
       default: // privacy
         return {
-          glowGradient: "from-teal-950/90 via-slate-900/95 to-neutral-950",
-          accentBorder: "border-teal-500/30",
-          accentBadgeBg: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
-          iconColor: "text-emerald-400",
-          iconBg: "bg-emerald-500/15 border border-emerald-400/30 shadow-[0_0_35px_rgba(16,185,129,0.25)]",
-          complianceLabel: "HIPAA & PK Medical Privacy Standards",
+          badgeText: "Patient Data Protection",
+          complianceLabel: "HIPAA & PK Medical Privacy",
           docRef: "DOC-MEDZOOS-PRIVACY-2026",
+          heroImage: "/images/hero-upload-prescription.png",
           IconComponent: ShieldCheck,
         };
     }
@@ -120,36 +112,45 @@ export function LegalPageLayout({
   const PolicyIcon = theme.IconComponent;
 
   const legalNavTabs = [
-    { key: "privacy", label: "Privacy Policy", href: "/privacy", icon: ShieldCheck },
-    { key: "terms", label: "Terms of Service", href: "/terms", icon: FileText },
-    { key: "cookies", label: "Cookie Policy", href: "/cookie-policy", icon: Cookie },
+    { key: "privacy", label: "Privacy Policy", href: "/privacy-policy", icon: ShieldCheck },
+    { key: "terms", label: "Terms of Service", href: "/terms-of-service", icon: FileText },
+    // { key: "cookies", label: "Cookie Policy", href: "/cookie-policy", icon: Cookie },
   ];
 
   return (
     <div className="min-h-screen bg-surface-base text-neutral-900 pb-20">
-      {/* Premium Hero Header */}
-      <header className={`relative bg-gradient-to-b ${theme.glowGradient} text-white pt-10 pb-16 px-4 sm:px-6 lg:px-8 border-b border-white/10 overflow-hidden`}>
-        {/* Background Ambient Glow Circles */}
-        <div className="absolute -top-32 -left-20 w-96 h-96 bg-brand-primary/20 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute top-1/2 -right-20 w-96 h-96 bg-brand-highlight/10 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.05)_0%,_transparent_60%)] pointer-events-none" />
-
-        <div className="relative z-10 max-w-7xl mx-auto space-y-8">
-          {/* Top Row: Breadcrumbs & Policy Switcher Tabs */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-white/10">
+      {/* Page Hero Container — Exact PageHero structure across Medzoos */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-2">
+        <div className="relative grid overflow-hidden rounded-[28px] bg-[#0B6E99] md:grid-cols-[1.1fr_0.9fr] md:rounded-[32px] text-white shadow-xl">
+          {/* Left Column: Text & Navigation Controls */}
+          <div className="relative z-10 flex flex-col justify-center px-6 py-9 md:px-10 md:py-12 lg:px-12">
             {/* Breadcrumbs */}
-            <nav className="flex items-center gap-2 text-xs font-medium text-neutral-300">
+            <nav className="flex items-center gap-2 text-xs font-semibold text-[#B8E8F5] mb-3">
               <Link href="/" className="hover:text-white transition-colors">
                 Home
               </Link>
               <CaretRight size={12} className="text-white/40" />
-              <span className="text-white/60">Legal Center</span>
+              <span className="text-white/70">Legal Center</span>
               <CaretRight size={12} className="text-white/40" />
-              <span className="text-white font-semibold">{title}</span>
+              <span className="text-white font-bold">{title}</span>
             </nav>
 
-            {/* Policy Switcher Navigation Tabs (Privacy · Terms · Cookies) */}
-            <div className="flex items-center gap-1.5 p-1 bg-black/40 backdrop-blur-xl rounded-2xl border border-white/10 print:hidden self-start sm:self-auto">
+            <p className="inline-flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.2em] text-[#B8E8F5] mb-3">
+              <Sparkle size={14} weight="fill" className="text-[#7DD3C7] shrink-0" />
+              {theme.badgeText}
+            </p>
+
+            <h1 className="text-[clamp(1.9rem,4.2vw,3.1rem)] font-bold leading-[1.08] tracking-tight text-white mb-3">
+              {title}{" "}
+              <span className="text-[#7DD3C7]">Policy</span>
+            </h1>
+
+            <p className="max-w-md text-[15px] leading-relaxed text-white/80 mb-6">
+              {subtitle}
+            </p>
+
+            {/* Policy Switcher Tabs */}
+            <div className="flex flex-wrap items-center gap-2 print:hidden mb-6">
               {legalNavTabs.map((tab) => {
                 const TabIcon = tab.icon;
                 const isActive = type === tab.key;
@@ -157,102 +158,53 @@ export function LegalPageLayout({
                   <Link
                     key={tab.key}
                     href={tab.href}
-                    className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all duration-300 ${
+                    className={`flex items-center gap-2 px-3.5 py-2 rounded-[14px] text-xs font-bold transition-all ${
                       isActive
-                        ? "bg-white/20 text-white shadow-lg backdrop-blur-md border border-white/30"
-                        : "text-neutral-400 hover:text-white hover:bg-white/10"
+                        ? "bg-white text-[#0B6E99] shadow-md font-extrabold"
+                        : "bg-white/10 text-white hover:bg-white/20 border border-white/20"
                     }`}
                   >
-                    <TabIcon size={16} weight={isActive ? "fill" : "regular"} className={isActive ? theme.iconColor : ""} />
+                    <TabIcon size={16} weight={isActive ? "fill" : "regular"} />
                     <span>{tab.label}</span>
                   </Link>
                 );
               })}
             </div>
+
+            {/* Actions / Metadata */}
+            <div className="flex flex-wrap items-center gap-3 text-xs text-white/90 font-medium">
+              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-3.5 py-2 rounded-[12px] border border-white/20">
+                <Clock size={15} className="text-[#7DD3C7] shrink-0" />
+                <span>Last Updated: <strong className="text-white">{lastUpdated}</strong></span>
+              </div>
+              <button
+                onClick={handlePrint}
+                type="button"
+                className="flex items-center gap-2 px-3.5 py-2 rounded-[12px] bg-white/15 hover:bg-white/25 text-white font-bold border border-white/20 transition-all active:scale-95 shadow-sm"
+              >
+                <Printer size={15} />
+                <span>Print / Save PDF</span>
+              </button>
+            </div>
           </div>
 
-          {/* Main Hero Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            {/* Left Column: Governance Badge, Heading, Subtitle, Badges */}
-            <div className="lg:col-span-8 space-y-5">
-              <div className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md border ${theme.accentBadgeBg}`}>
-                <Sparkle size={14} weight="fill" className="animate-pulse shrink-0" />
-                <span>{theme.badgeText}</span>
-              </div>
-
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight">
-                {title}
-              </h1>
-
-              <p className="text-base sm:text-lg text-neutral-300 leading-relaxed max-w-3xl font-normal">
-                {subtitle}
-              </p>
-
-              {/* Metadata Badges Row */}
-              <div className="flex flex-wrap items-center gap-3 pt-2 text-xs text-neutral-300 font-medium">
-                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-3.5 py-2 rounded-xl border border-white/15">
-                  <Clock size={16} className="text-brand-highlight shrink-0" />
-                  <span>Last Updated: <strong className="text-white">{lastUpdated}</strong></span>
-                </div>
-                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-3.5 py-2 rounded-xl border border-white/15">
-                  <CheckCircle size={16} className="text-emerald-400 shrink-0" />
-                  <span>{theme.complianceLabel}</span>
-                </div>
-                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-3.5 py-2 rounded-xl border border-white/15">
-                  <ShieldCheck size={16} className="text-cyan-400 shrink-0" />
-                  <span>256-Bit SSL Encrypted Engine</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column: Interactive Glassmorphic Policy Badge Card */}
-            <div className="lg:col-span-4 print:hidden">
-              <div className="relative group bg-white/10 backdrop-blur-xl rounded-3xl p-6 border border-white/20 shadow-2xl overflow-hidden hover:border-white/30 transition-all duration-300">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none" />
-
-                <div className="flex items-start justify-between mb-5">
-                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${theme.iconBg}`}>
-                    <PolicyIcon size={34} className={theme.iconColor} weight="duotone" />
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-[11px] font-bold border border-emerald-500/30">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0" />
-                      Active Policy
-                    </span>
-                    <span className="text-[10px] text-neutral-400 font-mono mt-1.5">{theme.docRef}</span>
-                  </div>
-                </div>
-
-                <h3 className="text-lg font-bold text-white mb-1 tracking-tight">
-                  Medzoos Compliance Deck
-                </h3>
-                <p className="text-xs text-neutral-300 leading-relaxed mb-6">
-                  Official regulatory terms binding all Medzoos platform interactions, prescription processing, and telehealth consultations.
-                </p>
-
-                {/* Quick Action Buttons */}
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    onClick={handlePrint}
-                    type="button"
-                    className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-bold border border-white/20 transition-all active:scale-95 shadow-sm"
-                  >
-                    <Printer size={16} />
-                    <span>Print / Save</span>
-                  </button>
-                  <Link
-                    href="/contact"
-                    className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-brand-primary hover:bg-brand-dark text-white text-xs font-bold transition-all active:scale-95 shadow-md"
-                  >
-                    <Envelope size={16} />
-                    <span>Legal Desk</span>
-                  </Link>
-                </div>
-              </div>
-            </div>
+          {/* Right Column: Hero Image (Exact PageHero right side image & gradient overlay) */}
+          <div className="relative hidden min-h-[300px] md:block">
+            <Image
+              src={theme.heroImage}
+              alt={`${title} Illustration`}
+              fill
+              className="object-cover object-center"
+              sizes="45vw"
+              priority
+            />
+            <div
+              className="absolute inset-0 bg-gradient-to-l from-transparent via-[#0B6E99]/25 to-[#0B6E99]"
+              aria-hidden
+            />
           </div>
         </div>
-      </header>
+      </div>
 
       {/* Main Content Area */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">

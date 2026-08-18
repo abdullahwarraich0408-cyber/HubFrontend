@@ -54,13 +54,13 @@ export function HealthcareNav({ sticky = true, className }) {
     <nav
       aria-label="Healthcare services"
       className={cn(
-        "z-40 w-full bg-[#073B4C] border-b border-white/10",
-        sticky && "sticky top-[var(--patient-header-offset,72px)]",
+        "z-40 w-full bg-[#073B4C] border-b border-white/10 shadow-sm",
+        sticky && "sticky top-[var(--patient-header-offset,64px)] md:top-[var(--patient-header-offset,72px)]",
         className
       )}
     >
-      <div className="home-container mx-auto">
-        <div className="flex h-[56px] items-stretch gap-0.5 overflow-x-auto scrollbar-hide md:h-[64px] md:gap-1">
+      <div className="home-container mx-auto px-2 sm:px-6">
+        <div className="flex h-12 sm:h-14 md:h-[60px] items-stretch justify-around sm:justify-start gap-1 sm:gap-2 overflow-x-auto scrollbar-hide">
           {HEALTHCARE_TABS.map((tab) => {
             const isActive = tab.match(pathname);
             const Icon = tab.icon;
@@ -70,17 +70,16 @@ export function HealthcareNav({ sticky = true, className }) {
                 key={tab.href}
                 href={tab.href}
                 className={cn(
-                  "relative flex shrink-0 items-center gap-2 px-3.5 text-[13px] font-medium whitespace-nowrap transition-colors md:px-5 md:text-[14px]",
+                  "relative flex flex-1 sm:flex-initial shrink-0 items-center justify-center gap-1.5 px-2.5 sm:px-4 text-[12px] sm:text-[13px] md:text-[14px] font-bold whitespace-nowrap transition-all",
                   isActive
-                    ? "text-[#16A9E0]"
-                    : "text-white/75 hover:text-white"
+                    ? "text-[#2DD4BF]"
+                    : "text-slate-300 hover:text-white"
                 )}
               >
-                <Icon size={18} weight={isActive ? "fill" : "regular"} />
-                <span className="hidden sm:inline">{tab.label}</span>
-                <span className="sm:hidden">{tab.shortLabel}</span>
+                <Icon size={18} weight={isActive ? "fill" : "regular"} className={isActive ? "text-[#2DD4BF]" : "text-slate-300"} />
+                <span>{tab.label}</span>
                 {isActive ? (
-                  <span className="absolute bottom-0 left-3 right-3 h-[2px] rounded-full bg-[#16A9E0] md:left-4 md:right-4" />
+                  <span className="absolute bottom-0 left-2 right-2 h-[3px] rounded-full bg-[#2DD4BF] shadow-[0_0_10px_rgba(45,212,191,0.5)]" />
                 ) : null}
               </Link>
             );

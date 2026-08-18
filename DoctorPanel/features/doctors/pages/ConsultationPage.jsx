@@ -80,7 +80,7 @@ export function ConsultationPage({ meetingId }) {
   const jitsiSrc = useMemo(() => {
     if (!videoRoom?.jitsi_room) return null;
     const displayName = encodeURIComponent(appointment?.doctorName || partner?.name || "Doctor");
-    return `https://meet.jit.si/${videoRoom.jitsi_room}#config.prejoinPageEnabled=false&userInfo.displayName="${displayName}"`;
+    return `https://meet.element.io/${videoRoom.jitsi_room}#config.prejoinPageEnabled=false&config.requireDisplayName=false&config.disableDeepLinking=true&config.startWithAudioMuted=false&config.startWithVideoMuted=false&userInfo.displayName="${displayName}"`;
   }, [videoRoom?.jitsi_room, appointment?.doctorName, partner?.name]);
 
   const handleStartConsultation = async () => {
@@ -464,52 +464,59 @@ export function ConsultationPage({ meetingId }) {
 
       {/* COMPLETION CONFIRMATION CHECKLIST DIALOG */}
       {showCompletionModal && (
-        <div className="fixed inset-0 z-60 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-slate-900 text-white rounded-xl max-w-md w-full p-6 shadow-2xl space-y-5 border border-slate-800">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-emerald-400 font-bold text-base">
-                <CheckCircle2 size={20} />
-                <span>Complete Consultation?</span>
+        <div className="fixed inset-0 z-60 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-[#0A0F1D] text-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5 border border-white/10 relative overflow-hidden animate-in zoom-in-95">
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-xl pointer-events-none" />
+            
+            <div className="flex items-center justify-between relative z-10">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
+                  <CheckCircle2 size={20} />
+                </div>
+                <div>
+                  <h4 className="font-bold text-base text-white">Complete Consultation?</h4>
+                  <span className="text-[11px] text-slate-400">Clinical Verification Checklist</span>
+                </div>
               </div>
               <button
                 onClick={() => setShowCompletionModal(false)}
-                className="text-slate-400 hover:text-white"
+                className="p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-xl transition-all"
               >
                 <X size={18} />
               </button>
             </div>
 
-            <p className="text-xs text-slate-300 leading-relaxed">
-              Before finishing this consultation with <strong>{appointment.patient}</strong>, please confirm all clinical records have been documented:
+            <p className="text-xs text-slate-300 leading-relaxed relative z-10">
+              Before wrapping up the session with <strong className="text-white">{appointment.patient}</strong>, please ensure all mandatory records have been documented:
             </p>
 
-            <div className="space-y-2 bg-slate-950 p-3.5 rounded-lg border border-slate-800 text-xs">
-              <div className="flex items-center gap-2.5">
-                <input type="checkbox" defaultChecked className="accent-teal-500 rounded" />
-                <span>Clinical observations & diagnosis written</span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <input type="checkbox" defaultChecked={prescriptionSaved} className="accent-teal-500 rounded" />
-                <span>Digital e-prescription compiled & saved</span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <input type="checkbox" defaultChecked className="accent-teal-500 rounded" />
-                <span>Follow-up advice communicated</span>
-              </div>
+            <div className="space-y-2.5 bg-slate-900/90 p-4 rounded-2xl border border-white/10 text-xs relative z-10">
+              <label className="flex items-center gap-3 text-slate-200 cursor-pointer">
+                <input type="checkbox" defaultChecked className="w-4 h-4 accent-emerald-500 rounded cursor-pointer" />
+                <span className="font-medium">Clinical observations & diagnosis written</span>
+              </label>
+              <label className="flex items-center gap-3 text-slate-200 cursor-pointer">
+                <input type="checkbox" defaultChecked={prescriptionSaved} className="w-4 h-4 accent-emerald-500 rounded cursor-pointer" />
+                <span className="font-medium">Digital e-prescription compiled & saved</span>
+              </label>
+              <label className="flex items-center gap-3 text-slate-200 cursor-pointer">
+                <input type="checkbox" defaultChecked className="w-4 h-4 accent-emerald-500 rounded cursor-pointer" />
+                <span className="font-medium">Follow-up advice & next steps communicated</span>
+              </label>
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-2">
+            <div className="flex items-center justify-end gap-3 pt-2 relative z-10">
               <button
                 onClick={() => setShowCompletionModal(false)}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-lg transition-colors"
+                className="px-4 py-2.5 bg-white/10 hover:bg-white/15 text-slate-300 text-xs font-bold rounded-xl transition-all"
               >
                 Review Records
               </button>
               <button
                 onClick={handleConfirmComplete}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg shadow-2xs transition-colors"
+                className="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-emerald-600/25 transition-all active:scale-[0.99]"
               >
-                Confirm & Complete
+                Confirm & Complete Session
               </button>
             </div>
           </div>

@@ -37,7 +37,7 @@ export function CustomerShell({ children }) {
             <main className="w-full flex-1 bg-[var(--color-surface-base)]">
               {children}
             </main>
-            {!isPatientHome ? <Footer /> : null}
+            <Footer />
           </>
         )}
       </PrescriptionModalProvider>

@@ -236,33 +236,39 @@ export function HospitalScheduleManager() {
       {/* LOCATION ADD / EDIT SIDE DRAWER */}
       {drawerOpen && (
         <div
-          className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-end transition-opacity duration-200"
+          className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-md flex items-center justify-end transition-all duration-300 animate-in fade-in"
           onClick={() => setDrawerOpen(false)}
         >
           <div
-            className="bg-white h-full w-full max-w-md shadow-2xl flex flex-col border-l border-slate-200 animate-in slide-in-from-right duration-200 overflow-hidden"
+            className="bg-white h-full w-full max-w-md shadow-2xl flex flex-col border-l border-slate-200/80 transform transition-all duration-300 animate-in slide-in-from-right overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Drawer Header */}
-            <div className="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
-              <div className="flex items-center gap-2">
-                <Building2 size={18} className="text-teal-600" />
-                <h3 className="font-bold text-sm text-slate-900">
-                  {editingId ? "Edit Hospital Schedule" : "Add Practice Location"}
-                </h3>
+            <div className="p-6 bg-[#0A0F1D] text-white border-b border-white/10 flex items-center justify-between shrink-0 relative overflow-hidden">
+              <div className="absolute -right-10 -top-10 w-36 h-36 bg-teal-500/10 rounded-full blur-xl pointer-events-none" />
+              <div className="flex items-center gap-3 relative z-10">
+                <div className="w-10 h-10 rounded-xl bg-teal-500/20 border border-teal-500/30 text-teal-400 flex items-center justify-center font-bold">
+                  <Building2 size={20} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-base text-white tracking-tight">
+                    {editingId ? "Edit Practice Location" : "Add Practice Location"}
+                  </h3>
+                  <span className="text-[11px] text-slate-400">Configure clinic hours and consultation fees</span>
+                </div>
               </div>
               <button
                 onClick={() => setDrawerOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-200/60 transition-colors"
+                className="p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-xl transition-all relative z-10"
               >
                 <X size={18} />
               </button>
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-5">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-5 bg-slate-50/40">
+              <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs space-y-1.5">
+                <label className="block text-xs font-bold text-slate-900">
                   Select Hospital / Medical Center *
                 </label>
                 <select
@@ -270,9 +276,9 @@ export function HospitalScheduleManager() {
                   value={form.hospital_id}
                   onChange={(e) => setForm({ ...form, hospital_id: e.target.value })}
                   disabled={Boolean(editingId)}
-                  className="w-full h-10 px-3 rounded-lg border border-slate-200 text-xs bg-slate-50 text-slate-900 focus:outline-none focus:border-teal-500 focus:bg-white disabled:opacity-60"
+                  className="w-full h-11 px-3.5 rounded-xl border border-slate-200 text-xs bg-slate-50 text-slate-900 focus:outline-none focus:border-teal-500 focus:bg-white disabled:opacity-60 font-medium transition-all"
                 >
-                  <option value="">Choose hospital...</option>
+                  <option value="">Choose hospital from directory...</option>
                   {hospitals.map((hospital) => (
                     <option key={hospital.id} value={hospital.id}>
                       {hospital.name} {hospital.city ? `(${hospital.city})` : ""}
@@ -281,12 +287,12 @@ export function HospitalScheduleManager() {
                 </select>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+              <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs space-y-1.5">
+                <label className="block text-xs font-bold text-slate-900">
                   Consultation Fee (PKR) *
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 font-mono">
                     PKR
                   </span>
                   <input
@@ -295,16 +301,16 @@ export function HospitalScheduleManager() {
                     value={form.fee}
                     onChange={(e) => setForm({ ...form, fee: e.target.value })}
                     placeholder={profile?.fee ? String(profile.fee) : "2500"}
-                    className="w-full h-10 pl-12 pr-3 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:border-teal-500 focus:bg-white"
+                    className="w-full h-11 pl-14 pr-3.5 text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-teal-500 focus:bg-white transition-all font-mono"
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-2">
-                  Working Days *
+              <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs space-y-2.5">
+                <label className="block text-xs font-bold text-slate-900">
+                  Working Practice Days *
                 </label>
-                <div className="grid grid-cols-4 gap-1.5">
+                <div className="grid grid-cols-4 gap-2">
                   {WEEKDAYS.map((day) => {
                     const isSelected = form.days.includes(day);
                     return (
@@ -312,9 +318,9 @@ export function HospitalScheduleManager() {
                         key={day}
                         type="button"
                         onClick={() => toggleDay(day)}
-                        className={`py-2 px-2 rounded-lg text-xs font-semibold border transition-all ${
+                        className={`py-2 px-2 rounded-xl text-xs font-bold border transition-all ${
                           isSelected
-                            ? "bg-teal-700 text-white border-teal-700 shadow-2xs"
+                            ? "bg-teal-600 text-white border-teal-600 shadow-md shadow-teal-600/20 scale-[1.02]"
                             : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
                         }`}
                       >
@@ -325,8 +331,8 @@ export function HospitalScheduleManager() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+              <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs space-y-1.5">
+                <label className="block text-xs font-bold text-slate-900">
                   Practice Hours (Time Window)
                 </label>
                 <input
@@ -334,22 +340,22 @@ export function HospitalScheduleManager() {
                   value={form.slots}
                   onChange={(e) => setForm({ ...form, slots: e.target.value })}
                   placeholder="e.g. 09:00 AM - 01:00 PM"
-                  className="w-full h-10 px-3 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:border-teal-500 focus:bg-white"
+                  className="w-full h-11 px-3.5 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-teal-500 focus:bg-white font-medium transition-all"
                 />
               </div>
 
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-2">
+              <div className="pt-4 border-t border-slate-200 flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setDrawerOpen(false)}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors"
+                  className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg text-xs font-semibold transition-colors shadow-2xs disabled:opacity-60"
+                  className="px-5 py-2.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-teal-600/20 disabled:opacity-60 active:scale-[0.99]"
                 >
                   {isSaving ? "Saving..." : editingId ? "Save Changes" : "Add Location"}
                 </button>

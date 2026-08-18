@@ -155,6 +155,20 @@ function NavArrow({ direction, onClick, label }) {
   );
 }
 
+function isDarkColor(colorStr) {
+  if (!colorStr) return false;
+  const hexMatch = colorStr.match(/#([0-9a-fA-F]{6})/);
+  if (hexMatch) {
+    const hex = hexMatch[1];
+    const r = parseInt(hex.slice(0, 2), 16);
+    const g = parseInt(hex.slice(2, 4), 16);
+    const b = parseInt(hex.slice(4, 6), 16);
+    const luma = 0.299 * r + 0.587 * g + 0.114 * b;
+    return luma < 170;
+  }
+  return false;
+}
+
 export function HomeHeroCarousel() {
   const { openPrescriptionModal } = usePrescriptionModal();
   const reduceMotion = useReducedMotion();
@@ -234,6 +248,7 @@ export function HomeHeroCarousel() {
 
   const slide = slides[index] || HERO_SLIDES[0];
   const CtaIcon = slide.ctaIcon;
+  const isDark = isDarkColor(slide.bgColor || slide.bg);
 
   const variants = reduceMotion
     ? {
@@ -279,7 +294,7 @@ export function HomeHeroCarousel() {
       <div
         className={cn(
           "relative w-full overflow-hidden rounded-[24px] shadow-[0_12px_40px_rgba(16,42,67,0.08)] md:rounded-[28px]",
-          "h-[540px] sm:h-[520px] md:h-[400px] lg:h-[420px]",
+          "min-h-[500px] sm:min-h-[480px] md:min-h-0 md:h-[420px] lg:h-[440px]",
           slide.bg
         )}
         style={slide.bgColor ? { backgroundColor: slide.bgColor } : undefined}
@@ -311,41 +326,60 @@ export function HomeHeroCarousel() {
             aria-label={`${index + 1} of ${slideCount}: ${slide.title}`}
           >
             {/* Text column — fixed height, consistent padding */}
-            <div className="relative z-10 flex h-full flex-col justify-start px-5 pb-[250px] pt-5 sm:px-7 sm:pb-[260px] md:justify-center md:px-8 md:pb-10 md:pt-10 lg:px-10">
+            <div className="relative z-10 flex h-full flex-col justify-start px-5 pt-5 pb-[210px] sm:px-7 sm:pb-[220px] md:justify-center md:px-8 md:py-8 lg:px-10">
               <motion.div
                 initial={reduceMotion ? false : { opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: reduceMotion ? 0 : 0.06 }}
                 className="flex flex-col"
               >
-                <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-[#0B6E99] md:text-[13px]">
+                <p className={cn(
+                  "text-[11px] sm:text-[12px] font-bold uppercase tracking-[0.12em] md:text-[13px]",
+                  isDark ? "text-[#7DD3C7] drop-shadow-sm" : "text-[#0B6E99]"
+                )}>
                   {slide.label}
                 </p>
-                <h2 className="mt-2 line-clamp-3 max-w-[22ch] text-[clamp(1.65rem,2.8vw,2.5rem)] font-semibold leading-[1.15] tracking-tight text-[#102A43]">
+                <h2 className={cn(
+                  "mt-1.5 line-clamp-3 max-w-[22ch] text-[clamp(1.4rem,4.5vw,2.4rem)] sm:text-[clamp(1.65rem,2.8vw,2.5rem)] font-extrabold leading-[1.15] tracking-tight",
+                  isDark ? "text-white drop-shadow-sm" : "text-[#073B4C]"
+                )}>
                   {slide.title}
                 </h2>
-                <p className="mt-3 line-clamp-3 max-w-[32rem] text-[15px] leading-[1.6] text-[#627D98] md:text-[16px]">
+                <p className={cn(
+                  "mt-2.5 line-clamp-3 max-w-[32rem] text-[14px] sm:text-[15px] leading-[1.55] md:text-[16px]",
+                  isDark ? "text-white/95 font-medium" : "text-[#334155]"
+                )}>
                   {slide.description}
                 </p>
 
                 {/* Reserved slot so badge/note don't change layout height */}
-                <div className="mt-3 min-h-[28px]">
+                <div className="mt-2.5 min-h-[26px]">
                   {slide.badge ? (
-                    <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-[#0B6E99]/15 bg-white/80 px-3 py-1 text-[11px] font-medium text-[#0B6E99]">
+                    <span className={cn(
+                      "inline-flex w-fit items-center gap-1.5 rounded-full border px-3 py-0.5 sm:py-1 text-[10px] sm:text-[11px] font-semibold",
+                      isDark
+                        ? "border-white/25 bg-white/20 text-white backdrop-blur-sm"
+                        : "border-[#0B6E99]/15 bg-white/80 text-[#0B6E99]"
+                    )}>
                       <House size={13} weight="duotone" />
                       {slide.badge}
                     </span>
                   ) : null}
                 </div>
 
-                <div className="mt-4 flex min-h-[48px] flex-col gap-2.5 sm:flex-row sm:items-center">
+                <div className="mt-3 sm:mt-4 flex min-h-[44px] flex-col gap-2 sm:flex-row sm:items-center">
                   {slide.id === "prescription" || slide.cta === "Upload Prescription" ? (
                     <button
                       type="button"
                       onClick={() => openPrescriptionModal()}
-                      className="group inline-flex h-12 w-full items-center justify-center gap-2 rounded-[14px] bg-[#0B6E99] px-5 text-[14px] font-semibold text-white transition-colors hover:bg-[#073B4C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B6E99]/40 focus-visible:ring-offset-2 sm:w-auto"
+                      className={cn(
+                        "group inline-flex h-11 sm:h-12 w-full items-center justify-center gap-2 rounded-[14px] px-4 sm:px-5 text-[13px] sm:text-[14px] font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B6E99]/40 focus-visible:ring-offset-2 sm:w-auto shadow-md",
+                        isDark
+                          ? "bg-white text-[#073B4C] hover:bg-slate-100"
+                          : "bg-[#0B6E99] text-white hover:bg-[#073B4C]"
+                      )}
                     >
-                      <CtaIcon size={17} weight="bold" />
+                      <CtaIcon size={16} weight="bold" />
                       {slide.cta}
                       <ArrowRight
                         size={15}
@@ -356,9 +390,14 @@ export function HomeHeroCarousel() {
                   ) : (
                     <Link
                       href={slide.href}
-                      className="group inline-flex h-12 w-full items-center justify-center gap-2 rounded-[14px] bg-[#0B6E99] px-5 text-[14px] font-semibold text-white transition-colors hover:bg-[#073B4C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B6E99]/40 focus-visible:ring-offset-2 sm:w-auto"
+                      className={cn(
+                        "group inline-flex h-11 sm:h-12 w-full items-center justify-center gap-2 rounded-[14px] px-4 sm:px-5 text-[13px] sm:text-[14px] font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B6E99]/40 focus-visible:ring-offset-2 sm:w-auto shadow-md",
+                        isDark
+                          ? "bg-white text-[#073B4C] hover:bg-slate-100"
+                          : "bg-[#0B6E99] text-white hover:bg-[#073B4C]"
+                      )}
                     >
-                      <CtaIcon size={17} weight="bold" />
+                      <CtaIcon size={16} weight="bold" />
                       {slide.cta}
                       <ArrowRight
                         size={15}
@@ -370,7 +409,12 @@ export function HomeHeroCarousel() {
                   {slide.secondaryCta && slide.secondaryHref ? (
                     <Link
                       href={slide.secondaryHref}
-                      className="inline-flex h-12 w-full items-center justify-center rounded-[14px] border border-[#102A43]/12 bg-white/80 px-4 text-[13px] font-semibold text-[#102A43] transition-colors hover:bg-white sm:w-auto"
+                      className={cn(
+                        "inline-flex h-11 sm:h-12 w-full items-center justify-center rounded-[14px] border px-4 text-[13px] font-bold transition-colors sm:w-auto",
+                        isDark
+                          ? "border-white/35 bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm"
+                          : "border-[#102A43]/12 bg-white/80 text-[#102A43] hover:bg-white"
+                      )}
                     >
                       {slide.secondaryCta}
                     </Link>
@@ -379,9 +423,12 @@ export function HomeHeroCarousel() {
                   )}
                 </div>
 
-                <div className="mt-3 min-h-[32px]">
+                <div className="mt-2 min-h-[28px]">
                   {slide.note ? (
-                    <p className="max-w-md text-[12px] leading-relaxed text-[#7B8794]">
+                    <p className={cn(
+                      "max-w-md text-[11px] sm:text-[12px] leading-relaxed",
+                      isDark ? "text-white/85 font-medium" : "text-[#627D98]"
+                    )}>
                       {slide.note}
                     </p>
                   ) : null}
@@ -407,14 +454,14 @@ export function HomeHeroCarousel() {
               </div>
             </div>
 
-            {/* Mobile image — fixed height band */}
-            <div className="absolute inset-x-4 bottom-[52px] h-[180px] overflow-hidden rounded-[18px] sm:h-[190px] md:hidden">
+            {/* Mobile image — responsive height banner card */}
+            <div className="absolute inset-x-4 bottom-[48px] h-[155px] sm:h-[175px] overflow-hidden rounded-[18px] md:hidden shadow-sm border border-white/20">
               <HeroImage
                 src={slide.image}
                 alt={slide.alt}
                 priority={index === 0}
               />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#102A43]/15 via-transparent to-transparent" />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
             </div>
           </motion.div>
         </AnimatePresence>

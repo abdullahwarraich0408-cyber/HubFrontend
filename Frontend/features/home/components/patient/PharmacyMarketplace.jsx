@@ -54,23 +54,23 @@ export function PharmacyMarketplace() {
   };
 
   return (
-    <section className="overflow-hidden bg-[#EEF5FC] py-16 md:py-20 lg:py-24">
-      <div className="home-container mx-auto">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <section className="overflow-hidden bg-[#EEF5FC] py-8 sm:py-12 md:py-16 lg:py-20">
+      <div className="home-container mx-auto px-4 sm:px-6">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="inline-flex items-center gap-2 text-[13px] font-semibold uppercase tracking-[0.14em] text-[#0B6E99]">
-              <Pill size={14} weight="duotone" />
+            <p className="inline-flex items-center gap-2 text-[12px] sm:text-[13px] font-bold uppercase tracking-[0.14em] text-[#0B6E99]">
+              <Pill size={15} weight="duotone" />
               Medicines & Pharmacies
             </p>
-            <h2 className="mt-3 max-w-xl text-[clamp(1.85rem,3.2vw,2.75rem)] font-semibold leading-[1.15] tracking-tight text-[#102A43]">
+            <h2 className="mt-2 max-w-xl text-[clamp(1.35rem,3.8vw,2.5rem)] font-extrabold leading-[1.18] tracking-tight text-[#102A43]">
               Search medicines without jumping between pharmacies
             </h2>
           </div>
           <Link
             href="/vendors"
-            className="group inline-flex items-center gap-1.5 text-[14px] font-semibold text-[#0B6E99]"
+            className="group inline-flex items-center gap-1.5 text-[13px] sm:text-[14px] font-bold text-[#0B6E99] hover:text-[#073B4C] transition-colors mt-1 sm:mt-0"
           >
-            Explore pharmacies
+            <span>Explore pharmacies</span>
             <ArrowRight
               size={15}
               weight="bold"
@@ -79,54 +79,55 @@ export function PharmacyMarketplace() {
           </Link>
         </div>
 
-        {/* Unique: dual panels — search + prescription (no lifestyle photo posters) */}
-        <div className="mt-8 grid gap-4 lg:grid-cols-12 lg:gap-5">
-          <div className="rounded-[24px] border border-[#102A43]/06 bg-white p-6 md:p-8 lg:col-span-7">
-            <h3 className="text-[18px] font-semibold text-[#102A43]">
+        {/* Dual panels — search + prescription */}
+        <div className="mt-6 sm:mt-8 grid gap-4 lg:grid-cols-12 lg:gap-5">
+          {/* Panel 1: Search & Categories */}
+          <div className="rounded-[20px] sm:rounded-[24px] border border-[#102A43]/06 bg-white p-4 sm:p-6 md:p-8 lg:col-span-7 shadow-xs">
+            <h3 className="text-[16px] sm:text-[18px] font-bold text-[#102A43]">
               Search by medicine name
             </h3>
-            <p className="mt-1.5 text-[14px] text-[#627D98]">
+            <p className="mt-1 text-[13px] sm:text-[14px] text-[#627D98] leading-relaxed">
               Explore medicines and healthcare products available through pharmacies on
               Medzoos.
             </p>
 
             <form
               onSubmit={submit}
-              className="mt-5 flex items-center gap-2 rounded-[14px] border border-[#102A43]/10 bg-[#F4F8FB] px-3 py-2.5 focus-within:border-[#0B6E99] focus-within:bg-white focus-within:ring-[3px] focus-within:ring-[#0B6E99]/15"
+              className="mt-4 flex items-center gap-2 rounded-[14px] border border-[#102A43]/10 bg-[#F4F8FB] px-3 py-2 focus-within:border-[#0B6E99] focus-within:bg-white focus-within:ring-[3px] focus-within:ring-[#0B6E99]/15"
             >
               <MagnifyingGlass size={18} className="ml-1 shrink-0 text-[#0B6E99]" />
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search medicine or healthcare product"
-                className="min-w-0 flex-1 bg-transparent text-[14px] outline-none placeholder:text-[#627D98]"
+                placeholder="Search medicine or product..."
+                className="min-w-0 flex-1 bg-transparent text-[13px] sm:text-[14px] outline-none placeholder:text-[#627D98]"
                 aria-label="Search medicines"
               />
               <button
                 type="submit"
-                className="rounded-[10px] bg-[#0B6E99] px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-[#073B4C]"
+                className="rounded-[10px] bg-[#0B6E99] px-3.5 sm:px-4 py-2 sm:py-2.5 text-[12px] sm:text-[13px] font-bold text-white hover:bg-[#073B4C] transition-colors shrink-0 shadow-xs"
               >
                 Search
               </button>
             </form>
 
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
               {CATEGORIES.map((cat) => {
                 const Icon = cat.icon;
                 return (
                   <Link
                     key={cat.label}
                     href={cat.href}
-                    className="group flex items-start gap-3 rounded-[16px] border border-transparent bg-[#F4F8FB] px-4 py-3.5 transition-colors hover:border-[#0B6E99]/20 hover:bg-[#EAF4FA]"
+                    className="group flex items-start gap-3 rounded-[16px] border border-transparent bg-[#F4F8FB] p-3 sm:px-4 sm:py-3.5 transition-all hover:border-[#0B6E99]/20 hover:bg-[#EAF4FA]"
                   >
-                    <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-[#0B6E99]">
+                    <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-[#0B6E99] shadow-xs">
                       <Icon size={18} weight="duotone" />
                     </span>
-                    <span>
-                      <span className="block text-[14px] font-semibold text-[#102A43] group-hover:text-[#0B6E99]">
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-[13px] sm:text-[14px] font-bold text-[#102A43] group-hover:text-[#0B6E99] truncate">
                         {cat.label}
                       </span>
-                      <span className="mt-0.5 block text-[12px] text-[#627D98]">
+                      <span className="mt-0.5 block text-[11px] sm:text-[12px] text-[#627D98] truncate">
                         {cat.hint}
                       </span>
                     </span>
@@ -136,36 +137,37 @@ export function PharmacyMarketplace() {
             </div>
           </div>
 
-          <div className="flex flex-col justify-between rounded-[24px] bg-[#073B4C] p-6 text-white md:p-8 lg:col-span-5">
+          {/* Panel 2: Upload Prescription Action Card */}
+          <div className="flex flex-col justify-between rounded-[20px] sm:rounded-[24px] bg-[#073B4C] p-5 sm:p-6 md:p-8 text-white lg:col-span-5 shadow-sm">
             <div>
-              <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-[#7DD3C7]">
+              <span className="inline-flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-2xl bg-white/10 text-[#7DD3C7]">
                 <UploadSimple size={22} weight="duotone" />
               </span>
-              <h3 className="mt-5 text-[clamp(1.35rem,2vw,1.65rem)] font-semibold leading-snug tracking-tight">
+              <h3 className="mt-4 text-[clamp(1.25rem,2vw,1.65rem)] font-extrabold leading-snug tracking-tight text-white">
                 Already have a prescription?
               </h3>
-              <p className="mt-3 text-[14px] leading-relaxed text-white/70">
+              <p className="mt-2 text-[13px] sm:text-[14px] leading-relaxed text-white/80">
                 Upload it securely and continue your medicine order through pharmacies
                 available on Medzoos.
               </p>
-              <p className="mt-3 text-[12px] leading-relaxed text-white/45">
+              <p className="mt-2 text-[11px] sm:text-[12px] leading-relaxed text-white/50">
                 Prescription medicines require a valid prescription where applicable.
               </p>
             </div>
 
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row">
+            <div className="mt-6 flex flex-col gap-2.5 sm:flex-row lg:flex-col xl:flex-row">
               <button
                 type="button"
                 onClick={openPrescriptionModal}
-                className="inline-flex h-12 items-center justify-center rounded-[12px] bg-white px-5 text-[14px] font-semibold text-[#073B4C] hover:bg-[#EAF7F5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                className="inline-flex h-11 sm:h-12 items-center justify-center rounded-[12px] bg-white px-5 text-[13px] sm:text-[14px] font-bold text-[#073B4C] hover:bg-[#EAF7F5] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white shadow-sm"
               >
                 Upload Prescription
               </button>
               <Link
                 href="/browse"
-                className="group inline-flex h-12 items-center justify-center gap-1.5 rounded-[12px] border border-white/25 px-5 text-[14px] font-semibold text-white hover:bg-white/10"
+                className="group inline-flex h-11 sm:h-12 items-center justify-center gap-1.5 rounded-[12px] border border-white/25 px-5 text-[13px] sm:text-[14px] font-bold text-white hover:bg-white/10 transition-colors"
               >
-                Browse medicines
+                <span>Browse medicines</span>
                 <ArrowRight
                   size={14}
                   weight="bold"

@@ -29,6 +29,12 @@ export function PrescriptionUploadZone({ className = "", onSuccess, initialFile 
   const { isAuthenticated, user } = useAuth();
   const inputRef = useRef(null);
   const [file, setFile] = useState(initialFile);
+
+  useEffect(() => {
+    if (initialFile) {
+      setFile(initialFile);
+    }
+  }, [initialFile]);
   const [deliveryType, setDeliveryType] = useState("standard");
   const [address, setAddress] = useState({
     street: user?.address || "",

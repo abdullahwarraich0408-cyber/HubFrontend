@@ -96,8 +96,8 @@ export function DoctorDashboard() {
   const nextConsultation = useMemo(() => {
     return (
       appointments.find(
-        (a) => ["confirmed", "in_progress"].includes(a.status) && (a.date === todayFormatted || !a.date)
-      ) || appointments.find((a) => a.status === "confirmed")
+        (a) => ["pending", "confirmed", "in_progress"].includes(a.status) && (a.date === todayFormatted || !a.date)
+      ) || appointments.find((a) => ["pending", "confirmed"].includes(a.status))
     );
   }, [appointments, todayFormatted]);
 

@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/auth/AuthProvider";
 import { getPendingPhoneAuth, setPendingPhoneAuth, clearPendingPhoneAuth } from "@/lib/auth/pendingPhoneAuth";
 import { maskPhone } from "@/lib/auth/maskContact";
 import { friendlyAuthError, isNetworkAuthError } from "@/lib/auth/friendlyAuthError";
-import { formatFirebaseAuthError } from "@/lib/auth/firebaseErrors";
+import { formatAuthError } from "@/lib/auth/testAuth";
 import { completeWebLogin } from "@/features/auth/lib/completeWebLogin";
 import { AuthLayout } from "@/features/auth/components/AuthLayout";
 import { OtpInput } from "@/features/auth/components/OtpInput";
@@ -21,20 +21,17 @@ export function VerifyOtpPage() {
   const redirectQuery = searchParams.get("redirect") || "/";
   const { completePhoneLogin, startPhoneLogin } = useAuth();
 
-  const [pending, setPending] = useState(null);
+  const [pending, setPending] = useState(() => getPendingPhoneAuth());
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
 
   useEffect(() => {
-    const stored = getPendingPhoneAuth();
-    if (!stored?.confirmation) {
+    if (!pending?.confirmation) {
       router.replace("/login");
-      return;
     }
-    setPending(stored);
-  }, [router]);
+  }, [pending, router]);
 
   if (!pending) return null;
 
@@ -54,7 +51,7 @@ export function VerifyOtpPage() {
       setError(
         isNetworkAuthError(err)
           ? friendlyAuthError(err)
-          : formatFirebaseAuthError(err)
+          : formatAuthError(err)
       );
     } finally {
       setLoading(false);
@@ -70,7 +67,7 @@ export function VerifyOtpPage() {
       setPending(next);
       setPendingPhoneAuth(next);
     } catch (err) {
-      setError(formatFirebaseAuthError(err));
+      setError(formatAuthError(err));
     } finally {
       setResending(false);
     }

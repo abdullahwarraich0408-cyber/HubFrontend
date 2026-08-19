@@ -1,5 +1,5 @@
 /**
- * Normalize phone numbers for Firebase (E.164).
+ * Normalize phone numbers in E.164 format.
  * Pakistan: 0336... → +92336...
  */
 export function normalizePhoneNumber(input) {

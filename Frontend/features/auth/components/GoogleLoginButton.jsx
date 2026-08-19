@@ -4,7 +4,6 @@ import { useState } from "react";
 import { GoogleLogo } from "@phosphor-icons/react";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { friendlyAuthError } from "@/lib/auth/friendlyAuthError";
-import { formatFirebaseAuthError } from "@/lib/auth/firebaseErrors";
 
 export function GoogleLoginButton({ onSuccess, className = "" }) {
   const { loginWithGoogle } = useAuth();
@@ -20,10 +19,8 @@ export function GoogleLoginButton({ onSuccess, className = "" }) {
       const user = await loginWithGoogle();
       if (user) onSuccess?.();
     } catch (err) {
-      const firebaseMessage = err?.code ? formatFirebaseAuthError(err) : "";
       setError(
-        firebaseMessage ||
-          friendlyAuthError(err, "Google sign-in could not be completed. Please try again.")
+        friendlyAuthError(err, "Google sign-in could not be completed. Please try again.")
       );
     } finally {
       setLoading(false);

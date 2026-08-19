@@ -20,7 +20,7 @@ import {
   Check,
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
-import { api } from "@/lib/api";
+import { api } from "@/lib/api/index";
 
 export default function AdminMarketingPage() {
   const [offers, setOffers] = useState([]);
@@ -54,7 +54,8 @@ export default function AdminMarketingPage() {
     setIsLoading(true);
     try {
       const res = await api.get("/offers/admin/all");
-      setOffers(res.data?.offers || res.offers || []);
+      const list = res?.offers || res?.data?.offers || (Array.isArray(res) ? res : []);
+      setOffers(list);
     } catch {
       toast.error("Failed to load offers");
     } finally {

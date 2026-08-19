@@ -9,6 +9,8 @@ import { hydrateAuth } from "../store/authSlice";
 import { AuthProvider } from "@/lib/auth/AuthProvider";
 import { AuthModalProvider } from "@/features/auth/context/AuthModalContext";
 
+import { PrescriptionModalProvider } from "@/features/prescription/context/PrescriptionModalContext";
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -31,6 +33,20 @@ function AuthHydrator({ children }) {
     return () => window.removeEventListener("auth-updated", syncAuth);
   }, [dispatch]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handleFocus = (e) => {
+      const el = e.target;
+      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT")) {
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }, 300);
+      }
+    };
+    document.addEventListener("focusin", handleFocus, { passive: true });
+    return () => document.removeEventListener("focusin", handleFocus);
+  }, []);
+
   return children;
 }
 
@@ -40,12 +56,14 @@ export function Providers({ children }) {
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <AuthModalProvider>
-            <AuthHydrator>{children}</AuthHydrator>
-            <div
-              id="recaptcha-container"
-              className="pointer-events-none absolute h-px w-px overflow-hidden opacity-0"
-              aria-hidden="true"
-            />
+            <PrescriptionModalProvider>
+              <AuthHydrator>{children}</AuthHydrator>
+              <div
+                id="recaptcha-container"
+                className="pointer-events-none absolute h-px w-px overflow-hidden opacity-0"
+                aria-hidden="true"
+              />
+            </PrescriptionModalProvider>
           </AuthModalProvider>
         </AuthProvider>
         <Toaster position="top-right" richColors />

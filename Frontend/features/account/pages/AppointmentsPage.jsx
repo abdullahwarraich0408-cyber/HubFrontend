@@ -25,6 +25,7 @@ import {
 } from "@/lib/hooks/useApi";
 import { formatDoctorDisplayName } from "@/lib/hooks/useTelehealth";
 import { toast } from "sonner";
+import { ViewPrescriptionModal } from "@/features/account/components/ViewPrescriptionModal";
 
 const STATUS_VARIANT = {
   pending: "warning",
@@ -133,7 +134,7 @@ function ConsultationModePicker({ appointment, onSelect, isPending }) {
   );
 }
 
-function AppointmentCard({ appointment, onCancel, onJoin, onReview, onChat, onSelectMode, isSelectingMode }) {
+function AppointmentCard({ appointment, onCancel, onJoin, onReview, onChat, onSelectMode, isSelectingMode, onViewPrescription }) {
   return (
     <div className="bg-white border border-neutral-200 rounded-[16px] p-5">
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
@@ -199,7 +200,7 @@ function AppointmentCard({ appointment, onCancel, onJoin, onReview, onChat, onSe
             </Button>
           )}
           {appointment.prescription && (
-            <Button variant="secondary">
+            <Button variant="secondary" onClick={() => onViewPrescription(appointment)}>
               <DownloadSimple size={16} className="mr-2" />
               Prescription Ready
             </Button>
@@ -225,6 +226,7 @@ export function AppointmentsPage() {
   const submitReview = useSubmitDoctorReview();
   const [filter, setFilter] = useState("all");
   const [reviewTarget, setReviewTarget] = useState(null);
+  const [prescriptionTarget, setPrescriptionTarget] = useState(null);
 
   const filtered = useMemo(() => {
     if (filter === "all") return appointments;
@@ -339,6 +341,7 @@ export function AppointmentsPage() {
                 onChat={handleChat}
                 onSelectMode={handleSelectMode}
                 isSelectingMode={selectConsultationMode.isPending}
+                onViewPrescription={setPrescriptionTarget}
               />
             ))}
           </div>
@@ -350,6 +353,13 @@ export function AppointmentsPage() {
             onClose={() => setReviewTarget(null)}
             onSubmit={handleReview}
             isPending={submitReview.isPending}
+          />
+        )}
+
+        {prescriptionTarget && (
+          <ViewPrescriptionModal
+            appointment={prescriptionTarget}
+            onClose={() => setPrescriptionTarget(null)}
           />
         )}
       </div>

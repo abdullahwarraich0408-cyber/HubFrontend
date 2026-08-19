@@ -193,9 +193,12 @@ export async function apiClient(path, options = {}) {
   return payload?.data ?? payload;
 }
 
+export const post = (path, body, options) => apiClient(path, { ...options, method: "POST", body });
+export const get = (path, options) => apiClient(path, { ...options, method: "GET" });
+
 export const api = {
-  get: (path, options) => apiClient(path, { ...options, method: "GET" }),
-  post: (path, body, options) => apiClient(path, { ...options, method: "POST", body }),
+  get,
+  post,
   put: (path, body, options) => apiClient(path, { ...options, method: "PUT", body }),
   patch: (path, body, options) => apiClient(path, { ...options, method: "PATCH", body }),
   delete: (path, options) => apiClient(path, { ...options, method: "DELETE" }),

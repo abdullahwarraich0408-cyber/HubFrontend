@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { PaperPlaneTilt, Paperclip, FilePdf, Image as ImageIcon } from "@phosphor-icons/react";
-import { Button } from "@/shared/components/Button";
-import { Input } from "@/shared/components/Input";
+import { Send, Paperclip, FileText, Image as ImageIcon, ArrowDown, Lock, Sparkles } from "lucide-react";
 import {
   useAppointmentChat,
   useAppointmentChatSocket,
@@ -14,46 +12,50 @@ import {
   getChatParticipantLabels,
 } from "@/lib/hooks/useTelehealth";
 
-function MessageBubble({ message }) {
+function MessageBubble({ message, dark }) {
   if (message.isSystem) {
     return (
-      <div className="text-center py-2">
-        <p className="text-[12px] text-neutral-500 bg-neutral-100 rounded-full px-3 py-1 inline-block">
+      <div className="text-center py-1.5">
+        <span className="text-[11px] text-slate-500 bg-slate-100 dark:bg-slate-800 dark:text-slate-400 rounded-full px-3 py-0.5 inline-block font-medium">
           {message.text}
-        </p>
+        </span>
       </div>
     );
   }
 
-  const senderLabel = message.isMine ? "You" : message.senderName || "Participant";
+  const senderLabel = message.isMine ? "Doctor" : message.senderName || "Patient";
 
   return (
-    <div className={`flex ${message.isMine ? "justify-end" : "justify-start"}`}>
+    <div className={`flex ${message.isMine ? "justify-end" : "justify-start"} my-1`}>
       <div
-        className={`max-w-[85%] rounded-[14px] px-4 py-3 ${
+        className={`max-w-[85%] sm:max-w-[78%] rounded-xl px-3.5 py-2.5 shadow-2xs text-xs leading-relaxed ${
           message.isMine
-            ? "bg-[var(--color-brand-primary)] text-white"
-            : "bg-neutral-100 text-neutral-800"
+            ? "bg-teal-700 text-white rounded-br-2xs"
+            : dark
+              ? "bg-slate-800 text-slate-100 border border-slate-700/60 rounded-bl-2xs"
+              : "bg-slate-100 text-slate-800 border border-slate-200/60 rounded-bl-2xs"
         }`}
       >
-        <p className="text-[10px] uppercase tracking-wide opacity-70 mb-1">{senderLabel}</p>
-        {message.text && <p className="text-[14px] whitespace-pre-wrap">{message.text}</p>}
+        <p className={`text-[10px] font-semibold tracking-wider uppercase mb-1 ${message.isMine ? "text-teal-200" : "text-slate-400"}`}>
+          {senderLabel}
+        </p>
+        {message.text && <p className="whitespace-pre-wrap">{message.text}</p>}
         {message.attachmentUrl && (
           <a
             href={message.attachmentUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className={`inline-flex items-center gap-2 mt-2 text-[13px] underline ${
-              message.isMine ? "text-white" : "text-[var(--color-brand-primary)]"
+            className={`inline-flex items-center gap-1.5 mt-1.5 text-xs font-medium underline ${
+              message.isMine ? "text-teal-100 hover:text-white" : "text-teal-700 hover:text-teal-800"
             }`}
           >
-            {message.type === "image" ? <ImageIcon size={16} /> : <FilePdf size={16} />}
+            {message.type === "image" ? <ImageIcon size={14} /> : <FileText size={14} />}
             View attachment
           </a>
         )}
-        <p className={`text-[10px] mt-1 ${message.isMine ? "text-white/70" : "text-neutral-400"}`}>
+        <p className={`text-[9px] font-mono mt-1 text-right ${message.isMine ? "text-teal-200/80" : "text-slate-400"}`}>
           {message.createdAt
-            ? new Date(message.createdAt).toLocaleTimeString("en-PK", { hour: "2-digit", minute: "2-digit" })
+            ? new Date(message.createdAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
             : ""}
         </p>
       </div>
@@ -71,6 +73,8 @@ export function AppointmentChatPanel({
   const fileInputRef = useRef(null);
   const scrollRef = useRef(null);
   const [draft, setDraft] = useState("");
+  const [showScrollDown, setShowScrollDown] = useState(false);
+
   const { data, isLoading } = useAppointmentChat(appointmentId, { auth: authMode });
   useAppointmentChatSocket(appointmentId, authMode);
   const sendMessage = useSendAppointmentMessage(appointmentId, authMode);
@@ -90,19 +94,33 @@ export function AppointmentChatPanel({
     }
   }, [access?.allowed, readOnly, messages.length]);
 
-  useEffect(() => {
+  const scrollToBottom = () => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      setShowScrollDown(false);
     }
+  };
+
+  useEffect(() => {
+    scrollToBottom();
   }, [messages.length]);
+
+  const handleScroll = () => {
+    if (scrollRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+      const isUpward = scrollHeight - scrollTop - clientHeight > 100;
+      setShowScrollDown(isUpward);
+    }
+  };
 
   const handleSend = async () => {
     if (!draft.trim() || readOnly) return;
     try {
       await sendMessage.mutateAsync({ message: draft.trim(), message_type: "text" });
       setDraft("");
+      scrollToBottom();
     } catch {
-      // toast handled by caller if needed
+      // toast handled upstream
     }
   };
 
@@ -122,89 +140,116 @@ export function AppointmentChatPanel({
         message_type,
         attachment_url: url,
       });
+      scrollToBottom();
     } finally {
       event.target.value = "";
     }
   };
 
   const containerClass = dark
-    ? "bg-white/5 border border-white/10 text-white"
-    : "bg-white border border-neutral-200";
+    ? "bg-slate-900 border border-slate-800 text-white"
+    : "bg-white border border-slate-200/80 shadow-2xs";
 
   return (
-    <div className={`rounded-[16px] p-4 ${containerClass} ${compact ? "" : "min-h-[420px] flex flex-col"}`}>
-      <div className="mb-3">
-        <h3 className={`font-bold text-[15px] ${dark ? "text-white" : "text-ink-headline"}`}>
-          {participantLabels.panelTitle}
-        </h3>
-        {access && !access.allowed && !access.readOnly && (
-          <p className={`text-[12px] mt-1 ${dark ? "text-white/60" : "text-neutral-500"}`}>{access.reason}</p>
-        )}
-        {access?.readOnly && (
-          <p className={`text-[12px] mt-1 ${dark ? "text-white/60" : "text-neutral-500"}`}>{access.reason}</p>
-        )}
-        {access?.allowed && !readOnly && (
-          <p className={`text-[12px] mt-1 ${dark ? "text-white/60" : "text-neutral-500"}`}>
-            Chat is open for this appointment. Share reports, images, or questions here.
+    <div className={`rounded-xl p-4 flex flex-col relative ${containerClass} ${compact ? "h-[380px]" : "h-[500px]"}`}>
+      {/* Header */}
+      <div className="pb-3 mb-2 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between shrink-0">
+        <div>
+          <h3 className="font-bold text-sm text-slate-900 dark:text-white leading-tight">
+            Clinical Chat Communication
+          </h3>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+            Secure messaging with {participantLabels.panelTitle || "Patient"}
           </p>
+        </div>
+        {readOnly && (
+          <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 px-2 py-0.5 rounded-full border border-slate-200 dark:border-slate-700">
+            <Lock size={10} /> Ended
+          </span>
         )}
       </div>
 
+      {/* Messages Scroll Area */}
       <div
         ref={scrollRef}
-        className={`flex-1 overflow-y-auto space-y-3 mb-3 ${compact ? "max-h-[260px]" : "max-h-[360px]"}`}
+        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto pr-1 space-y-2 relative"
       >
         {isLoading ? (
-          <p className={dark ? "text-white/50 text-[13px]" : "text-neutral-500 text-[13px]"}>Loading chat...</p>
+          <div className="py-12 text-center text-xs text-slate-400">Loading messages...</div>
         ) : messages.length === 0 ? (
-          <p className={dark ? "text-white/50 text-[13px]" : "text-neutral-500 text-[13px]"}>
-            No messages yet. Start the conversation.
-          </p>
+          <div className="py-12 text-center flex flex-col items-center justify-center text-slate-400">
+            <Sparkles size={20} className="text-slate-300 mb-1.5" />
+            <p className="text-xs font-bold text-slate-700 dark:text-slate-300">No messages yet</p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+              Messages exchanged during this consultation will appear here.
+            </p>
+          </div>
         ) : (
-          messages.map((message) => <MessageBubble key={message.id} message={message} />)
+          messages.map((message) => <MessageBubble key={message.id} message={message} dark={dark} />)
         )}
       </div>
 
-      {!readOnly && access?.allowed && (
-        <div className="flex gap-2 items-end">
-          <input
-            ref={fileInputRef}
-            type="file"
-            className="hidden"
-            accept="image/*,.pdf,.doc,.docx"
-            onChange={handleFileUpload}
-          />
-          <Button
-            type="button"
-            variant="secondary"
-            className="shrink-0 px-3"
-            disabled={uploadAttachment.isPending}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <Paperclip size={18} />
-          </Button>
-          <Input
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder="Type a message..."
-            className={dark ? "bg-neutral-900 border-white/10 text-white" : ""}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handleSend();
-              }
-            }}
-          />
-          <Button
-            type="button"
-            className="shrink-0 px-3"
-            disabled={sendMessage.isPending || !draft.trim()}
-            onClick={handleSend}
-          >
-            <PaperPlaneTilt size={18} weight="fill" />
-          </Button>
-        </div>
+      {/* New Message Scroll Indicator */}
+      {showScrollDown && (
+        <button
+          onClick={scrollToBottom}
+          className="absolute bottom-16 right-6 z-10 bg-teal-700 text-white p-1.5 rounded-full shadow-md text-xs flex items-center gap-1 hover:bg-teal-800 transition-all"
+        >
+          <ArrowDown size={14} />
+        </button>
       )}
+
+      {/* Message Input / Read-Only Banner */}
+      <div className="pt-3 border-t border-slate-200/80 dark:border-slate-800 shrink-0">
+        {readOnly ? (
+          <div className="p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-center text-xs text-slate-500 dark:text-slate-400 font-medium">
+            Consultation chat has ended.
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="hidden"
+              accept="image/*,.pdf,.doc,.docx"
+              onChange={handleFileUpload}
+            />
+            <button
+              type="button"
+              disabled={uploadAttachment.isPending}
+              onClick={() => fileInputRef.current?.click()}
+              className="p-2 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0"
+              title="Attach File"
+            >
+              <Paperclip size={18} />
+            </button>
+            <textarea
+              rows={1}
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              placeholder="Write a clinical message..."
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
+              className="flex-1 py-2 px-3 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:bg-white resize-none"
+            />
+            <button
+              type="button"
+              disabled={sendMessage.isPending || !draft.trim()}
+              onClick={handleSend}
+              className="p-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg text-xs font-semibold transition-colors disabled:opacity-50 shrink-0 shadow-2xs"
+              title="Send Message"
+            >
+              <Send size={16} />
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
+

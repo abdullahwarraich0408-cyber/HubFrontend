@@ -23,10 +23,11 @@ function normalizeCategory(value) {
 
 function applyFilters(medicines, { search, category, rxFilter, sort }) {
   let result = [...medicines];
+  let searchFiltered = result;
 
   if (search.trim()) {
     const q = search.toLowerCase();
-    result = result.filter((m) => {
+    searchFiltered = result.filter((m) => {
       const haystack = [
         m.name,
         m.generic,
@@ -41,29 +42,45 @@ function applyFilters(medicines, { search, category, rxFilter, sort }) {
     });
   }
 
+  let categoryFiltered = searchFiltered;
+  let categoryFallbackTriggered = false;
+
   if (category) {
     const key = normalizeCategory(category);
-    result = result.filter((m) => normalizeCategory(m.category).includes(key) || key.includes(normalizeCategory(m.category)));
+    const inCategory = searchFiltered.filter(
+      (m) =>
+        normalizeCategory(m.category).includes(key) ||
+        key.includes(normalizeCategory(m.category))
+    );
+
+    if (inCategory.length > 0 || !search.trim()) {
+      categoryFiltered = inCategory;
+    } else {
+      // Search term (e.g. Panadol) has matches in another category -> fall back to all categories
+      categoryFiltered = searchFiltered;
+      categoryFallbackTriggered = true;
+    }
   }
 
+  let finalFiltered = categoryFiltered;
   if (rxFilter === "rx") {
-    result = result.filter((m) => m.prescriptionRequired);
+    finalFiltered = finalFiltered.filter((m) => m.prescriptionRequired);
   } else if (rxFilter === "otc") {
-    result = result.filter((m) => !m.prescriptionRequired);
+    finalFiltered = finalFiltered.filter((m) => !m.prescriptionRequired);
   }
 
   switch (sort) {
     case "price-low":
-      result.sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
+      finalFiltered.sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
       break;
     case "price-high":
-      result.sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
+      finalFiltered.sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
       break;
     default:
       break;
   }
 
-  return result;
+  return { filtered: finalFiltered, categoryFallbackTriggered };
 }
 
 export function MedicinesPage() {
@@ -96,7 +113,7 @@ export function MedicinesPage() {
     return Array.from(set).sort((a, b) => a.localeCompare(b));
   }, [medicines]);
 
-  const filtered = useMemo(
+  const { filtered, categoryFallbackTriggered } = useMemo(
     () => applyFilters(medicines, { search, category, rxFilter, sort }),
     [medicines, search, category, rxFilter, sort]
   );
@@ -194,6 +211,21 @@ export function MedicinesPage() {
             })}
           </div>
         </div>
+
+        {categoryFallbackTriggered ? (
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#0B6E99]/20 bg-[#E8F4F8] p-4 text-[13px] font-medium text-[#0B6E99]">
+            <span>
+              Showing results for &quot;<strong>{search}</strong>&quot; across all categories (no match under &quot;{category}&quot;).
+            </span>
+            <button
+              type="button"
+              onClick={() => setCategory("")}
+              className="rounded-lg bg-[#0B6E99] px-3 py-1.5 text-[12px] font-bold text-white transition-colors hover:bg-[#073B4C]"
+            >
+              Clear category filter
+            </button>
+          </div>
+        ) : null}
 
         <div className="mb-5">
           <p className="text-[12px] font-bold uppercase tracking-[0.16em] text-[#0B6E99]">

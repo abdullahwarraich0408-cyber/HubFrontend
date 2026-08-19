@@ -1,17 +1,27 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CalendarBlank, Clock, Plus, Trash, PencilSimple, CheckCircle, Buildings, VideoCamera } from "@phosphor-icons/react";
-import { Button } from "@/shared/components/Button";
-import { Input } from "@/shared/components/Input";
+import {
+  Calendar,
+  Clock,
+  Plus,
+  Trash2,
+  Edit2,
+  CheckCircle2,
+  Building2,
+  Video,
+  Copy,
+  Layers,
+  X
+} from "lucide-react";
 import { DEFAULT_SCHEDULE } from "@/features/doctor-panel/data/doctorData";
 import { HospitalScheduleManager } from "@/features/doctor-panel/components/HospitalScheduleManager";
 import { useDoctorPortalSchedule, useUpdateDoctorSchedule } from "@/lib/hooks/usePartnerPortal";
 import { toast } from "sonner";
 
 const TABS = [
-  { id: "hospitals", label: "Hospital Locations", icon: Buildings },
-  { id: "online", label: "Online Schedule", icon: VideoCamera },
+  { id: "hospitals", label: "Hospital Locations", icon: Building2 },
+  { id: "online", label: "Online Schedule", icon: Video },
 ];
 
 export default function DoctorSchedulePage() {
@@ -79,28 +89,24 @@ export default function DoctorSchedulePage() {
   };
 
   return (
-    <div className="animate-in fade-in zoom-in-95 duration-500">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+    <div className="space-y-6 animate-in fade-in duration-200">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-[28px] font-heading font-extrabold text-ink-headline tracking-tight">Schedule</h1>
-          <p className="text-[14px] text-neutral-500 mt-1">
-            Manage in-person hospital days and your online video consultation hours separately.
+          <h1 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">Schedule & Availability</h1>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Manage in-person hospital days and online video consultation hours separately.
           </p>
         </div>
         {activeTab === "online" && updateSchedule.isPending && (
-          <div className="flex items-center gap-2 px-4 py-2 bg-brand-light border border-brand-primary/20 rounded-[10px] text-brand-primary text-[13px] font-semibold">
-            Saving online schedule...
-          </div>
-        )}
-        {activeTab === "online" && updateSchedule.isSuccess && !updateSchedule.isPending && (
-          <div className="flex items-center gap-2 px-4 py-2 bg-status-success/10 border border-status-success/30 rounded-[10px] text-status-success text-[13px] font-semibold">
-            <CheckCircle size={16} weight="fill" />
-            Online schedule saved!
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-teal-50 border border-teal-200/80 rounded-lg text-teal-700 text-xs font-semibold">
+            <Clock size={14} className="animate-spin" /> Saving schedule...
           </div>
         )}
       </div>
 
-      <div className="flex gap-2 mb-6 p-1 bg-neutral-100 rounded-[12px] w-fit">
+      {/* Segmented Tab Bar */}
+      <div className="flex gap-1.5 p-1 bg-slate-200/60 rounded-xl w-fit text-xs font-semibold">
         {TABS.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -109,113 +115,132 @@ export default function DoctorSchedulePage() {
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-[13px] font-semibold transition-all ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
                 isActive
-                  ? "bg-white text-brand-primary shadow-sm"
-                  : "text-neutral-500 hover:text-ink-headline"
+                  ? "bg-white text-slate-900 shadow-2xs font-bold"
+                  : "text-slate-600 hover:text-slate-900"
               }`}
             >
-              <Icon size={16} weight={isActive ? "fill" : "regular"} />
+              <Icon size={15} className={isActive ? "text-teal-600" : "text-slate-500"} />
               {tab.label}
             </button>
           );
         })}
       </div>
 
+      {/* Tab Content */}
       {activeTab === "hospitals" ? (
         <HospitalScheduleManager />
       ) : isLoading ? (
-        <div className="text-neutral-500 text-sm">Loading online schedule...</div>
+        <div className="text-slate-500 text-xs py-8 text-center">Loading online schedule...</div>
       ) : (
-        <>
-          <p className="text-[13px] text-neutral-500 mb-4">
-            These hours apply to <strong>online video consultations</strong> only. In-person patients book
-            through your hospital locations.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {schedule.map((item) => (
-              <div key={item.day} className="bg-white rounded-[16px] border border-neutral-200 shadow-sm p-5">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-[10px] bg-brand-light flex items-center justify-center text-brand-primary">
-                      <CalendarBlank size={20} weight="fill" />
-                    </div>
-                    <h3 className="text-[16px] font-bold text-ink-headline">{item.day}</h3>
-                  </div>
-                  <button
-                    onClick={() => setEditingDay(editingDay === item.day ? null : item.day)}
-                    className="p-2 rounded-md text-neutral-500 hover:text-brand-primary hover:bg-brand-light transition-colors"
-                    title="Edit slots"
-                  >
-                    <PencilSimple size={18} />
-                  </button>
-                </div>
-
-                {item.slots.length > 0 ? (
-                  <div className="space-y-2 mb-3">
-                    {item.slots.map((slot, i) => (
-                      <div key={i} className="flex items-center justify-between gap-2 px-3 py-2 bg-neutral-50 rounded-md border border-neutral-200">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <Clock size={14} className="text-brand-primary shrink-0" />
-                          <span className="text-[13px] font-medium text-neutral-700 truncate">{slot}</span>
-                        </div>
-                        {editingDay === item.day && (
-                          <button
-                            onClick={() => removeSlot(item.day, i)}
-                            className="p-1 text-status-danger hover:bg-status-danger/10 rounded transition-colors shrink-0"
-                          >
-                            <Trash size={14} />
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-[13px] text-neutral-400 italic mb-3">No slots available</p>
-                )}
-
-                {editingDay === item.day && (
-                  <div className="pt-2 border-t border-neutral-200 space-y-2">
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="e.g. 09:00 AM - 01:00 PM"
-                        value={newSlot}
-                        onChange={(e) => setNewSlot(e.target.value)}
-                        className="flex-1"
-                      />
-                      <Button type="button" onClick={() => addSlot(item.day)} className="shrink-0 px-3" title="Add slot">
-                        <Plus size={18} weight="bold" />
-                      </Button>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => addSlot(item.day, true)}
-                        className="text-[12px]"
-                      >
-                        Add to all weekdays
-                      </Button>
-                      {item.slots.length > 0 && (
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => copyDayToWeekdays(item.day)}
-                          className="text-[12px]"
-                        >
-                          Copy {item.day} to Mon–Fri
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
+        <div className="space-y-4">
+          {/* Top Actions Bar */}
+          <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs flex flex-wrap items-center justify-between gap-3">
+            <div className="text-xs text-slate-600">
+              <strong className="text-slate-900 font-semibold">Online Video Hours</strong> — Define available time slots for virtual patient appointments.
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => copyDayToWeekdays("Monday")}
+                className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 border border-slate-200"
+              >
+                <Copy size={13} className="text-teal-600" />
+                <span>Copy Monday to Mon–Fri</span>
+              </button>
+            </div>
           </div>
-        </>
+
+          {/* Clean Rows with Thin Dividers */}
+          <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden divide-y divide-slate-100">
+            {schedule.map((item) => {
+              const isEditing = editingDay === item.day;
+              return (
+                <div
+                  key={item.day}
+                  className="p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-50/50 transition-colors"
+                >
+                  <div className="flex items-center gap-3 w-36 shrink-0">
+                    <span className="font-bold text-sm text-slate-900">{item.day}</span>
+                    <span
+                      className={`px-2 py-0.5 rounded-md text-[10px] font-semibold ${
+                        item.slots.length > 0
+                          ? "bg-teal-50 text-teal-700 border border-teal-200/60"
+                          : "bg-slate-100 text-slate-400"
+                      }`}
+                    >
+                      {item.slots.length} slots
+                    </span>
+                  </div>
+
+                  {/* Slot Pills View */}
+                  <div className="flex-1 flex flex-wrap items-center gap-2">
+                    {item.slots.length > 0 ? (
+                      item.slots.map((slot, i) => (
+                        <div
+                          key={i}
+                          className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 shadow-2xs group"
+                        >
+                          <Clock size={12} className="text-teal-600" />
+                          <span>{slot}</span>
+                          {isEditing && (
+                            <button
+                              onClick={() => removeSlot(item.day, i)}
+                              className="text-slate-400 hover:text-rose-600 ml-1 transition-colors"
+                              title="Remove slot"
+                            >
+                              <X size={13} />
+                            </button>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <span className="text-xs text-slate-400 italic">No time slots configured</span>
+                    )}
+                  </div>
+
+                  {/* Inline Slot Controls */}
+                  <div className="shrink-0 flex items-center gap-2">
+                    {isEditing ? (
+                      <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-lg border border-slate-200">
+                        <input
+                          type="text"
+                          placeholder="e.g. 09:00 AM - 01:00 PM"
+                          value={newSlot}
+                          onChange={(e) => setNewSlot(e.target.value)}
+                          className="h-8 px-2.5 text-xs bg-white border border-slate-200 rounded-md text-slate-900 focus:outline-none focus:border-teal-500 w-44"
+                        />
+                        <button
+                          onClick={() => addSlot(item.day)}
+                          className="h-8 px-3 bg-teal-700 hover:bg-teal-800 text-white rounded-md text-xs font-semibold transition-colors flex items-center gap-1"
+                        >
+                          <Plus size={14} /> Add
+                        </button>
+                        <button
+                          onClick={() => setEditingDay(null)}
+                          className="p-1.5 text-slate-400 hover:text-slate-700"
+                          title="Done Editing"
+                        >
+                          <X size={15} />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setEditingDay(item.day)}
+                        className="px-3 py-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-lg border border-slate-200 transition-colors flex items-center gap-1.5"
+                      >
+                        <Edit2 size={13} />
+                        <span>Edit Hours</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       )}
     </div>
   );
 }
+

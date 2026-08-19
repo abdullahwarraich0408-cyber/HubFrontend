@@ -7,6 +7,8 @@ import { Footer } from "@/shared/layout/Footer";
 import { AuthModalProvider } from "@/features/auth/context/AuthModalContext";
 import { useAuth } from "@/lib/auth/AuthProvider";
 
+import { PrescriptionModalProvider } from "@/features/prescription/context/PrescriptionModalContext";
+
 export function CustomerShell({ children }) {
   const pathname = usePathname();
   const { isAuthenticated, isLoading } = useAuth();
@@ -25,18 +27,20 @@ export function CustomerShell({ children }) {
 
   return (
     <AuthModalProvider>
-      {isMarketingHome || isAuthPage ? (
-        children
-      ) : (
-        <>
-          <CustomerNavbar />
-          <MainNavigation />
-          <main className="w-full flex-1 bg-[var(--color-surface-base)]">
-            {children}
-          </main>
-          {!isPatientHome ? <Footer /> : null}
-        </>
-      )}
+      <PrescriptionModalProvider>
+        {isMarketingHome || isAuthPage ? (
+          children
+        ) : (
+          <>
+            <CustomerNavbar />
+            <MainNavigation />
+            <main className="w-full flex-1 bg-[var(--color-surface-base)]">
+              {children}
+            </main>
+            <Footer />
+          </>
+        )}
+      </PrescriptionModalProvider>
     </AuthModalProvider>
   );
 }

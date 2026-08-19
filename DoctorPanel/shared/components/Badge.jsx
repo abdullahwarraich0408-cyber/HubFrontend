@@ -2,102 +2,81 @@
 
 import { cn } from "@/utils/cn";
 import { 
-  CheckCircle, 
+  CheckCircle2, 
   XCircle, 
   Clock, 
-  Warning, 
+  AlertCircle, 
   MinusCircle, 
-  ArrowsClockwise, 
+  RefreshCw, 
   Package, 
   X, 
-  Star 
-} from "@phosphor-icons/react";
+  Star,
+  PlayCircle
+} from "lucide-react";
 
 export function Badge({ status, className }) {
-  const baseStyles = "inline-flex items-center gap-1.5 rounded-pill px-[12px] py-[6px] text-[11px] font-semibold uppercase tracking-wider";
+  const baseStyles = "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold tracking-tight border shadow-xs transition-colors duration-150";
 
   const config = {
-    active: {
-      bg: "bg-[var(--color-status-success-bg)]",
-      text: "text-[var(--color-status-success-text)]",
-      icon: <CheckCircle weight="fill" size={14} />,
-      label: "Active"
-    },
-    instock: {
-      bg: "bg-[var(--color-status-success-bg)]",
-      text: "text-[var(--color-status-success-text)]",
-      icon: <CheckCircle weight="fill" size={14} />,
-      label: "In Stock"
-    },
-    inactive: {
-      bg: "bg-[var(--color-status-danger-bg)]",
-      text: "text-[var(--color-status-danger-text)]",
-      icon: <XCircle weight="fill" size={14} />,
-      label: "Inactive"
-    },
     pending: {
-      bg: "bg-[var(--color-status-warning-bg)]",
-      text: "text-[var(--color-status-warning-text)]",
-      icon: <Clock size={14} />,
+      bg: "bg-amber-50 text-amber-700 border-amber-200/80",
+      icon: <Clock size={12} className="text-amber-600 shrink-0" />,
       label: "Pending"
     },
-    lowstock: {
-      bg: "bg-[var(--color-status-warning-bg)]",
-      text: "text-[var(--color-status-warning-text)]",
-      icon: <Warning size={14} />,
-      label: "Low Stock"
+    confirmed: {
+      bg: "bg-blue-50 text-blue-700 border-blue-200/80",
+      icon: <CheckCircle2 size={12} className="text-blue-600 shrink-0" />,
+      label: "Confirmed"
     },
-    outofstock: {
-      bg: "bg-[var(--color-status-danger-bg)]",
-      text: "text-[var(--color-status-danger-text)]",
-      icon: <MinusCircle size={14} />,
-      label: "Out of Stock"
+    inprogress: {
+      bg: "bg-teal-50 text-teal-700 border-teal-200/80",
+      icon: <PlayCircle size={12} className="text-teal-600 shrink-0" />,
+      label: "In Progress"
     },
-    processing: {
-      bg: "bg-[var(--color-status-info-bg)]",
-      text: "text-[var(--color-status-info-text)]",
-      icon: <ArrowsClockwise size={14} />,
-      label: "Processing"
+    in_progress: {
+      bg: "bg-teal-50 text-teal-700 border-teal-200/80",
+      icon: <PlayCircle size={12} className="text-teal-600 shrink-0" />,
+      label: "In Progress"
     },
-    shipped: {
-      bg: "bg-[var(--color-status-shipped-bg)]",
-      text: "text-[var(--color-status-shipped-text)]",
-      icon: <Package size={14} />,
-      label: "Shipped"
-    },
-    delivered: {
-      bg: "bg-[var(--color-status-success-bg)]",
-      text: "text-[var(--color-status-success-text)]",
-      icon: <CheckCircle weight="fill" size={14} />,
-      label: "Delivered"
+    completed: {
+      bg: "bg-emerald-50 text-emerald-700 border-emerald-200/80",
+      icon: <CheckCircle2 size={12} className="text-emerald-600 shrink-0" />,
+      label: "Completed"
     },
     cancelled: {
-      bg: "bg-[var(--color-status-cancelled-bg)]",
-      text: "text-[var(--color-status-cancelled-text)]",
-      icon: <X size={14} />,
+      bg: "bg-rose-50 text-rose-700 border-rose-200/80",
+      icon: <XCircle size={12} className="text-rose-600 shrink-0" />,
       label: "Cancelled"
     },
+    active: {
+      bg: "bg-emerald-50 text-emerald-700 border-emerald-200/80",
+      icon: <CheckCircle2 size={12} className="text-emerald-600 shrink-0" />,
+      label: "Active"
+    },
+    inactive: {
+      bg: "bg-rose-50 text-rose-700 border-rose-200/80",
+      icon: <XCircle size={12} className="text-rose-600 shrink-0" />,
+      label: "Inactive"
+    },
     premium: {
-      bg: "bg-[var(--color-accent-gold-bg)]",
-      text: "text-[var(--color-accent-gold-text)]",
-      icon: <Star weight="fill" size={14} className="text-[var(--color-accent-gold)]" />,
+      bg: "bg-amber-50 text-amber-800 border-amber-300",
+      icon: <Star size={12} className="text-amber-500 fill-amber-500 shrink-0" />,
       label: "Premium"
     }
   };
 
-  // Default to a simple gray badge if status not found
-  const badgeKey = status?.toLowerCase().replace(/\s+/g, "");
+  const badgeKey = status?.toLowerCase().replace(/[\s_-]+/g, "");
   const selectedConfig = config[badgeKey] || {
-    bg: "bg-[var(--color-surface-subtle)]",
-    text: "text-[var(--color-neutral-600)]",
+    bg: "bg-slate-100 text-slate-700 border-slate-200",
     icon: null,
-    label: status
+    label: status || "Unknown"
   };
 
   return (
-    <span className={cn(baseStyles, selectedConfig.bg, selectedConfig.text, className)}>
+    <span className={cn(baseStyles, selectedConfig.bg, className)}>
       {selectedConfig.icon}
-      {selectedConfig.label}
+      <span>{selectedConfig.label}</span>
     </span>
   );
 }
+

@@ -16,6 +16,7 @@ import {
   SignOut,
 } from "@phosphor-icons/react";
 import { useAuth } from "@/lib/auth/AuthProvider";
+import { usePrescriptionModal } from "@/features/prescription/context/PrescriptionModalContext";
 import { toast } from "sonner";
 import { cn } from "@/utils/cn";
 
@@ -38,6 +39,7 @@ const MENU_LINKS = [
 
 export function UserMenu({ profile, className }) {
   const { user, logout } = useAuth();
+  const { openPrescriptionModal } = usePrescriptionModal();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const rootRef = useRef(null);
@@ -114,6 +116,18 @@ export function UserMenu({ profile, className }) {
             </p>
           </div>
           <div className="py-1">
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setOpen(false);
+                openPrescriptionModal();
+              }}
+              className="flex w-full items-center gap-2.5 px-4 py-2.5 text-[13px] font-semibold text-[#0B6E99] transition-colors hover:bg-[#EAF7F5]"
+            >
+              <Prescription size={16} weight="bold" />
+              Upload Prescription
+            </button>
             {MENU_LINKS.map((item) => {
               const Icon = item.icon;
               return (

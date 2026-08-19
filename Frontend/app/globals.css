@@ -484,3 +484,10 @@
     }
   }
 }
+
+/* Soft keyboard scroll clearance for web inputs on mobile devices */
+input, textarea, select {
+  scroll-margin-bottom: 120px;
+  scroll-margin-top: 80px;
+}
+

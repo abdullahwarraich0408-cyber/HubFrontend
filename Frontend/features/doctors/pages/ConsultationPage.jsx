@@ -58,7 +58,7 @@ export function ConsultationRoom({ meetingId, role = "patient" }) {
     const displayName = encodeURIComponent(
       isDoctor ? appointment?.doctorName || "Doctor" : user?.name || "Patient"
     );
-    return `https://meet.jit.si/${videoRoom.jitsi_room}#config.prejoinPageEnabled=false&userInfo.displayName="${displayName}"`;
+    return `https://meet.element.io/${videoRoom.jitsi_room}#config.prejoinPageEnabled=false&config.requireDisplayName=false&config.disableDeepLinking=true&config.startWithAudioMuted=false&config.startWithVideoMuted=false&userInfo.displayName="${displayName}"`;
   }, [videoRoom?.jitsi_room, isDoctor, appointment?.doctorName, user?.name]);
 
   const handleStartConsultation = async () => {

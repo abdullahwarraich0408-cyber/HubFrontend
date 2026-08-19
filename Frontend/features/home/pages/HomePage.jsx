@@ -60,8 +60,6 @@ export function HomePage() {
         <CampaignBanners />
         <ClosingBand />
       </div>
-
-      <LoggedInFooter />
     </div>
   );
 }

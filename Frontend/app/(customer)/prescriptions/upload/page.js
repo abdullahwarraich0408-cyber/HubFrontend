@@ -1,5 +1,2 @@
-import { redirect } from "next/navigation";
+export { default } from "@/app/(customer)/prescription/page";
 
-export default function PrescriptionUploadRedirect() {
-  redirect("/prescription");
-}

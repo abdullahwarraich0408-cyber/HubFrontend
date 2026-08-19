@@ -17,6 +17,7 @@ import Link from "next/link";
 import { useAllOrders } from "@/lib/hooks/useApi";
 import { useCustomerOrderTracking } from "@/lib/hooks/useOrderTracking";
 import { useAuthModal } from "@/features/auth/context/AuthModalContext";
+import { usePrescriptionModal } from "@/features/prescription/context/PrescriptionModalContext";
 
 const TABS = [
   { id: "all", label: "All", fullLabel: "All Orders", icon: Package },
@@ -41,6 +42,7 @@ function OrderSkeleton() {
 }
 
 export function OrdersPage() {
+  const { openPrescriptionModal } = usePrescriptionModal();
   const searchParams = useSearchParams();
   const router = useRouter();
   const typeParam = searchParams.get("type") || "all";
@@ -222,26 +224,32 @@ export function OrdersPage() {
                 ? "Your orders will appear here after you book."
                 : `No ${TABS.find((t) => t.id === activeSubtab)?.fullLabel?.toLowerCase()} yet.`}
             </p>
-            <Link
-              href={
-                activeSubtab === "doctor"
-                  ? "/doctors"
-                  : activeSubtab === "lab"
-                    ? "/lab-tests"
-                    : activeSubtab === "prescription"
-                      ? "/"
+            {activeSubtab === "prescription" ? (
+              <button
+                type="button"
+                onClick={openPrescriptionModal}
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--color-brand-primary)] text-white text-[14px] font-semibold rounded-xl hover:bg-[var(--color-brand-dark)] transition-colors"
+              >
+                Upload Prescription
+              </button>
+            ) : (
+              <Link
+                href={
+                  activeSubtab === "doctor"
+                    ? "/doctors"
+                    : activeSubtab === "lab"
+                      ? "/lab-tests"
                       : "/browse"
-              }
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--color-brand-primary)] text-white text-[14px] font-semibold rounded-xl"
-            >
-              {activeSubtab === "doctor"
-                ? "Book a Doctor"
-                : activeSubtab === "lab"
-                  ? "Book a Lab Test"
-                  : activeSubtab === "prescription"
-                    ? "Upload Prescription"
+                }
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--color-brand-primary)] text-white text-[14px] font-semibold rounded-xl"
+              >
+                {activeSubtab === "doctor"
+                  ? "Book a Doctor"
+                  : activeSubtab === "lab"
+                    ? "Book a Lab Test"
                     : "Shop Medicines"}
-            </Link>
+              </Link>
+            )}
           </div>
         )}
       </div>

@@ -34,6 +34,20 @@ function AuthHydrator({ children }) {
     }
   }, [dispatch, initialized]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handleFocus = (e) => {
+      const el = e.target;
+      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT")) {
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }, 300);
+      }
+    };
+    document.addEventListener("focusin", handleFocus, { passive: true });
+    return () => document.removeEventListener("focusin", handleFocus);
+  }, []);
+
   return children;
 }
 

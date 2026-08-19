@@ -6,21 +6,23 @@ import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/utils/cn";
 import {
   Stethoscope,
-  SquaresFour,
+  LayoutDashboard,
   CalendarCheck,
-  CalendarBlank,
+  Clock,
   Users,
-  Gear,
-  SignOut,
-  ArrowLineLeft,
-  ArrowLineRight,
-} from "@phosphor-icons/react";
+  Settings,
+  LogOut,
+  ChevronLeft,
+  ChevronRight,
+  Menu,
+  X,
+  Bell
+} from "lucide-react";
 import { partnerAuthApi } from "@/lib/api/index";
 import { useDoctorProfile } from "@/features/doctor-panel/hooks/useDoctorProfile";
-
 import { partnerRoutes } from "@/lib/constants/partnerRoutes";
 
-export function DoctorSidebar() {
+export function DoctorSidebar({ mobileOpen, setMobileOpen }) {
   const pathname = usePathname();
   const router = useRouter();
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -28,11 +30,11 @@ export function DoctorSidebar() {
   const routes = partnerRoutes.doctor;
 
   const menuItems = [
-    { name: "Dashboard", href: routes.dashboard, icon: SquaresFour },
+    { name: "Overview", href: routes.dashboard, icon: LayoutDashboard },
     { name: "Appointments", href: routes.appointments, icon: CalendarCheck },
-    { name: "Schedule", href: routes.schedule, icon: CalendarBlank },
+    { name: "Schedule", href: routes.schedule, icon: Clock },
     { name: "Patients", href: routes.patients, icon: Users },
-    { name: "Account Settings", href: routes.settings, icon: Gear },
+    { name: "Settings", href: routes.settings, icon: Settings },
   ];
 
   const handleLogout = () => {
@@ -41,111 +43,125 @@ export function DoctorSidebar() {
   };
 
   return (
-    <aside
-      className={cn(
-        "fixed left-0 top-0 h-full bg-ink-900 z-40 transition-all duration-250 ease-in-out flex flex-col",
-        isCollapsed ? "w-[72px]" : "w-[260px]"
+    <>
+      {/* Mobile Overlay */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-40 md:hidden transition-opacity duration-200"
+          onClick={() => setMobileOpen(false)}
+        />
       )}
-    >
-      <div className="h-[64px] flex items-center justify-between px-4 border-b border-white/10 shrink-0">
-        {!isCollapsed && (
-          <Link href={routes.dashboard} className="flex items-center gap-2 overflow-hidden">
-            <Stethoscope size={28} className="text-brand-primary shrink-0" weight="fill" />
-            <span className="font-heading text-[20px] text-white tracking-tight whitespace-nowrap">
-              Doctor Portal
-            </span>
-          </Link>
-        )}
-        {isCollapsed && (
-          <Link href={routes.dashboard} className="mx-auto">
-            <Stethoscope size={28} className="text-brand-primary shrink-0" weight="fill" />
-          </Link>
-        )}
-        <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className={cn(
-            "text-white/50 hover:text-white transition-colors shrink-0",
-            isCollapsed && "absolute -right-3 top-[20px] bg-ink-800 rounded-full p-1 border border-white/10"
-          )}
-        >
-          {isCollapsed ? <ArrowLineRight size={16} /> : <ArrowLineLeft size={20} />}
-        </button>
-      </div>
 
-      <nav className="flex-1 py-6 px-3 flex flex-col gap-2 overflow-y-auto no-scrollbar">
-        {menuItems.map((item) => {
-          const isActive = pathname === item.href;
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={cn(
-                "relative flex items-center h-[44px] rounded-lg transition-colors group",
-                isCollapsed ? "justify-center px-0" : "px-3",
-                isActive ? "bg-brand-primary/20" : "hover:bg-white/5"
-              )}
-              title={isCollapsed ? item.name : undefined}
-            >
-              {isActive && (
-                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-brand-primary rounded-l-lg" />
-              )}
-              <item.icon
-                size={20}
-                weight={isActive ? "fill" : "regular"}
-                className={cn(
-                  "shrink-0",
-                  isActive ? "text-brand-primary" : "text-white/60 group-hover:text-white"
-                )}
-              />
-              {!isCollapsed && (
-                <span
-                  className={cn(
-                    "ml-3 text-[14px] font-medium whitespace-nowrap",
-                    isActive ? "text-white" : "text-white/70 group-hover:text-white"
-                  )}
-                >
-                  {item.name}
-                </span>
-              )}
-            </Link>
-          );
-        })}
-      </nav>
-
-      <div className="p-4 border-t border-white/10 shrink-0">
-        <Link
-          href={routes.settings}
-          className={cn("flex items-center", isCollapsed ? "justify-center" : "gap-3")}
-        >
-          <div className="w-[40px] h-[40px] rounded-full bg-ink-800 border border-white/20 flex items-center justify-center shrink-0">
-            <span className="text-[14px] font-bold text-white">{initials}</span>
-          </div>
-          {!isCollapsed && (
-            <div className="flex flex-col overflow-hidden">
-              <span className="text-[14px] font-semibold text-white whitespace-nowrap truncate">{profile.name}</span>
-              <span className="text-[11px] text-brand-primary uppercase font-semibold">{profile.specialty}</span>
+      <aside
+        className={cn(
+          "fixed left-0 top-0 h-full bg-slate-900 border-r border-slate-800/80 z-50 transition-all duration-200 ease-in-out flex flex-col shadow-xl",
+          // Mobile responsive drawer classes
+          mobileOpen ? "translate-x-0 w-[260px]" : "-translate-x-full md:translate-x-0",
+          // Desktop/Tablet collapse classes
+          isCollapsed ? "md:w-[72px]" : "md:w-[250px]"
+        )}
+      >
+        {/* Header */}
+        <div className="h-[64px] flex items-center justify-between px-4 border-b border-slate-800/80 shrink-0">
+          <Link href={routes.dashboard} className="flex items-center gap-3 overflow-hidden">
+            <div className="w-9 h-9 rounded-xl bg-teal-600/20 border border-teal-500/30 flex items-center justify-center shrink-0">
+              <Stethoscope size={20} className="text-teal-400" />
             </div>
-          )}
-        </Link>
-        {!isCollapsed && (
+            {(!isCollapsed || mobileOpen) && (
+              <div className="flex flex-col">
+                <span className="font-semibold text-base text-white tracking-tight leading-tight">
+                  Medzoos
+                </span>
+                <span className="text-[11px] text-teal-400 font-medium tracking-wide uppercase">
+                  Doctor Panel
+                </span>
+              </div>
+            )}
+          </Link>
+
+          {/* Desktop/Tablet Collapse toggle */}
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="hidden md:flex text-slate-400 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-slate-800/60"
+            title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+          >
+            {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+          </button>
+
+          {/* Mobile close button */}
+          <button
+            onClick={() => setMobileOpen(false)}
+            className="md:hidden text-slate-400 hover:text-white transition-colors p-1.5"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Navigation links */}
+        <nav className="flex-1 py-4 px-3 flex flex-col gap-1 overflow-y-auto no-scrollbar">
+          {menuItems.map((item) => {
+            const isActive = pathname === item.href;
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                onClick={() => setMobileOpen?.(false)}
+                className={cn(
+                  "relative flex items-center h-[42px] rounded-lg transition-all duration-150 group text-sm font-medium",
+                  isCollapsed && !mobileOpen ? "justify-center px-0" : "px-3",
+                  isActive
+                    ? "bg-slate-800 text-white font-semibold"
+                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
+                )}
+                title={isCollapsed && !mobileOpen ? item.name : undefined}
+              >
+                {/* Thin left indicator for active route */}
+                {isActive && (
+                  <div className="absolute left-0 top-1.5 bottom-1.5 w-[3px] bg-teal-400 rounded-r-full" />
+                )}
+                <Icon
+                  size={19}
+                  className={cn(
+                    "shrink-0 transition-colors",
+                    isActive ? "text-teal-400" : "text-slate-400 group-hover:text-slate-200"
+                  )}
+                />
+                {(!isCollapsed || mobileOpen) && (
+                  <span className="ml-3 truncate">{item.name}</span>
+                )}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Doctor profile Footer */}
+        <div className="p-3 border-t border-slate-800/80 shrink-0 bg-slate-900/50">
+          <div className={cn("flex items-center gap-3", isCollapsed && !mobileOpen && "justify-center")}>
+            <div className="w-[38px] h-[38px] rounded-full bg-teal-500/10 border border-teal-500/30 flex items-center justify-center shrink-0">
+              <span className="text-xs font-bold text-teal-400">{initials || "DR"}</span>
+            </div>
+            {(!isCollapsed || mobileOpen) && (
+              <div className="flex flex-col min-w-0 flex-1">
+                <span className="text-xs font-semibold text-slate-100 truncate">{profile.name}</span>
+                <span className="text-[11px] text-slate-400 truncate">{profile.specialty}</span>
+              </div>
+            )}
+          </div>
           <button
             onClick={handleLogout}
-            className="w-full mt-4 flex items-center justify-center gap-2 h-[36px] rounded-md text-status-danger hover:bg-status-danger/10 transition-colors text-[13px] font-semibold"
+            className={cn(
+              "w-full mt-3 flex items-center justify-center gap-2 h-[34px] rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors text-xs font-medium border border-slate-800 hover:border-rose-500/20",
+              isCollapsed && !mobileOpen && "px-0"
+            )}
+            title="Sign out"
           >
-            <SignOut size={16} />
-            Logout
+            <LogOut size={15} />
+            {(!isCollapsed || mobileOpen) && <span>Sign Out</span>}
           </button>
-        )}
-        {isCollapsed && (
-          <button
-            onClick={handleLogout}
-            title="Logout"
-            className="w-full mt-4 flex items-center justify-center h-[36px] rounded-md text-status-danger hover:bg-status-danger/10 transition-colors"
-          >
-            <SignOut size={16} />
-          </button>
-        )}
-      </div>
-    </aside>
+        </div>
+      </aside>
+    </>
   );
 }
+

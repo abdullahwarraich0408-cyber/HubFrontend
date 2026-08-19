@@ -27,7 +27,7 @@ export function BrandLogo({
         <img
           src="/images/medzoos-wordmark.png"
           alt="Medzoos"
-          className={cn("h-8 w-auto sm:h-9", imgClassName)}
+          className={cn("h-7 sm:h-8 md:h-9 w-auto object-contain", imgClassName)}
         />
       </span>
     </Link>

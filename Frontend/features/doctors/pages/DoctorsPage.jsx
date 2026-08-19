@@ -23,19 +23,11 @@ function matchesSpecialtyFocus(doctor, specialtyParam) {
 
 function applyFilters(doctors, { search, specialty, consult, availableToday }) {
   let result = [...doctors];
+  let searchFiltered = result;
 
-  if (specialty) {
-    result = result.filter((d) => matchesSpecialtyFocus(d, specialty));
-  }
-  if (consult === "online") {
-    result = result.filter((d) => d.online);
-  }
-  if (availableToday) {
-    result = result.filter((d) => d.availableToday);
-  }
   if (search.trim()) {
     const q = search.toLowerCase();
-    result = result.filter(
+    searchFiltered = result.filter(
       (d) =>
         String(d.name || "").toLowerCase().includes(q) ||
         String(d.specialty || "").toLowerCase().includes(q) ||
@@ -43,7 +35,23 @@ function applyFilters(doctors, { search, specialty, consult, availableToday }) {
     );
   }
 
-  return result;
+  let specialtyFiltered = searchFiltered;
+  if (specialty) {
+    const inSpecialty = searchFiltered.filter((d) => matchesSpecialtyFocus(d, specialty));
+    if (inSpecialty.length > 0 || !search.trim()) {
+      specialtyFiltered = inSpecialty;
+    }
+  }
+
+  let finalFiltered = specialtyFiltered;
+  if (consult === "online") {
+    finalFiltered = finalFiltered.filter((d) => d.online);
+  }
+  if (availableToday) {
+    finalFiltered = finalFiltered.filter((d) => d.availableToday);
+  }
+
+  return finalFiltered;
 }
 
 export function DoctorsPage() {

@@ -1,103 +1,79 @@
 "use client";
 
 import { cn } from "@/utils/cn";
-import { 
-  CheckCircle, 
-  XCircle, 
-  Clock, 
-  Warning, 
-  MinusCircle, 
-  ArrowsClockwise, 
-  Package, 
-  X, 
-  Star 
-} from "@phosphor-icons/react";
+import { STATUS_BADGE_STYLES, normalizeStatus } from "@/lib/constants/lab";
 
-export function Badge({ status, className }) {
-  const baseStyles = "inline-flex items-center gap-1.5 rounded-pill px-[12px] py-[6px] text-[11px] font-semibold uppercase tracking-wider";
+export function Badge({ status, type = "status", label, className }) {
+  if (type === "collection") {
+    const isHome = status === "Home Collection" || status === "Home" || status === "HOME";
+    return (
+      <span
+        className={cn(
+          "inline-flex items-center px-2.5 py-1 rounded-md text-[12px] font-medium tracking-tight",
+          isHome
+            ? "bg-teal-50 text-[#087F82] border border-[#087F82]/20"
+            : "bg-slate-100 text-slate-700 border border-slate-200",
+          className
+        )}
+      >
+        {isHome ? "Home Collection" : "Lab Visit"}
+      </span>
+    );
+  }
 
-  const config = {
-    active: {
-      bg: "bg-[var(--color-status-success-bg)]",
-      text: "text-[var(--color-status-success-text)]",
-      icon: <CheckCircle weight="fill" size={14} />,
-      label: "Active"
-    },
-    instock: {
-      bg: "bg-[var(--color-status-success-bg)]",
-      text: "text-[var(--color-status-success-text)]",
-      icon: <CheckCircle weight="fill" size={14} />,
-      label: "In Stock"
-    },
-    inactive: {
-      bg: "bg-[var(--color-status-danger-bg)]",
-      text: "text-[var(--color-status-danger-text)]",
-      icon: <XCircle weight="fill" size={14} />,
-      label: "Inactive"
-    },
-    pending: {
-      bg: "bg-[var(--color-status-warning-bg)]",
-      text: "text-[var(--color-status-warning-text)]",
-      icon: <Clock size={14} />,
-      label: "Pending"
-    },
-    lowstock: {
-      bg: "bg-[var(--color-status-warning-bg)]",
-      text: "text-[var(--color-status-warning-text)]",
-      icon: <Warning size={14} />,
-      label: "Low Stock"
-    },
-    outofstock: {
-      bg: "bg-[var(--color-status-danger-bg)]",
-      text: "text-[var(--color-status-danger-text)]",
-      icon: <MinusCircle size={14} />,
-      label: "Out of Stock"
-    },
-    processing: {
-      bg: "bg-[var(--color-status-info-bg)]",
-      text: "text-[var(--color-status-info-text)]",
-      icon: <ArrowsClockwise size={14} />,
-      label: "Processing"
-    },
-    shipped: {
-      bg: "bg-[var(--color-status-shipped-bg)]",
-      text: "text-[var(--color-status-shipped-text)]",
-      icon: <Package size={14} />,
-      label: "Shipped"
-    },
-    delivered: {
-      bg: "bg-[var(--color-status-success-bg)]",
-      text: "text-[var(--color-status-success-text)]",
-      icon: <CheckCircle weight="fill" size={14} />,
-      label: "Delivered"
-    },
-    cancelled: {
-      bg: "bg-[var(--color-status-cancelled-bg)]",
-      text: "text-[var(--color-status-cancelled-text)]",
-      icon: <X size={14} />,
-      label: "Cancelled"
-    },
-    premium: {
-      bg: "bg-[var(--color-accent-gold-bg)]",
-      text: "text-[var(--color-accent-gold-text)]",
-      icon: <Star weight="fill" size={14} className="text-[var(--color-accent-gold)]" />,
-      label: "Premium"
-    }
-  };
+  if (type === "active") {
+    const isActive = status === "active" || status === true;
+    return (
+      <span
+        className={cn(
+          "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider",
+          isActive
+            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+            : "bg-rose-50 text-rose-700 border border-rose-200",
+          className
+        )}
+      >
+        <span className={cn("w-1.5 h-1.5 rounded-full", isActive ? "bg-emerald-500" : "bg-rose-500")} />
+        {isActive ? "Active" : "Inactive"}
+      </span>
+    );
+  }
 
-  // Default to a simple gray badge if status not found
-  const badgeKey = status?.toLowerCase().replace(/\s+/g, "");
-  const selectedConfig = config[badgeKey] || {
-    bg: "bg-[var(--color-surface-subtle)]",
-    text: "text-[var(--color-neutral-600)]",
-    icon: null,
-    label: status
+  if (type === "payment") {
+    const isPaid = String(status).toUpperCase() === "PAID";
+    return (
+      <span
+        className={cn(
+          "inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold uppercase tracking-wider",
+          isPaid
+            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+            : "bg-amber-50 text-amber-700 border border-amber-200",
+          className
+        )}
+      >
+        {isPaid ? "PAID" : "UNPAID"}
+      </span>
+    );
+  }
+
+  // Booking status badge
+  const norm = normalizeStatus(status);
+  const style = STATUS_BADGE_STYLES[norm] || {
+    bg: "bg-gray-100 text-gray-700 border border-gray-200",
+    dot: "bg-gray-400",
+    label: label || status || "Unknown",
   };
 
   return (
-    <span className={cn(baseStyles, selectedConfig.bg, selectedConfig.text, className)}>
-      {selectedConfig.icon}
-      {selectedConfig.label}
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-medium tracking-tight whitespace-nowrap",
+        style.bg,
+        className
+      )}
+    >
+      <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", style.dot)} />
+      <span>{label || style.label}</span>
     </span>
   );
 }

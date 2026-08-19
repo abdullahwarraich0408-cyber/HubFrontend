@@ -2,16 +2,16 @@
 
 @theme {
   /* Brand */
-  --color-brand-primary: #0B6E72;
-  --color-brand-dark: #084F52;
+  --color-brand-primary: #087F82;
+  --color-brand-dark: #076C70;
   --color-brand-light: #E6F4F5;
   --color-brand-mist: #F0F9FA;
   --color-brand-highlight: #7DD3D8;
 
   /* Ink / Dark */
-  --color-ink-900: #0C1A2E;
-  --color-ink-800: #152845;
-  --color-ink-headline: #0C1A2E;
+  --color-ink-900: #071A30;
+  --color-ink-800: #10243C;
+  --color-ink-headline: #07172E;
 
   /* Surfaces */
   --color-surface-base: #FFFFFF;
@@ -30,13 +30,13 @@
   --color-neutral-900: #111827;
 
   /* Status */
-  --color-status-success: #0F9D58;
+  --color-status-success: #079455;
   --color-status-success-bg: #DCFCE7;
   --color-status-success-text: #14532D;
-  --color-status-warning: #D97706;
+  --color-status-warning: #F79009;
   --color-status-warning-bg: #FEF3C7;
   --color-status-warning-text: #78350F;
-  --color-status-danger: #DC2626;
+  --color-status-danger: #D92D20;
   --color-status-danger-bg: #FEE2E2;
   --color-status-danger-text: #7F1D1D;
   --color-status-info: #2563EB;

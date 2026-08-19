@@ -271,3 +271,9 @@ export const adminGeneralApi = {
   
   impersonate: (entity_id, role) => api.post("/admin/impersonate", { entity_id, role })
 };
+
+export const notificationsApi = {
+  list: () => api.get("/notifications"),
+  markRead: (id) => api.patch(`/notifications/${id}/read`),
+  markAllRead: () => api.post("/notifications/read-all", {}),
+};

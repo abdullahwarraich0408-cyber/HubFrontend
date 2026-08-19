@@ -15,10 +15,10 @@ export function ContactPage() {
             Get in touch
           </div>
           <h1 className="text-[48px] md:text-[64px] font-[var(--font-heading)] font-bold text-white mb-6 leading-tight">
-            We're here to help.
+            We&apos;re here to help.
           </h1>
           <p className="text-[18px] text-white/80 max-w-2xl mx-auto leading-relaxed font-medium">
-            Whether you're a customer with an order issue, or a pharmacy looking to join our network, our team is ready to support you.
+            Whether you&apos;re a customer with an order issue, or a pharmacy looking to join our network, our team is ready to support you.
           </p>
         </div>
       </section>
@@ -83,7 +83,7 @@ export function ContactPage() {
                 </div>
                 <h3 className="text-[28px] font-bold text-white mb-3 tracking-tight">Become a Partner</h3>
                 <p className="text-white/70 text-[16px] mb-8 leading-relaxed">
-                  Join hundreds of verified pharmacies expanding their reach through Medzoos's digital network.
+                  Join hundreds of verified pharmacies expanding their reach through Medzoos&apos;s digital network.
                 </p>
                 <Button className="bg-white text-ink-900 hover:bg-neutral-100 font-bold rounded-xl w-full h-14 text-[16px]">
                   Partner Application <CaretRight size={20} className="ml-2" />

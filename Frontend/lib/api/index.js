@@ -286,6 +286,16 @@ export const healthApi = {
   check: () => api.get("/health"),
 };
 
+export const notificationsApi = {
+  list: () => api.get("/notifications"),
+  markRead: (id) => api.patch(`/notifications/${id}/read`),
+  markAllRead: () => api.post("/notifications/read-all", {}),
+};
+
+export const inquiriesApi = {
+  submit: (data) => api.post("/inquiries", data),
+};
+
 export const telehealthApi = {
   getChat: (appointmentId, options = {}) =>
     api.get(`/telehealth/appointments/${appointmentId}/chat`, options),

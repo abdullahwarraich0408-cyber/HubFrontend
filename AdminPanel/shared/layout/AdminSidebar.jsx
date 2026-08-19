@@ -22,7 +22,8 @@ import {
   Stethoscope,
   Flag,
   Globe,
-  MagnifyingGlass
+  MagnifyingGlass,
+  EnvelopeSimple,
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
 
@@ -49,6 +50,7 @@ const navGroups = [
     title: "OPERATIONS",
     items: [
       { name: "Orders & Fulfillment", path: "/admin/orders", icon: Package },
+      { name: "Leads & Inquiries", path: "/admin/inquiries", icon: EnvelopeSimple },
       { name: "Prescription Orders", path: "/admin/prescription-orders", icon: Pill },
       { name: "Financial & Payouts", path: "/admin/finance", icon: CurrencyDollar },
       { name: "Analytics & Reports", path: "/admin/analytics", icon: ChartLineUp },

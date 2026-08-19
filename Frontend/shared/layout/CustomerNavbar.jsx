@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import {
   MapPin,
-  Bell,
   ShoppingCart,
   CaretDown,
   Spinner,
@@ -28,6 +27,7 @@ import { useAuth } from "@/lib/auth/AuthProvider";
 import { usePrescriptionModal } from "@/features/prescription/context/PrescriptionModalContext";
 import { GlobalSearch } from "@/features/home/components/patient/GlobalSearch";
 import { UserMenu } from "@/features/home/components/patient/UserMenu";
+import { CustomerNotificationInbox } from "@/shared/notifications/NotificationInbox";
 import { cn } from "@/utils/cn";
 
 const HIGHLIGHTS = [
@@ -222,13 +222,7 @@ export function CustomerNavbar() {
                 </span>
               </Link>
 
-              <button
-                type="button"
-                className="relative rounded-xl p-2 text-[#334E68] transition-colors hover:bg-[#F1F7FA] hover:text-[#0B6E99]"
-                aria-label="Notifications"
-              >
-                <Bell size={20} />
-              </button>
+              <CustomerNotificationInbox isAuthenticated={isAuthenticated} />
 
               <Link
                 href="/cart"

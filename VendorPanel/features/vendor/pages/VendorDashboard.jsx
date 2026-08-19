@@ -1,26 +1,19 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Pill,
   CurrencyDollar,
   Warning,
-  ArrowUpRight,
-  ArrowDownRight,
-  Medal,
   Clock,
-  DownloadSimple,
   Plus,
-  DotsThree,
   Storefront,
-  TrendUp,
-  ChartLine,
-  Bell,
   MagnifyingGlass,
   ShoppingCart,
+  Medal,
 } from "@phosphor-icons/react";
 import {
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -29,81 +22,88 @@ import {
   Area,
   AreaChart,
 } from "recharts";
-import { Badge } from "@/shared/components/Badge";
 import Link from "next/link";
 import { partnerRoutes } from "@/lib/constants/partnerRoutes";
-import { useVendorProfile, useVendorDashboardStats, useVendorEarningsSummary } from "@/lib/hooks/useApi";
+import { useVendorProfile, useVendorDashboardStats, useSearchVendorProducts } from "@/lib/hooks/useApi";
+import { useDebouncedValue } from "@/lib/hooks/useDebouncedValue";
+import { VendorNotificationInbox } from "@/shared/notifications/NotificationInbox";
+import { MetricCard } from "@/shared/components/MetricCard";
+import { StatusBadge } from "@/shared/components/StatusBadge";
+import { formatPkr, formatDate, formatToday } from "@/lib/format";
 
 const containerVariants = {
   hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1 },
-  },
+  show: { opacity: 1, transition: { staggerChildren: 0.08 } },
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 16 },
   show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } },
 };
+
+function cleanTrend(value) {
+  return String(value || "").replace(/^[↑↓]\s*/, "");
+}
 
 export function VendorDashboard() {
   const { data: vendorProfile } = useVendorProfile();
   const { data: stats, isLoading } = useVendorDashboardStats();
-  const { data: earnings } = useVendorEarningsSummary();
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebouncedValue(search, 350);
+  const { data: searchResults = [] } = useSearchVendorProducts(debouncedSearch);
 
-  const today = new Date().toLocaleDateString("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-
+  const comparisons = stats?.comparisons || {};
   const chartData = stats?.monthlyPerformance?.length ? stats.monthlyPerformance : [];
-  const topProducts = stats?.topProducts || [];
   const recentOrders = stats?.recentOrders || [];
+  const lowStockAlerts = stats?.lowStockAlerts || [];
+  const expiringSoon = stats?.expiringSoon || [];
+  const prescriptionQueue = stats?.prescriptionQueue || [];
+  const earnings = stats?.earnings || {};
+
+  const emptyPharmacy = useMemo(
+    () => !isLoading && !(stats?.activeProducts || stats?.totalOrders),
+    [isLoading, stats]
+  );
 
   return (
-    <motion.div
-      className="flex flex-col gap-6 max-w-[1440px] mx-auto w-full p-4 md:p-6"
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-    >
-      <motion.div
-        variants={itemVariants}
-        className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-[var(--radius-xl)] border border-[var(--color-neutral-200)] shadow-[var(--shadow-card)]"
-      >
+    <motion.div className="flex flex-col gap-6 max-w-[1440px] mx-auto w-full" variants={containerVariants} initial="hidden" animate="show">
+      <motion.div variants={itemVariants} className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-[16px] border border-neutral-200 shadow-[var(--shadow-card)]">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-full icon-box-light flex items-center justify-center shrink-0">
-            <Storefront size={24} className="text-[var(--color-brand-primary)]" weight="fill" />
+            <Storefront size={24} className="text-brand-primary" weight="fill" />
           </div>
           <div>
-            <h1 className="font-[var(--font-heading)] text-2xl md:text-3xl font-bold text-[var(--color-ink-headline)] leading-tight">
+            <h1 className="font-heading text-2xl md:text-3xl font-bold text-ink-headline leading-tight">
               Welcome back, {vendorProfile?.business_name || "Vendor"}
             </h1>
-            <p className="text-[var(--color-neutral-500)] text-sm md:text-base">{today}</p>
+            <p className="text-neutral-500 text-sm md:text-base">{formatToday()}</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-[var(--color-neutral-100)] rounded-[var(--radius-md)] border border-[var(--color-neutral-200)]">
-            <MagnifyingGlass size={18} className="text-[var(--color-neutral-500)]" />
+        <div className="flex items-center gap-3 relative">
+          <div className="hidden md:flex items-center gap-2 px-4 h-[46px] bg-neutral-100 rounded-[8px] border border-neutral-200 relative">
+            <MagnifyingGlass size={18} className="text-neutral-500" />
             <input
-              type="text"
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
               placeholder="Search products..."
-              className="bg-transparent border-none outline-none text-sm text-[var(--color-neutral-700)] placeholder:text-[var(--color-neutral-500)]"
+              className="bg-transparent border-none outline-none text-sm text-neutral-700 placeholder:text-neutral-500 w-48"
+              aria-label="Search products"
             />
-          </div>
-          <button className="relative p-2 rounded-[var(--radius-md)] border border-[var(--color-neutral-200)] bg-white hover:bg-[var(--color-neutral-100)] transition-colors">
-            <Bell size={20} className="text-[var(--color-neutral-600)]" />
-            {(stats?.unreadNotifications || 0) > 0 ? (
-              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[var(--color-status-danger)] text-white text-[10px] font-bold flex items-center justify-center">
-                {stats.unreadNotifications}
-              </span>
+            {debouncedSearch && searchResults.length > 0 ? (
+              <div className="absolute left-0 top-full mt-2 w-[320px] bg-white border border-neutral-200 rounded-[12px] shadow-xl z-30 overflow-hidden">
+                {searchResults.slice(0, 6).map((product) => (
+                  <Link key={product.id} href={partnerRoutes.vendor.product(product.id)} className="block px-4 py-3 text-sm hover:bg-neutral-50">
+                    <p className="font-semibold text-ink-headline">{product.name}</p>
+                    <p className="text-xs text-neutral-500">{product.sku || product.generic_name || product.category}</p>
+                  </Link>
+                ))}
+              </div>
             ) : null}
-          </button>
+          </div>
+          <VendorNotificationInbox />
           <Link href={partnerRoutes.vendor.productsNew}>
-            <button className="flex items-center gap-2 px-4 py-2.5 bg-[var(--color-brand-primary)] text-white text-sm font-semibold rounded-[var(--radius-md)] hover:bg-[var(--color-brand-dark)] transition-colors shadow-[var(--shadow-card)]">
+            <button type="button" className="flex items-center gap-2 px-4 h-[46px] bg-brand-primary text-white text-sm font-semibold rounded-[8px] hover:bg-brand-dark transition-colors">
               <Plus size={18} weight="bold" />
               <span className="hidden sm:inline">New Product</span>
             </button>
@@ -112,239 +112,177 @@ export function VendorDashboard() {
       </motion.div>
 
       {isLoading ? (
-        <div className="text-sm text-neutral-500">Loading your dashboard...</div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          {Array.from({ length: 7 }).map((_, index) => (
+            <MetricCard key={index} loading />
+          ))}
+        </div>
       ) : (
-        <>
-          <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            <KPICard
-              title="Total Revenue"
-              value={`PKR ${(stats?.totalRevenue || 0).toLocaleString()}`}
-              trend={stats?.totalRevenue ? "+live" : "0"}
-              positive={Boolean(stats?.totalRevenue)}
-              icon={CurrencyDollar}
-              color="var(--color-brand-primary)"
-            />
-            <KPICard
-              title="Orders Today"
-              value={stats?.ordersToday || 0}
-              trend="today"
-              positive={Boolean(stats?.ordersToday)}
-              icon={ShoppingCart}
-              color="var(--color-status-info)"
-            />
-            <KPICard
-              title="Active Products"
-              value={stats?.activeProducts || 0}
-              trend="listed"
-              positive
-              icon={Pill}
-              color="var(--color-status-success)"
-            />
-            <KPICard
-              title="Low Stock"
-              value={stats?.lowStock || 0}
-              trend={stats?.lowStock ? "alert" : "ok"}
-              positive={!stats?.lowStock}
-              icon={Warning}
-              color="var(--color-status-danger)"
-            />
-            <KPICard
-              title="Rx Acceptance"
-              value={`${stats?.performance?.prescriptionAcceptanceRate || 0}%`}
-              trend="prescriptions"
-              positive={(stats?.performance?.prescriptionAcceptanceRate || 0) >= 70}
-              icon={Medal}
-              color="var(--color-rating)"
-            />
-            <KPICard
-              title="Avg Response"
-              value={`${stats?.performance?.averageResponseMinutes || 0} min`}
-              trend="offers"
-              positive={(stats?.performance?.averageResponseMinutes || 0) <= 10}
-              icon={Clock}
-              color="var(--color-status-info)"
-            />
-            <KPICard
-              title="Net Earnings"
-              value={`PKR ${(earnings?.totals?.net || 0).toLocaleString()}`}
-              trend="after fees"
-              positive
-              icon={CurrencyDollar}
-              color="var(--color-status-success)"
-            />
-          </motion.div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-            <motion.div
-              variants={itemVariants}
-              className="lg:col-span-2 bg-white rounded-[var(--radius-xl)] border border-[var(--color-neutral-200)] shadow-[var(--shadow-card)] flex flex-col p-6"
-            >
-              <div className="mb-6">
-                <h3 className="font-[var(--font-heading)] text-xl font-bold text-[var(--color-ink-headline)]">
-                  Sales Performance
-                </h3>
-                <p className="text-[var(--color-neutral-500)] text-sm">Your monthly revenue and orders</p>
-              </div>
-              <div className="flex-1 min-h-[300px] w-full">
-                {chartData.length === 0 ? (
-                  <div className="h-full flex items-center justify-center text-sm text-neutral-500">
-                    No sales data yet for your store.
-                  </div>
-                ) : (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                      <defs>
-                        <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="var(--color-brand-primary)" stopOpacity={0.2} />
-                          <stop offset="95%" stopColor="var(--color-brand-primary)" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-neutral-200)" />
-                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "var(--color-neutral-500)" }} dy={10} />
-                      <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "var(--color-neutral-500)" }} tickFormatter={(val) => `PKR ${val / 1000}k`} />
-                      <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "var(--color-neutral-500)" }} />
-                      <Tooltip contentStyle={{ borderRadius: "12px", border: "1px solid var(--color-neutral-200)", fontSize: "13px", padding: "12px" }} />
-                      <Area yAxisId="left" type="monotone" dataKey="revenue" stroke="var(--color-brand-primary)" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
-                      <Line yAxisId="right" type="monotone" dataKey="orders" stroke="var(--color-status-info)" strokeWidth={2} dot={{ r: 3 }} />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                )}
-              </div>
-            </motion.div>
-
-            <div className="lg:col-span-1 flex flex-col gap-4 md:gap-6">
-              <motion.div variants={itemVariants} className="bg-white rounded-[var(--radius-xl)] shadow-[var(--shadow-card)] border border-[var(--color-neutral-200)] flex flex-col">
-                <div className="p-6 border-b border-[var(--color-neutral-200)]">
-                  <h3 className="font-[var(--font-heading)] text-lg font-semibold text-[var(--color-ink-headline)]">
-                    Top Selling
-                  </h3>
-                </div>
-                <div className="p-4 flex flex-col gap-1">
-                  {topProducts.length === 0 ? (
-                    <p className="p-4 text-sm text-neutral-500 text-center">No sales yet.</p>
-                  ) : (
-                    topProducts.map((product) => (
-                      <div key={product.name} className="flex items-center gap-4 p-3 rounded-[var(--radius-md)] hover:bg-[var(--color-surface-subtle)] transition-colors">
-                        <div className="relative shrink-0">
-                          <div className="w-10 h-10 rounded-[var(--radius-md)] icon-box-light flex items-center justify-center font-bold text-sm">
-                            {product.name.charAt(0)}
-                          </div>
-                          {product.rank <= 3 && (
-                            <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-white shadow-sm border border-[var(--color-neutral-200)] flex items-center justify-center">
-                              <Medal size={14} weight="fill" className={product.rank === 1 ? "text-[var(--color-rating)]" : product.rank === 2 ? "text-[var(--color-neutral-500)]" : "text-amber-700"} />
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-sm font-semibold text-[var(--color-ink-headline)] truncate">{product.name}</h4>
-                          <p className="text-xs text-[var(--color-neutral-500)]">{product.sales} units sold</p>
-                        </div>
-                        <div className="text-right text-sm font-bold text-[var(--color-brand-primary)]">
-                          PKR {Math.round(product.revenue).toLocaleString()}
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </motion.div>
-
-              <motion.div variants={itemVariants} className="bg-gradient-to-br from-[var(--color-brand-light)] to-[var(--color-brand-primary)] rounded-[var(--radius-xl)] p-6 text-[var(--color-brand-dark)]">
-                <h3 className="font-[var(--font-heading)] text-lg font-bold mb-4">Quick Actions</h3>
-                <div className="grid grid-cols-2 gap-3">
-                  <Link href={partnerRoutes.vendor.orders}>
-                    <button className="flex flex-col items-center gap-2 p-4 bg-white/90 backdrop-blur rounded-[var(--radius-md)] hover:bg-white transition-colors shadow-sm w-full">
-                      <ShoppingCart size={24} weight="bold" className="text-[var(--color-brand-primary)]" />
-                      <span className="text-sm font-semibold">Orders</span>
-                    </button>
-                  </Link>
-                  <Link href={partnerRoutes.vendor.products}>
-                    <button className="flex flex-col items-center gap-2 p-4 bg-white/90 backdrop-blur rounded-[var(--radius-md)] hover:bg-white transition-colors shadow-sm w-full">
-                      <Pill size={24} weight="bold" className="text-[var(--color-brand-primary)]" />
-                      <span className="text-sm font-semibold">Products</span>
-                    </button>
-                  </Link>
-                  <Link href={partnerRoutes.vendor.reports}>
-                    <button className="flex flex-col items-center gap-2 p-4 bg-white/90 backdrop-blur rounded-[var(--radius-md)] hover:bg-white transition-colors shadow-sm w-full">
-                      <TrendUp size={24} weight="bold" className="text-[var(--color-brand-primary)]" />
-                      <span className="text-sm font-semibold">Analytics</span>
-                    </button>
-                  </Link>
-                  <Link href={partnerRoutes.vendor.settings}>
-                    <button className="flex flex-col items-center gap-2 p-4 bg-white/90 backdrop-blur rounded-[var(--radius-md)] hover:bg-white transition-colors shadow-sm w-full">
-                      <ChartLine size={24} weight="bold" className="text-[var(--color-brand-primary)]" />
-                      <span className="text-sm font-semibold">Settings</span>
-                    </button>
-                  </Link>
-                </div>
-              </motion.div>
-            </div>
-          </div>
-
-          <motion.div variants={itemVariants} className="bg-white rounded-[var(--radius-xl)] shadow-[var(--shadow-card)] border border-[var(--color-neutral-200)] overflow-hidden">
-            <div className="p-6 border-b border-[var(--color-neutral-200)] flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <h3 className="font-[var(--font-heading)] text-xl font-bold text-[var(--color-ink-headline)]">Recent Orders</h3>
-                <p className="text-[var(--color-neutral-500)] text-sm mt-1">Last orders for your pharmacy only</p>
-              </div>
-              <Link href={partnerRoutes.vendor.orders} className="text-sm font-semibold text-[var(--color-brand-primary)] hover:underline">
-                View All Orders
-              </Link>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-[var(--color-surface-subtle)] border-b border-[var(--color-neutral-200)]">
-                    <th className="py-4 px-6 text-xs uppercase tracking-wider text-[var(--color-neutral-500)] font-bold">Order ID</th>
-                    <th className="py-4 px-6 text-xs uppercase tracking-wider text-[var(--color-neutral-500)] font-bold">Customer</th>
-                    <th className="py-4 px-6 text-xs uppercase tracking-wider text-[var(--color-neutral-500)] font-bold">Items</th>
-                    <th className="py-4 px-6 text-xs uppercase tracking-wider text-[var(--color-neutral-500)] font-bold">Status</th>
-                    <th className="py-4 px-6 text-xs uppercase tracking-wider text-[var(--color-neutral-500)] font-bold text-right">Amount</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[var(--color-neutral-200)]">
-                  {recentOrders.length === 0 ? (
-                    <tr>
-                      <td colSpan={5} className="py-8 text-center text-sm text-neutral-500">
-                        No orders yet for your store.
-                      </td>
-                    </tr>
-                  ) : (
-                    recentOrders.map((order) => (
-                      <tr key={order.id} className="hover:bg-[var(--color-surface-subtle)]/50 transition-colors">
-                        <td className="py-4 px-6 text-sm font-bold">{String(order.id).slice(0, 8)}</td>
-                        <td className="py-4 px-6 text-sm">{order.customer}</td>
-                        <td className="py-4 px-6 text-sm">{order.items} items</td>
-                        <td className="py-4 px-6"><Badge status={order.status} /></td>
-                        <td className="py-4 px-6 text-right text-sm font-bold">PKR {Number(order.amount || 0).toLocaleString()}</td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </motion.div>
-        </>
+        <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          <MetricCard title="Total Revenue" value={formatPkr(stats?.totalRevenue)} trend={cleanTrend(comparisons.totalRevenue)} positive={comparisons.totalRevenuePositive !== false} icon={CurrencyDollar} />
+          <MetricCard title="Orders Today" value={stats?.ordersToday || 0} trend={cleanTrend(comparisons.ordersToday)} positive={comparisons.ordersTodayPositive !== false} icon={ShoppingCart} color="var(--color-status-info)" />
+          <MetricCard title="Active Products" value={stats?.activeProducts || 0} trend={cleanTrend(comparisons.activeProducts)} positive icon={Pill} color="var(--color-status-success)" />
+          <MetricCard title="Low Stock" value={stats?.lowStock || 0} trend={cleanTrend(comparisons.lowStock)} positive={!stats?.lowStock} icon={Warning} color="var(--color-status-danger)" />
+          <MetricCard title="RX Acceptance" value={`${stats?.performance?.prescriptionAcceptanceRate || 0}%`} trend={cleanTrend(comparisons.rxAcceptance)} positive={(stats?.performance?.prescriptionAcceptanceRate || 0) >= 70} icon={Medal} color="var(--color-rating)" />
+          <MetricCard title="Avg Response" value={stats?.performance?.averageResponseLabel || "0 min"} trend={cleanTrend(comparisons.avgResponse)} positive={(stats?.performance?.averageResponseMinutes || 0) <= 30} icon={Clock} color="var(--color-status-info)" />
+          <MetricCard title="Net Earnings" value={formatPkr(earnings.net || 0)} trend={cleanTrend(comparisons.netEarnings) || "after fees"} positive icon={CurrencyDollar} color="var(--color-status-success)" />
+        </motion.div>
       )}
+
+      {emptyPharmacy ? (
+        <div className="bg-white border border-neutral-200 rounded-[16px] p-8 text-center">
+          <p className="font-semibold text-ink-headline">Add your first product to start selling on Medzoos.</p>
+          <Link href={partnerRoutes.vendor.productsNew} className="inline-block mt-3 text-sm font-semibold text-brand-primary hover:underline">
+            Add Product
+          </Link>
+        </div>
+      ) : null}
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+        <motion.div variants={itemVariants} className="lg:col-span-2 bg-white rounded-[16px] border border-neutral-200 p-6">
+          <h3 className="font-heading text-xl font-bold text-ink-headline">Sales Overview</h3>
+          <p className="text-neutral-500 text-sm mb-4">Revenue trend for the last six months</p>
+          <div className="min-h-[260px]">
+            {chartData.length === 0 ? (
+              <div className="h-[260px] flex items-center justify-center text-sm text-neutral-500">No sales data yet for your store.</div>
+            ) : (
+              <ResponsiveContainer width="100%" height={260}>
+                <AreaChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-neutral-200)" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "var(--color-neutral-500)" }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "var(--color-neutral-500)" }} />
+                  <Tooltip />
+                  <Area type="monotone" dataKey="revenue" stroke="var(--color-brand-primary)" strokeWidth={3} fill="var(--color-brand-light)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </motion.div>
+
+        <motion.div variants={itemVariants} className="bg-white rounded-[16px] border border-neutral-200 p-6">
+          <h3 className="font-heading text-lg font-semibold mb-4">Quick Actions</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <QuickLink href={partnerRoutes.vendor.productsNew} label="Add Product" />
+            <QuickLink href={partnerRoutes.vendor.inventory} label="Update Stock" />
+            <QuickLink href={partnerRoutes.vendor.prescriptionOrders} label="Review Prescriptions" />
+            <QuickLink href={`${partnerRoutes.vendor.orders}?status=NEW`} label="View Pending Orders" />
+          </div>
+        </motion.div>
+      </div>
+
+      <DashboardTable
+        title="Recent Orders"
+        href={partnerRoutes.vendor.orders}
+        headers={["Order", "Customer", "Items", "Amount", "Status", "Time"]}
+        empty="No orders yet for your store."
+        rows={recentOrders.map((order) => [
+          order.order_number || String(order.id).slice(0, 8),
+          order.customer,
+          order.items,
+          formatPkr(order.amount),
+          <StatusBadge key={order.id} status={order.status} kind="order" />,
+          formatDate(order.created_at, true),
+        ])}
+      />
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <MiniList
+          title="Low Stock Alerts"
+          empty="No low stock products."
+          items={lowStockAlerts.map((item) => ({ id: item.id, title: item.name, meta: `${item.stock} left · alert at ${item.threshold}` }))}
+          href={partnerRoutes.vendor.inventory}
+        />
+        <MiniList
+          title="Expiring Soon"
+          empty="No batches expiring soon."
+          items={expiringSoon.map((item) => ({ id: item.id, title: item.product, meta: `${item.quantity} units · ${formatDate(item.expiry_date)}` }))}
+          href={partnerRoutes.vendor.batches}
+        />
+        <MiniList
+          title="Prescription Queue"
+          empty="No prescription requests awaiting review."
+          items={prescriptionQueue.map((item) => ({ id: item.id, title: item.patient, meta: `${item.items} items · ${item.status}` }))}
+          href={partnerRoutes.vendor.prescriptionOrders}
+        />
+      </div>
     </motion.div>
   );
 }
 
-function KPICard({ title, value, trend, positive, icon: Icon, color }) {
+function QuickLink({ href, label }) {
   return (
-    <div className="bg-white p-5 md:p-6 rounded-[var(--radius-xl)] border border-[var(--color-neutral-200)] shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all group overflow-hidden relative">
-      <div className="flex justify-between items-start mb-4">
-        <div className="w-10 h-10 rounded-[var(--radius-md)] flex items-center justify-center" style={{ backgroundColor: `${color}10` }}>
-          <Icon size={20} style={{ color }} weight="fill" />
-        </div>
-        <div className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md ${positive ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"}`}>
-          {positive ? <ArrowUpRight size={12} weight="bold" /> : <ArrowDownRight size={12} weight="bold" />}
-          {trend}
-        </div>
+    <Link href={href} className="rounded-[12px] border border-neutral-200 px-3 py-4 text-center text-sm font-semibold hover:bg-neutral-50">
+      {label}
+    </Link>
+  );
+}
+
+function DashboardTable({ title, href, headers, rows, empty }) {
+  return (
+    <div className="bg-white rounded-[16px] border border-neutral-200 overflow-hidden">
+      <div className="p-6 border-b border-neutral-200 flex items-center justify-between">
+        <h3 className="font-heading text-xl font-bold">{title}</h3>
+        <Link href={href} className="text-sm font-semibold text-brand-primary hover:underline">
+          View all
+        </Link>
       </div>
-      <div>
-        <p className="text-xs md:text-sm text-[var(--color-neutral-500)] font-semibold uppercase tracking-wider mb-1">{title}</p>
-        <h4 className="text-2xl md:text-3xl font-[var(--font-heading)] font-bold text-[var(--color-ink-headline)] leading-none">{value}</h4>
+      <div className="overflow-x-auto">
+        <table className="w-full text-left">
+          <thead>
+            <tr className="bg-neutral-50 border-b border-neutral-200">
+              {headers.map((header) => (
+                <th key={header} className="py-4 px-6 text-xs uppercase tracking-wider text-neutral-500 font-bold">
+                  {header}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-neutral-200">
+            {rows.length === 0 ? (
+              <tr>
+                <td colSpan={headers.length} className="py-8 text-center text-sm text-neutral-500">
+                  {empty}
+                </td>
+              </tr>
+            ) : (
+              rows.map((cells, index) => (
+                <tr key={index} className="hover:bg-neutral-50/50">
+                  {cells.map((cell, cellIndex) => (
+                    <td key={cellIndex} className="py-4 px-6 text-sm">
+                      {cell}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
+    </div>
+  );
+}
+
+function MiniList({ title, items, empty, href }) {
+  return (
+    <div className="bg-white rounded-[16px] border border-neutral-200 p-6">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="font-heading text-lg font-semibold">{title}</h3>
+        <Link href={href} className="text-xs font-semibold text-brand-primary">
+          View
+        </Link>
+      </div>
+      {items.length === 0 ? (
+        <p className="text-sm text-neutral-500">{empty}</p>
+      ) : (
+        <div className="space-y-3">
+          {items.map((item) => (
+            <div key={item.id}>
+              <p className="text-sm font-semibold text-ink-headline">{item.title}</p>
+              <p className="text-xs text-neutral-500">{item.meta}</p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

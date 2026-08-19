@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { 
-  Bell, 
   MagnifyingGlass, 
   Globe, 
   ShieldCheck
 } from "@phosphor-icons/react";
+import { NotificationInbox } from "@/shared/notifications/NotificationInbox";
+import { getAdminSocket } from "@/lib/socket";
 
 export function AdminHeader() {
   const [time, setTime] = useState("");
@@ -60,13 +61,7 @@ export function AdminHeader() {
           <span>System Operational</span>
         </div>
 
-        {/* Notification Bell */}
-        <button 
-          title="Notifications" 
-          className="relative w-9 h-9 rounded-xl bg-[#F8FAFC] hover:bg-[#0C1A2E]/5 border border-[#0C1A2E]/10 flex items-center justify-center text-[#0C1A2E] transition-colors"
-        >
-          <Bell size={18} />
-        </button>
+        <NotificationInbox getSocket={getAdminSocket} />
 
         {/* Minimal Profile Widget */}
         <div className="flex items-center gap-3 pl-3 border-l border-[#0C1A2E]/10">

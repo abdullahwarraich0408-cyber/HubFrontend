@@ -69,6 +69,8 @@ export const productsApi = {
   getReviews: (id) => api.get(`/products/${id}/reviews`),
   create: (data) => api.post("/products", data),
   update: (id, data) => api.patch(`/products/${id}`, data),
+  duplicate: (id) => api.post(`/products/${id}/duplicate`),
+  setListing: (id, listing_status) => api.patch(`/products/${id}/listing`, { listing_status }),
   delete: (id) => api.delete(`/products/${id}`),
 };
 
@@ -91,7 +93,24 @@ export const vendorsApi = {
   updateOperatingHours: (hours) => api.put("/vendors/operating-hours", { hours }),
   getServiceAreas: () => api.get("/vendors/service-areas"),
   updateServiceAreas: (areas) => api.put("/vendors/service-areas", { areas }),
-  getMyProducts: () => api.get("/vendors/products/mine"),
+  getMyProducts: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return api.get(query ? `/vendors/products/mine?${query}` : "/vendors/products/mine");
+  },
+  getMyProduct: (id) => api.get(`/vendors/products/${id}`),
+  searchMyProducts: (q) => api.get(`/vendors/products/search?q=${encodeURIComponent(q || "")}`),
+  getCatalog: () => api.get("/vendors/catalog"),
+  getSalesReport: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return api.get(query ? `/vendors/sales-report?${query}` : "/vendors/sales-report");
+  },
+  getPayoutOverview: () => api.get("/vendors/payouts/overview"),
+  getStaff: () => api.get("/vendors/staff"),
+  inviteStaff: (data) => api.post("/vendors/staff", data),
+  updateStaff: (id, data) => api.patch(`/vendors/staff/${id}`, data),
+  changePassword: (data) => api.post("/vendors/security/password", data),
+  getLoginActivity: () => api.get("/vendors/security/activity"),
+  signOutOthers: () => api.post("/vendors/security/sign-out-others", {}),
   getDashboardStats: () => api.get("/vendors/dashboard/stats"),
   register: (data) => api.post("/vendors/register", data),
   getOnboardingStatus: (id) => api.get(`/vendors/onboarding-status/${id}`),
@@ -107,11 +126,36 @@ export const vendorsApi = {
 };
 
 export const inventoryApi = {
-  bulkImport: (file) => {
+  bulkImport: (file, params = {}) => {
     const formData = new FormData();
     formData.append("file", file);
-    return api.post("/vendor/inventory/bulk", formData);
+    const query = new URLSearchParams(params).toString();
+    return api.post(query ? `/vendor/inventory/bulk?${query}` : "/vendor/inventory/bulk", formData);
   },
+  validateImport: (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return api.post("/vendor/inventory/validate", formData);
+  },
+  list: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return api.get(query ? `/vendor/inventory?${query}` : "/vendor/inventory");
+  },
+  batches: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return api.get(query ? `/vendor/inventory/batches?${query}` : "/vendor/inventory/batches");
+  },
+  addBatch: (data) => api.post("/vendor/inventory/batches", data),
+  expiring: () => api.get("/vendor/inventory/expiring"),
+  lowStock: () => api.get("/vendor/inventory/low-stock"),
+  updateStock: (id, stock, reason) => api.put(`/vendor/products/${id}/stock`, { stock, reason }),
+  adjust: (id, data) => api.post(`/vendor/inventory/${id}/adjust`, data),
+};
+
+export const returnsApi = {
+  getVendorReturns: () => api.get("/vendor/returns"),
+  updateVendorReturn: (id, data) => api.patch(`/vendor/returns/${id}`, data),
+  processReturn: (id, data) => api.post(`/vendor/returns/${id}/process`, data),
 };
 
 export const cartApi = {
@@ -130,8 +174,11 @@ export const ordersApi = {
   getAdminAll: () => api.get("/admin/orders"),
   getById: (id) => api.get(`/orders/${id}`),
   create: (data) => api.post("/orders", data),
-  getVendorOrders: () => api.get("/orders/vendor"),
-  updateStatus: (id, status) => api.patch(`/orders/${id}/status`, { status }),
+  getVendorOrders: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return api.get(query ? `/orders/vendor?${query}` : "/orders/vendor");
+  },
+  updateStatus: (id, status, extra = {}) => api.patch(`/orders/${id}/status`, { status, ...extra }),
 };
 
 export const usersApi = {
@@ -187,11 +234,14 @@ export const prescriptionsApi = {
 export const prescriptionOrdersApi = {
   getVendorOrders: () => api.get("/prescription-orders/vendor"),
   getVendorHistory: () => api.get("/prescription-orders/vendor/history"),
+  getById: (id) => api.get(`/prescription-orders/${id}`),
+  getDocument: (id) => api.get(`/prescription-orders/${id}/document`),
   accept: (id) => api.post(`/prescription-orders/${id}/accept`),
   decline: (id) => api.post(`/prescription-orders/${id}/decline`),
   confirmStock: (id, data) => api.post(`/prescription-orders/${id}/stock`, data),
   markPacked: (id) => api.post(`/prescription-orders/${id}/packed`),
   updateStatus: (id, status) => api.patch(`/prescription-orders/${id}/status`, { status }),
+  review: (id, data) => api.post(`/prescription-orders/${id}/review`, data),
 };
 
 export const uploadApi = {
@@ -214,8 +264,12 @@ export const paymentsApi = {
 };
 
 export const notificationsApi = {
+  list: () => api.get("/notifications"),
+  markRead: (id) => api.patch(`/notifications/${id}/read`),
+  markAllRead: () => api.post("/notifications/read-all", {}),
   getVendorNotifications: () => api.get("/notifications/vendor"),
   markVendorNotificationRead: (id) => api.patch(`/notifications/vendor/${id}/read`),
+  markAllVendorRead: () => api.post("/notifications/vendor/read-all", {}),
   createTestNotification: () => api.post("/notifications/test", {}),
 };
 

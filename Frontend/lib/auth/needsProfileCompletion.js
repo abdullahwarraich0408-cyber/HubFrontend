@@ -1,4 +1,4 @@
-const PLACEHOLDER_EMAIL = /@(firebase|dev)\.medzoos\.local$/i;
+const PLACEHOLDER_EMAIL = /@dev\.medzoos\.local$/i;
 
 export function needsProfileCompletion(user) {
   if (!user) return false;

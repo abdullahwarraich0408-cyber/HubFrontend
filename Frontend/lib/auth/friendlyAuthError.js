@@ -22,11 +22,7 @@ export function friendlyAuthError(err, fallback = "Something went wrong. Please 
   const code = err?.code || "";
 
   if (code === "auth/unauthorized-domain" || /unauthorized-domain|domain is not authorized/i.test(lower)) {
-    return "This website domain is not authorized for Google sign-in. Add it in the Firebase project the live site actually uses.";
-  }
-
-  if (code === "auth/operation-not-allowed") {
-    return "Google sign-in is not enabled in Firebase yet. Enable the Google provider under Authentication → Sign-in method.";
+    return fallback;
   }
 
   if (code === "auth/popup-blocked") {
@@ -64,7 +60,7 @@ export function friendlyAuthError(err, fallback = "Something went wrong. Please 
   }
 
   if (message && message.length <= 140 && !message.includes("\n")) {
-    return message.replace(/^Firebase:\s*/i, "").trim();
+    return message.trim();
   }
 
   return fallback;

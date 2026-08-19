@@ -7,8 +7,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Envelope,
   Lock,
-  GoogleLogo,
-  AppleLogo,
   Pill,
   ShieldCheck,
   Truck,
@@ -30,10 +28,9 @@ export function SignInForm({
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
   
   const router = useRouter();
-  const { loginWithEmail, loginWithGoogle } = useAuth();
+  const { loginWithEmail } = useAuth();
   const isModal = variant === "modal";
 
   const handlePostLogin = async () => {
@@ -67,18 +64,6 @@ export function SignInForm({
       toast.error(typeof err === "string" ? err : err?.message || "Sign in failed");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleGoogleLogin = async () => {
-    setGoogleLoading(true);
-    try {
-      await loginWithGoogle();
-      await handlePostLogin();
-    } catch (err) {
-      toast.error(typeof err === "string" ? err : err?.message || "Google sign in failed");
-    } finally {
-      setGoogleLoading(false);
     }
   };
 
@@ -244,7 +229,7 @@ export function SignInForm({
 
           <Button
             type="submit"
-            disabled={loading || googleLoading}
+              disabled={loading}
             className="w-full h-[52px] text-[15px] font-bold mt-2 rounded-xl bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-brand-dark)] hover:from-[var(--color-brand-dark)] hover:to-[#093f41] text-white transition-all shadow-[0_8px_20px_rgba(11,110,114,0.25)] hover:shadow-[0_12px_24px_rgba(11,110,114,0.35)] flex justify-center items-center group border-none hover:-translate-y-0.5"
           >
             {loading ? "Signing in..." : "Sign In"}
@@ -252,53 +237,10 @@ export function SignInForm({
           </Button>
         </motion.form>
 
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3, duration: 0.5 }}
-          className="relative my-8"
-        >
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-[var(--color-neutral-200)]" />
-          </div>
-          <div className="relative flex justify-center text-[12px]">
-            <span className="px-5 bg-transparent backdrop-blur-sm text-[var(--color-neutral-400)] font-bold uppercase tracking-widest">
-              Or continue with
-            </span>
-          </div>
-        </motion.div>
-
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.5 }}
-          className="grid grid-cols-2 gap-4"
-        >
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={handleGoogleLogin}
-            disabled={loading || googleLoading}
-            className="w-full h-[48px] text-[14px] font-bold bg-white border border-[var(--color-neutral-200)] hover:bg-[var(--color-neutral-50)] hover:border-[var(--color-neutral-300)] hover:shadow-md transition-all text-[var(--color-neutral-800)] flex items-center justify-center disabled:opacity-50 hover:-translate-y-0.5"
-          >
-            <GoogleLogo size={20} className="mr-2 text-[#DB4437]" weight="bold" />
-            {googleLoading ? "Wait..." : "Google"}
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            disabled={loading || googleLoading}
-            className="w-full h-[48px] text-[14px] font-bold bg-white border border-[var(--color-neutral-200)] hover:bg-[var(--color-neutral-50)] hover:border-[var(--color-neutral-300)] hover:shadow-md transition-all text-[var(--color-neutral-800)] flex items-center justify-center hover:-translate-y-0.5"
-          >
-            <AppleLogo size={20} className="mr-2 text-black" weight="fill" />
-            Apple
-          </Button>
-        </motion.div>
-
         <motion.p 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.5, duration: 0.5 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
           className="mt-8 text-[15px] text-[var(--color-neutral-600)] text-center font-medium"
         >
           Don&apos;t have an account?{" "}

@@ -55,12 +55,6 @@ export const labPortalApi = {
 export const authApi = {
   register: (data) => api.post("/auth/register", data),
   login: (data) => api.post("/auth/login", data),
-  // Real phone-OTP: send Firebase idToken → get JWT back
-  phoneLogin: (data) => api.post("/auth/firebase", data),
-  // Legacy / Google / Apple Firebase exchange
-  firebaseLogin: (data) => api.post("/auth/firebase", data),
-  googleLogin: (data) => api.post("/auth/google", data),
-  appleLogin: (data) => api.post("/auth/apple", data),
   refresh: (data) => api.post("/auth/refresh", data),
   devLogin: (data) => api.post("/auth/dev-login", data),
   me: () => api.get("/auth/me"),

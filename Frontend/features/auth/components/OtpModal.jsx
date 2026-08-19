@@ -8,9 +8,9 @@ import { normalizePhoneNumber } from "@/lib/auth/phoneUtils";
 import {
   DEV_TEST_OTP,
   DEV_TEST_PHONE,
-  formatFirebaseAuthError,
+  formatAuthError,
   isTestAuthEnabled,
-} from "@/lib/auth/firebaseErrors";
+} from "@/lib/auth/testAuth";
 
 const showTestAuth = isTestAuthEnabled();
 
@@ -38,7 +38,7 @@ export function OtpModal({ open, onClose, onSuccess, phone: initialPhone = "" })
       setConfirmation(result);
       setStep("otp");
     } catch (err) {
-      setError(formatFirebaseAuthError(err));
+      setError(formatAuthError(err));
     } finally {
       setLoading(false);
     }
@@ -53,7 +53,7 @@ export function OtpModal({ open, onClose, onSuccess, phone: initialPhone = "" })
       onSuccess?.();
       onClose?.();
     } catch (err) {
-      setError(formatFirebaseAuthError(err));
+      setError(formatAuthError(err));
     } finally {
       setLoading(false);
     }
@@ -87,7 +87,7 @@ export function OtpModal({ open, onClose, onSuccess, phone: initialPhone = "" })
           <div className="text-xs text-[var(--color-neutral-600)] bg-[var(--color-neutral-50)] border border-[var(--color-neutral-200)] rounded-lg px-3 py-2 mb-3 space-y-2">
             <p className="font-semibold text-[var(--color-ink-headline)]">Test login (no SMS)</p>
             <p>
-              Dev login (no Firebase SMS): use{" "}
+              Dev login: use{" "}
               <code className="text-[11px]">{DEV_TEST_PHONE}</code> → OTP{" "}
               <code className="text-[11px]">{DEV_TEST_OTP}</code>
             </p>
@@ -158,7 +158,6 @@ export function OtpModal({ open, onClose, onSuccess, phone: initialPhone = "" })
           />
         </div>
 
-        <div id="recaptcha-container" />
       </div>
     </div>
   );

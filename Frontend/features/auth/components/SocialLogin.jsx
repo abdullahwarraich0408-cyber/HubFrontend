@@ -4,8 +4,6 @@ import { useMemo, useState } from "react";
 import { AppleLogo, GoogleLogo } from "@phosphor-icons/react";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { friendlyAuthError } from "@/lib/auth/friendlyAuthError";
-import { formatFirebaseAuthError } from "@/lib/auth/firebaseErrors";
-import { isFirebaseConfigured } from "@/lib/firebase";
 import { AuthError } from "./AuthError";
 
 function isApplePlatform() {
@@ -19,8 +17,6 @@ export function SocialLogin({ onSuccess }) {
   const [error, setError] = useState("");
   const showApple = useMemo(() => isApplePlatform() && typeof loginWithApple === "function", [loginWithApple]);
 
-  if (!isFirebaseConfigured()) return null;
-
   const run = async (provider, action) => {
     setError("");
     setLoading(provider);
@@ -28,10 +24,8 @@ export function SocialLogin({ onSuccess }) {
       const user = await action();
       if (user) onSuccess?.(user);
     } catch (err) {
-      const firebaseMessage = err?.code ? formatFirebaseAuthError(err) : "";
       setError(
-        firebaseMessage ||
-          friendlyAuthError(err, `${provider === "apple" ? "Apple" : "Google"} sign-in could not be completed. Please try again.`)
+        friendlyAuthError(err, `${provider === "apple" ? "Apple" : "Google"} sign-in could not be completed. Please try again.`)
       );
     } finally {
       setLoading("");

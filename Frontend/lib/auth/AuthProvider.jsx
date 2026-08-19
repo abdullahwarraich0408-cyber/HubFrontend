@@ -16,31 +16,17 @@ import {
   isTestAuthEnabled,
   isDevTestOtp,
   isDevTestPhone,
-} from "@/lib/auth/firebaseErrors";
+} from "@/lib/auth/testAuth";
 import { normalizePhoneNumber } from "@/lib/auth/phoneUtils";
-import {
-  isFirebaseConfigured,
-  sendWebPhoneOtp,
-  signInWithGooglePopup,
-  signInWithApplePopup,
-  getGoogleRedirectIdToken,
-  signInWithFirebaseCustomToken,
-  verifyWebPhoneOtp,
-} from "@/lib/firebase";
 
 const AuthContext = createContext(null);
-
-async function exchangeFirebaseToken(idToken) {
-  // Send the Firebase ID token to the backend to receive JWT tokens
-  return authApi.phoneLogin({ idToken, deviceId: getDeviceId(), platform: "web" });
-}
 
 function mapSession(data) {
   const tokens = data.tokens ?? {
     accessToken: data.accessToken,
     refreshToken: data.refreshToken,
   };
-  return { user: data.user, tokens, firebaseCustomToken: data.firebaseCustomToken ?? null };
+  return { user: data.user, tokens };
 }
 
 
@@ -100,48 +86,12 @@ export function AuthProvider({ children }) {
     };
   }, [refreshSession]);
 
-  const completeFirebaseLogin = useCallback(
-    async (idToken) => {
-      const data = await exchangeFirebaseToken(idToken);
-      const { user: sessionUser, tokens } = mapSession(data);
-      if (!tokens?.accessToken) throw new Error("Invalid authentication response");
-      applySession(sessionUser, tokens);
-      return sessionUser;
-    },
-    [applySession]
-  );
-
-  useEffect(() => {
-    let active = true;
-
-    async function finishGoogleRedirect() {
-      try {
-        const idToken = await getGoogleRedirectIdToken();
-        if (!idToken || !active) return;
-        await completeFirebaseLogin(idToken);
-        if (typeof window !== "undefined") {
-          window.dispatchEvent(new Event("auth-updated"));
-        }
-      } catch {
-        // No Google redirect in progress.
-      }
-    }
-
-    finishGoogleRedirect();
-    return () => {
-      active = false;
-    };
-  }, [completeFirebaseLogin]);
-
   const startPhoneLogin = useCallback(async (phone) => {
     const normalized = phone.replace(/[\s-]/g, "");
     if (isTestAuthEnabled() && isDevTestPhone(normalized)) {
       return { dev: true, phone: normalizePhoneNumber(normalized) || normalized };
     }
-    if (!isFirebaseConfigured()) {
-      throw new Error("Firebase is not configured. Add NEXT_PUBLIC_FIREBASE_* env vars.");
-    }
-    return sendWebPhoneOtp(phone);
+    throw new Error("Phone OTP is not available in this build.");
   }, []);
 
   const completePhoneLogin = useCallback(
@@ -156,37 +106,22 @@ export function AuthProvider({ children }) {
           deviceId: getDeviceId(),
           platform: "web",
         });
-        const { user: sessionUser, tokens, firebaseCustomToken } = mapSession(data);
+        const { user: sessionUser, tokens } = mapSession(data);
         applySession(sessionUser, tokens);
-        // Hydrate Firebase auth so any Firebase-based guard doesn't see currentUser===null
-        // and redirect back to login (the loop bug).
-        if (firebaseCustomToken) {
-          try {
-            await signInWithFirebaseCustomToken(firebaseCustomToken);
-          } catch (e) {
-            // Non-fatal — JWT session is already set; log for debugging only
-            console.warn("[auth] signInWithCustomToken failed (non-fatal):", e?.message);
-          }
-        }
         return sessionUser;
       }
-      const idToken = await verifyWebPhoneOtp(confirmation, code);
-      return completeFirebaseLogin(idToken);
+      throw new Error("Phone OTP is not available in this build.");
     },
-    [applySession, completeFirebaseLogin]
+    [applySession]
   );
 
   const loginWithGoogle = useCallback(async () => {
-    const idToken = await signInWithGooglePopup();
-    if (!idToken) return null;
-    return completeFirebaseLogin(idToken);
-  }, [completeFirebaseLogin]);
+    throw new Error("Google sign-in is not available.");
+  }, []);
 
   const loginWithApple = useCallback(async () => {
-    const idToken = await signInWithApplePopup();
-    if (!idToken) return null;
-    return completeFirebaseLogin(idToken);
-  }, [completeFirebaseLogin]);
+    throw new Error("Apple sign-in is not available.");
+  }, []);
 
   const updateProfile = useCallback(async (payload) => {
     const data = await authApi.updateProfile(payload);

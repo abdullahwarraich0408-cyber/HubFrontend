@@ -48,6 +48,7 @@ export const labPortalApi = {
   getBookings: () => api.get("/partners/lab/bookings"),
   updateBookingStatus: (id, status, note) =>
     api.patch(`/partners/lab/bookings/${id}/status`, { status, note }),
+  markPaymentReceived: (id) => api.patch(`/partners/lab/bookings/${id}/payment`),
   assignCollector: (id, data) => api.patch(`/partners/lab/bookings/${id}/collector`, data),
   uploadReport: (id, reportUrl) =>
     api.patch(`/partners/lab/bookings/${id}/report`, { report_url: reportUrl }),
@@ -284,4 +285,5 @@ export const notificationsApi = {
   list: () => api.get("/notifications"),
   markRead: (id) => api.patch(`/notifications/${id}/read`),
   markAllRead: () => api.post("/notifications/read-all", {}),
+  registerDeviceToken: (data) => api.post("/notifications/device-token", data),
 };

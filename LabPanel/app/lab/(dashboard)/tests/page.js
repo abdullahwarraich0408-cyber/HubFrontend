@@ -136,7 +136,7 @@ export default function LabTestsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-[30px] md:text-[34px] font-heading font-bold text-[#07172E] tracking-tight">
+          <h1 className="text-[30px] md:text-[34px] font-heading font-bold text-[#082B3F] tracking-tight">
             Tests
           </h1>
           <p className="text-[14px] text-[#667085] mt-1.5 font-normal">
@@ -146,7 +146,7 @@ export default function LabTestsPage() {
         <button
           type="button"
           onClick={handleOpenAdd}
-          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#087F82] hover:bg-[#076B6E] text-white text-[13px] font-semibold transition-all shadow-sm self-start sm:self-auto"
+          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#17618E] hover:bg-[#124362] text-white text-[13px] font-semibold transition-all shadow-sm self-start sm:self-auto"
         >
           <Plus size={18} />
           <span>Add Test</span>
@@ -173,7 +173,7 @@ export default function LabTestsPage() {
               setCategoryFilter(e.target.value);
               setCurrentPage(1);
             }}
-            className="h-[40px] px-3 text-[13px] font-medium bg-neutral-50 border border-[#D9DEE5] rounded-lg text-[#07172E] focus:outline-none focus:border-[#087F82]"
+            className="h-[40px] px-3 text-[13px] font-medium bg-neutral-50 border border-[#D9DEE5] rounded-lg text-[#082B3F] focus:outline-none focus:border-[#17618E]"
           >
             <option value="ALL">All Categories</option>
             {TEST_CATEGORIES.map((cat) => (
@@ -190,7 +190,7 @@ export default function LabTestsPage() {
               setStatusFilter(e.target.value);
               setCurrentPage(1);
             }}
-            className="h-[40px] px-3 text-[13px] font-medium bg-neutral-50 border border-[#D9DEE5] rounded-lg text-[#07172E] focus:outline-none focus:border-[#087F82]"
+            className="h-[40px] px-3 text-[13px] font-medium bg-neutral-50 border border-[#D9DEE5] rounded-lg text-[#082B3F] focus:outline-none focus:border-[#17618E]"
           >
             <option value="ALL">All Status</option>
             <option value="active">Active Only</option>
@@ -235,7 +235,7 @@ export default function LabTestsPage() {
                           <button
                             type="button"
                             onClick={handleOpenAdd}
-                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#087F82] text-white text-[13px] font-semibold hover:bg-[#076B6E]"
+                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#17618E] text-white text-[13px] font-semibold hover:bg-[#124362]"
                           >
                             <Plus size={16} />
                             <span>Add Test</span>
@@ -253,7 +253,7 @@ export default function LabTestsPage() {
                   >
                     {/* Name */}
                     <td className="py-4 px-6">
-                      <div className="font-semibold text-[#07172E] max-w-sm">
+                      <div className="font-semibold text-[#082B3F] max-w-sm">
                         {t.name}
                       </div>
                       {t.description && (
@@ -269,13 +269,13 @@ export default function LabTestsPage() {
                     </td>
 
                     {/* Category */}
-                    <td className="py-4 px-4 font-medium text-[#07172E]">
+                    <td className="py-4 px-4 font-medium text-[#082B3F]">
                       {t.category}
                     </td>
 
                     {/* Price */}
                     <td className="py-4 px-4">
-                      <div className="font-bold text-[#087F82]">
+                      <div className="font-bold text-[#17618E]">
                         PKR {Number(t.price).toLocaleString()}
                       </div>
                       {t.discount_price && (
@@ -301,7 +301,7 @@ export default function LabTestsPage() {
                         <button
                           type="button"
                           onClick={() => handleOpenEdit(t)}
-                          className="p-1.5 rounded-lg border border-[#D9DEE5] text-[#667085] hover:text-[#087F82] hover:bg-teal-50/50 transition-colors"
+                          className="p-1.5 rounded-lg border border-[#D9DEE5] text-[#667085] hover:text-[#17618E] hover:bg-teal-50/50 transition-colors"
                           title="Edit Test"
                         >
                           <Edit2 size={14} />

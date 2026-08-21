@@ -110,11 +110,11 @@ export function TestFormModal({
         {/* Header */}
         <div className="px-7 py-5 border-b border-[#D9DEE5] flex items-center justify-between bg-neutral-50/60 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#E6F4F5] text-[#087F82] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-[#DEEEF9] text-[#17618E] flex items-center justify-center">
               <TestTube size={20} />
             </div>
             <div>
-              <h2 className="text-[19px] font-bold text-[#07172E]">
+              <h2 className="text-[19px] font-bold text-[#082B3F]">
                 {isEditing ? "Edit Diagnostic Test" : "Add New Diagnostic Test"}
               </h2>
               <p className="text-[12px] text-[#667085]">
@@ -125,7 +125,7 @@ export function TestFormModal({
           <button
             type="button"
             onClick={onClose}
-            className="text-[#667085] hover:text-[#07172E] p-2 rounded-lg hover:bg-neutral-100 transition-colors"
+            className="text-[#667085] hover:text-[#082B3F] p-2 rounded-lg hover:bg-neutral-100 transition-colors"
           >
             <X size={18} />
           </button>
@@ -136,7 +136,7 @@ export function TestFormModal({
           {/* Test Name & Category */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-[12px] font-semibold text-[#07172E] mb-1.5">
+              <label className="block text-[12px] font-semibold text-[#082B3F] mb-1.5">
                 Test Name <span className="text-red-500">*</span>
               </label>
               <input
@@ -144,7 +144,7 @@ export function TestFormModal({
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="e.g. Complete Blood Count"
-                className={`w-full h-[42px] px-3.5 text-[13px] border rounded-xl text-[#07172E] focus:outline-none focus:border-[#087F82] ${
+                className={`w-full h-[42px] px-3.5 text-[13px] border rounded-xl text-[#082B3F] focus:outline-none focus:border-[#17618E] ${
                   errors.name ? "border-red-400 bg-red-50/30" : "border-[#D9DEE5]"
                 }`}
               />
@@ -154,13 +154,13 @@ export function TestFormModal({
             </div>
 
             <div>
-              <label className="block text-[12px] font-semibold text-[#07172E] mb-1.5">
+              <label className="block text-[12px] font-semibold text-[#082B3F] mb-1.5">
                 Category <span className="text-red-500">*</span>
               </label>
               <select
                 value={form.category}
                 onChange={(e) => setForm({ ...form, category: e.target.value })}
-                className="w-full h-[42px] px-3.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#07172E] bg-white focus:outline-none focus:border-[#087F82]"
+                className="w-full h-[42px] px-3.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#082B3F] bg-white focus:outline-none focus:border-[#17618E]"
               >
                 {TEST_CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
@@ -174,7 +174,7 @@ export function TestFormModal({
           {/* Pricing & Turnaround */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-[12px] font-semibold text-[#07172E] mb-1.5">
+              <label className="block text-[12px] font-semibold text-[#082B3F] mb-1.5">
                 Price (PKR) <span className="text-red-500">*</span>
               </label>
               <input
@@ -183,7 +183,7 @@ export function TestFormModal({
                 value={form.price}
                 onChange={(e) => setForm({ ...form, price: e.target.value })}
                 placeholder="1200"
-                className={`w-full h-[42px] px-3.5 text-[13px] border rounded-xl text-[#07172E] focus:outline-none focus:border-[#087F82] ${
+                className={`w-full h-[42px] px-3.5 text-[13px] border rounded-xl text-[#082B3F] focus:outline-none focus:border-[#17618E] ${
                   errors.price ? "border-red-400 bg-red-50/30" : "border-[#D9DEE5]"
                 }`}
               />
@@ -193,7 +193,7 @@ export function TestFormModal({
             </div>
 
             <div>
-              <label className="block text-[12px] font-semibold text-[#07172E] mb-1.5">
+              <label className="block text-[12px] font-semibold text-[#082B3F] mb-1.5">
                 Discount Price (Optional)
               </label>
               <input
@@ -202,18 +202,18 @@ export function TestFormModal({
                 value={form.discount_price}
                 onChange={(e) => setForm({ ...form, discount_price: e.target.value })}
                 placeholder="1000"
-                className="w-full h-[42px] px-3.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#07172E] focus:outline-none focus:border-[#087F82]"
+                className="w-full h-[42px] px-3.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#082B3F] focus:outline-none focus:border-[#17618E]"
               />
             </div>
 
             <div>
-              <label className="block text-[12px] font-semibold text-[#07172E] mb-1.5">
+              <label className="block text-[12px] font-semibold text-[#082B3F] mb-1.5">
                 Turnaround Time <span className="text-red-500">*</span>
               </label>
               <select
                 value={form.turnaround}
                 onChange={(e) => setForm({ ...form, turnaround: e.target.value })}
-                className="w-full h-[42px] px-3 text-[13px] border border-[#D9DEE5] rounded-xl text-[#07172E] bg-white focus:outline-none focus:border-[#087F82]"
+                className="w-full h-[42px] px-3 text-[13px] border border-[#D9DEE5] rounded-xl text-[#082B3F] bg-white focus:outline-none focus:border-[#17618E]"
               >
                 {TURNAROUND_OPTIONS.map((time) => (
                   <option key={time} value={time}>
@@ -227,13 +227,13 @@ export function TestFormModal({
           {/* Sample Type & Status */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-[12px] font-semibold text-[#07172E] mb-1.5">
+              <label className="block text-[12px] font-semibold text-[#082B3F] mb-1.5">
                 Sample Type
               </label>
               <select
                 value={form.sample_type}
                 onChange={(e) => setForm({ ...form, sample_type: e.target.value })}
-                className="w-full h-[42px] px-3 text-[13px] border border-[#D9DEE5] rounded-xl text-[#07172E] bg-white focus:outline-none focus:border-[#087F82]"
+                className="w-full h-[42px] px-3 text-[13px] border border-[#D9DEE5] rounded-xl text-[#082B3F] bg-white focus:outline-none focus:border-[#17618E]"
               >
                 {SAMPLE_TYPES.map((type) => (
                   <option key={type} value={type}>
@@ -244,13 +244,13 @@ export function TestFormModal({
             </div>
 
             <div>
-              <label className="block text-[12px] font-semibold text-[#07172E] mb-1.5">
+              <label className="block text-[12px] font-semibold text-[#082B3F] mb-1.5">
                 Catalog Status
               </label>
               <select
                 value={form.status}
                 onChange={(e) => setForm({ ...form, status: e.target.value })}
-                className="w-full h-[42px] px-3 text-[13px] border border-[#D9DEE5] rounded-xl text-[#07172E] bg-white focus:outline-none focus:border-[#087F82]"
+                className="w-full h-[42px] px-3 text-[13px] border border-[#D9DEE5] rounded-xl text-[#082B3F] bg-white focus:outline-none focus:border-[#17618E]"
               >
                 <option value="active">Active (Available for booking)</option>
                 <option value="inactive">Inactive (Hidden from catalog)</option>
@@ -267,10 +267,10 @@ export function TestFormModal({
                 onChange={(e) =>
                   setForm({ ...form, home_collection_supported: e.target.checked })
                 }
-                className="w-4 h-4 rounded text-[#087F82] border-[#D9DEE5] focus:ring-[#087F82]"
+                className="w-4 h-4 rounded text-[#17618E] border-[#D9DEE5] focus:ring-[#17618E]"
               />
               <div>
-                <span className="text-[13px] font-semibold text-[#07172E] block">
+                <span className="text-[13px] font-semibold text-[#082B3F] block">
                   Home Collection Supported
                 </span>
                 <span className="text-[11px] text-[#667085]">
@@ -286,10 +286,10 @@ export function TestFormModal({
                 onChange={(e) =>
                   setForm({ ...form, fasting_required: e.target.checked })
                 }
-                className="w-4 h-4 rounded text-[#087F82] border-[#D9DEE5] focus:ring-[#087F82]"
+                className="w-4 h-4 rounded text-[#17618E] border-[#D9DEE5] focus:ring-[#17618E]"
               />
               <div>
-                <span className="text-[13px] font-semibold text-[#07172E] block">
+                <span className="text-[13px] font-semibold text-[#082B3F] block">
                   Fasting Required
                 </span>
                 <span className="text-[11px] text-[#667085]">
@@ -301,7 +301,7 @@ export function TestFormModal({
 
           {/* Description & Preparation Instructions */}
           <div>
-            <label className="block text-[12px] font-semibold text-[#07172E] mb-1.5">
+            <label className="block text-[12px] font-semibold text-[#082B3F] mb-1.5">
               Description / Clinical Significance
             </label>
             <textarea
@@ -309,12 +309,12 @@ export function TestFormModal({
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               rows={2}
               placeholder="e.g. Evaluates overall health and detects a wide range of blood disorders."
-              className="w-full px-3.5 py-2 text-[13px] border border-[#D9DEE5] rounded-xl text-[#07172E] focus:outline-none focus:border-[#087F82]"
+              className="w-full px-3.5 py-2 text-[13px] border border-[#D9DEE5] rounded-xl text-[#082B3F] focus:outline-none focus:border-[#17618E]"
             />
           </div>
 
           <div>
-            <label className="block text-[12px] font-semibold text-[#07172E] mb-1.5">
+            <label className="block text-[12px] font-semibold text-[#082B3F] mb-1.5">
               Patient Preparation Instructions
             </label>
             <textarea
@@ -324,7 +324,7 @@ export function TestFormModal({
               }
               rows={2}
               placeholder="e.g. Avoid high-fat meals 12 hours prior to test. Early morning sample preferred."
-              className="w-full px-3.5 py-2 text-[13px] border border-[#D9DEE5] rounded-xl text-[#07172E] focus:outline-none focus:border-[#087F82]"
+              className="w-full px-3.5 py-2 text-[13px] border border-[#D9DEE5] rounded-xl text-[#082B3F] focus:outline-none focus:border-[#17618E]"
             />
           </div>
 
@@ -341,7 +341,7 @@ export function TestFormModal({
             <button
               type="submit"
               disabled={isLoading}
-              className="px-6 py-2.5 text-[13px] font-semibold text-white bg-[#087F82] hover:bg-[#076B6E] rounded-lg transition-all shadow-xs disabled:opacity-50 flex items-center gap-2"
+              className="px-6 py-2.5 text-[13px] font-semibold text-white bg-[#17618E] hover:bg-[#124362] rounded-lg transition-all shadow-xs disabled:opacity-50 flex items-center gap-2"
             >
               <CheckCircle2 size={16} />
               <span>{isEditing ? "Save Test Changes" : "Create Test"}</span>

@@ -1,16 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --sidebar: #071A30;
-  --sidebar-active: #0A3445;
-  --sidebar-hover: #0E294B;
-  --primary: #087F82;
-  --primary-dark: #076B6E;
-  --primary-light: #E6F4F5;
-  --primary-mist: #F0F9FA;
-  --background: #F6F8FA;
+  --sidebar: #082B3F;
+  --sidebar-active: #0A3D52;
+  --sidebar-hover: #0E2940;
+  --primary: #17618E;
+  --primary-dark: #124362;
+  --primary-light: #DEEEF9;
+  --primary-mist: #F0F6FB;
+  --background: #F0F6FB;
   --card: #FFFFFF;
-  --heading: #07172E;
+  --heading: #082B3F;
   --muted: #667085;
   --border: #D9DEE5;
   --danger: #EF233C;
@@ -31,28 +31,28 @@
 }
 
 @theme {
-  /* Brand */
-  --color-brand-primary: #087F82;
-  --color-brand-dark: #076B6E;
-  --color-brand-light: #E6F4F5;
-  --color-brand-mist: #F0F9FA;
-  --color-brand-highlight: #7DD3D8;
+  /* Brand — Medzoos */
+  --color-brand-primary: #17618E;
+  --color-brand-dark: #082B3F;
+  --color-brand-light: #DEEEF9;
+  --color-brand-mist: #F0F6FB;
+  --color-brand-highlight: #0FA7E3;
 
   /* Sidebar */
-  --color-sidebar: #071A30;
-  --color-sidebar-active: #0A3445;
-  --color-sidebar-hover: #0E294B;
+  --color-sidebar: #082B3F;
+  --color-sidebar-active: #0A3D52;
+  --color-sidebar-hover: #0E2940;
 
   /* Ink / Dark */
-  --color-ink-900: #07172E;
-  --color-ink-800: #0C1A2E;
-  --color-ink-headline: #07172E;
+  --color-ink-900: #082B3F;
+  --color-ink-800: #124362;
+  --color-ink-headline: #082B3F;
 
   /* Surfaces */
   --color-surface-base: #F6F8FA;
   --color-surface-subtle: #F6F8FA;
   --color-surface-raised: #FFFFFF;
-  --color-surface-overlay: #F0F9FA;
+  --color-surface-overlay: #F0F6FB;
   --color-surface-elevated: #FFFFFF;
 
   /* Neutrals */
@@ -62,7 +62,7 @@
   --color-neutral-500: #667085;
   --color-neutral-600: #475467;
   --color-neutral-800: #1D2939;
-  --color-neutral-900: #07172E;
+  --color-neutral-900: #082B3F;
 
   /* Status */
   --color-status-success: #079455;

@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/utils/cn";
 import {
-  FirstAidKit,
   FileText,
   SquaresFour,
   Pill,
@@ -26,6 +25,7 @@ import {
 import { partnerRoutes } from "@/lib/constants/partnerRoutes";
 import { partnerAuthApi } from "@/lib/api/index";
 import { useVendorProfile } from "@/lib/hooks/useApi";
+import { PartnerBrandLockup } from "@/shared/branding/PartnerBrandMark";
 
 const SIDEBAR_KEY = "medzoos.vendor.sidebarCollapsed";
 
@@ -75,18 +75,12 @@ export function VendorSidebar({ isMobileOpen, setIsMobileOpen, isCollapsed, setI
         isMobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
       )}
     >
-      <div className="h-[64px] flex items-center justify-between px-4 border-b border-white/10 shrink-0">
-        {!isCollapsed && (
-          <Link href={routes.dashboard} className="flex items-center gap-2 overflow-hidden">
-            <FirstAidKit size={28} className="text-brand-primary shrink-0" weight="fill" />
-            <span className="font-heading text-[20px] text-white tracking-tight whitespace-nowrap">Vendor Portal</span>
-          </Link>
-        )}
-        {isCollapsed && (
-          <Link href={routes.dashboard} className="mx-auto" aria-label="Vendor Portal">
-            <FirstAidKit size={28} className="text-brand-primary shrink-0" weight="fill" />
-          </Link>
-        )}
+      <div className="h-[64px] flex items-center justify-between px-4 border-b border-white/10 shrink-0 gap-2">
+        <PartnerBrandLockup
+          href={routes.dashboard}
+          collapsed={isCollapsed}
+          title="Vendor Portal"
+        />
         <button
           type="button"
           onClick={() => {
@@ -123,7 +117,7 @@ export function VendorSidebar({ isMobileOpen, setIsMobileOpen, isCollapsed, setI
               className={cn(
                 "relative flex items-center h-[44px] rounded-lg transition-colors group",
                 isCollapsed ? "justify-center px-0" : "px-3",
-                isActive ? "bg-[#0A3445]" : "hover:bg-[#10243C]"
+                isActive ? "bg-[#0A3D52]" : "hover:bg-[#10243C]"
               )}
             >
               {isActive && <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-brand-primary rounded-l-lg" />}

@@ -64,7 +64,7 @@ function DoctorCover({ doctor }) {
           onError={() => setIndex((i) => i + 1)}
         />
       ) : (
-        <div className="absolute inset-0 flex items-end bg-gradient-to-br from-[#0B6E99] via-[#087F8C] to-[#073B4C] p-5">
+        <div className="absolute inset-0 flex items-end bg-gradient-to-br from-[#0B6E99] via-[#17618E] to-[#073B4C] p-5">
           <span className="text-[40px] font-bold text-white/90">
             {initialsFromName(doctor?.name)}
           </span>

@@ -11,7 +11,7 @@ export function Badge({ status, type = "status", label, className }) {
         className={cn(
           "inline-flex items-center px-2.5 py-1 rounded-md text-[12px] font-medium tracking-tight",
           isHome
-            ? "bg-teal-50 text-[#087F82] border border-[#087F82]/20"
+            ? "bg-teal-50 text-[#17618E] border border-[#17618E]/20"
             : "bg-slate-100 text-slate-700 border border-slate-200",
           className
         )}

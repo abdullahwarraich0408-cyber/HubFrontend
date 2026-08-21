@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   CalendarCheck,
   VideoCamera,
@@ -13,6 +13,7 @@ import {
   Stethoscope,
   Buildings,
   UploadSimple,
+  CreditCard,
 } from "@phosphor-icons/react";
 import { Button } from "@/shared/components/Button";
 import { Badge } from "@/shared/components/Badge";
@@ -23,6 +24,7 @@ import {
   useSelectConsultationMode,
   useSubmitDoctorReview,
 } from "@/lib/hooks/useApi";
+import { paymentsApi } from "@/lib/api/index";
 import { formatDoctorDisplayName } from "@/lib/hooks/useTelehealth";
 import { toast } from "sonner";
 import { ViewPrescriptionModal } from "@/features/account/components/ViewPrescriptionModal";
@@ -134,7 +136,11 @@ function ConsultationModePicker({ appointment, onSelect, isPending }) {
   );
 }
 
-function AppointmentCard({ appointment, onCancel, onJoin, onReview, onChat, onSelectMode, isSelectingMode, onViewPrescription }) {
+function AppointmentCard({ appointment, onCancel, onJoin, onReview, onChat, onSelectMode, isSelectingMode, onViewPrescription, onPay, payingId }) {
+  const needsPay =
+    appointment.paymentStatus !== "paid" &&
+    ["stripe", "card", "online"].includes(String(appointment.paymentMethod || "").toLowerCase());
+
   return (
     <div className="bg-white border border-neutral-200 rounded-[16px] p-5">
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
@@ -154,6 +160,7 @@ function AppointmentCard({ appointment, onCancel, onJoin, onReview, onChat, onSe
             {!appointment.consultationMode && appointment.preferredMode === "in_person" && (
               <Badge variant="neutral">In-Clinic (booked)</Badge>
             )}
+            {needsPay && <Badge variant="warning">Payment due</Badge>}
           </div>
           <p className="text-[13px] text-neutral-500 mb-1">{appointment.specialty} · {appointment.hospital}</p>
           <p className="text-[13px] text-neutral-600">{appointment.date} · {appointment.slot}</p>
@@ -179,6 +186,12 @@ function AppointmentCard({ appointment, onCancel, onJoin, onReview, onChat, onSe
           )}
         </div>
         <div className="flex flex-wrap gap-2">
+          {needsPay && (
+            <Button onClick={() => onPay(appointment)} disabled={payingId === appointment.id}>
+              <CreditCard size={16} className="mr-2" />
+              {payingId === appointment.id ? "Opening Stripe…" : "Pay with Stripe"}
+            </Button>
+          )}
           {appointment.canViewChat && (
             <Button variant="secondary" onClick={() => onChat(appointment)}>
               <ChatCircleText size={16} className="mr-2" />
@@ -219,7 +232,8 @@ function AppointmentCard({ appointment, onCancel, onJoin, onReview, onChat, onSe
 
 export function AppointmentsPage() {
   const router = useRouter();
-  const { data: appointments = [], isLoading } = useDoctorAppointments();
+  const searchParams = useSearchParams();
+  const { data: appointments = [], isLoading, refetch } = useDoctorAppointments();
   const cancelAppointment = useCancelDoctorAppointment();
   const joinConsultation = useJoinDoctorConsultation();
   const selectConsultationMode = useSelectConsultationMode();
@@ -227,6 +241,31 @@ export function AppointmentsPage() {
   const [filter, setFilter] = useState("all");
   const [reviewTarget, setReviewTarget] = useState(null);
   const [prescriptionTarget, setPrescriptionTarget] = useState(null);
+  const [payingId, setPayingId] = useState(null);
+
+  useEffect(() => {
+    const payment = searchParams.get("payment");
+    const sessionId = searchParams.get("session_id");
+    if (payment === "cancelled") {
+      toast.error("Payment was cancelled");
+      return;
+    }
+    if (payment === "success" && sessionId) {
+      paymentsApi
+        .verifyStripeSession(sessionId)
+        .then((result) => {
+          if (result.paid) {
+            toast.success("Appointment payment successful");
+            refetch?.();
+          } else {
+            toast.error("Payment not completed yet");
+          }
+        })
+        .catch((error) => {
+          toast.error(error.message || "Could not verify payment");
+        });
+    }
+  }, [searchParams, refetch]);
 
   const filtered = useMemo(() => {
     if (filter === "all") return appointments;
@@ -235,6 +274,26 @@ export function AppointmentsPage() {
     }
     return appointments.filter((item) => item.status === filter);
   }, [appointments, filter]);
+
+  const handlePay = async (appointment) => {
+    setPayingId(appointment.id);
+    try {
+      const payment = await paymentsApi.checkout({
+        purpose: "appointment",
+        appointment_id: appointment.id,
+        payment_method: "stripe",
+        frontend_url: typeof window !== "undefined" ? window.location.origin : undefined,
+      });
+      if (payment.checkoutUrl) {
+        window.location.href = payment.checkoutUrl;
+        return;
+      }
+      throw new Error("Stripe checkout URL was not returned");
+    } catch (error) {
+      toast.error(error.message || "Could not start payment");
+      setPayingId(null);
+    }
+  };
 
   const handleCancel = async (id) => {
     try {
@@ -342,6 +401,8 @@ export function AppointmentsPage() {
                 onSelectMode={handleSelectMode}
                 isSelectingMode={selectConsultationMode.isPending}
                 onViewPrescription={setPrescriptionTarget}
+                onPay={handlePay}
+                payingId={payingId}
               />
             ))}
           </div>

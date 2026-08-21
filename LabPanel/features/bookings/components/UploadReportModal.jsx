@@ -88,7 +88,7 @@ export function UploadReportModal({
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-[#D9DEE5]">
           <div>
-            <h3 className="text-[18px] font-bold text-[#07172E]">
+            <h3 className="text-[18px] font-bold text-[#082B3F]">
               Upload Diagnostic Report
             </h3>
             <p className="text-[13px] text-[#667085] mt-0.5">
@@ -98,7 +98,7 @@ export function UploadReportModal({
           <button
             type="button"
             onClick={onClose}
-            className="text-[#667085] hover:text-[#07172E] p-1.5 rounded-lg hover:bg-neutral-100 transition-colors"
+            className="text-[#667085] hover:text-[#082B3F] p-1.5 rounded-lg hover:bg-neutral-100 transition-colors"
           >
             <X size={18} />
           </button>
@@ -112,8 +112,8 @@ export function UploadReportModal({
               onClick={() => setUploadMode("file")}
               className={`flex-1 py-1.5 rounded-lg transition-all ${
                 uploadMode === "file"
-                  ? "bg-white text-[#07172E] shadow-xs"
-                  : "text-[#667085] hover:text-[#07172E]"
+                  ? "bg-white text-[#082B3F] shadow-xs"
+                  : "text-[#667085] hover:text-[#082B3F]"
               }`}
             >
               Upload Document (PDF / Image)
@@ -123,8 +123,8 @@ export function UploadReportModal({
               onClick={() => setUploadMode("url")}
               className={`flex-1 py-1.5 rounded-lg transition-all ${
                 uploadMode === "url"
-                  ? "bg-white text-[#07172E] shadow-xs"
-                  : "text-[#667085] hover:text-[#07172E]"
+                  ? "bg-white text-[#082B3F] shadow-xs"
+                  : "text-[#667085] hover:text-[#082B3F]"
               }`}
             >
               Link Report URL
@@ -142,8 +142,8 @@ export function UploadReportModal({
                   onClick={() => fileInputRef.current?.click()}
                   className={`border-2 border-dashed rounded-2xl p-7 text-center cursor-pointer transition-all ${
                     isDragging
-                      ? "border-[#087F82] bg-teal-50/50 scale-[1.01]"
-                      : "border-[#D9DEE5] hover:border-[#087F82]/60 hover:bg-neutral-50/60"
+                      ? "border-[#17618E] bg-teal-50/50 scale-[1.01]"
+                      : "border-[#D9DEE5] hover:border-[#17618E]/60 hover:bg-neutral-50/60"
                   }`}
                 >
                   <input
@@ -155,10 +155,10 @@ export function UploadReportModal({
                     }}
                     className="hidden"
                   />
-                  <div className="w-12 h-12 rounded-full bg-[#E6F4F5] text-[#087F82] mx-auto flex items-center justify-center mb-3">
+                  <div className="w-12 h-12 rounded-full bg-[#DEEEF9] text-[#17618E] mx-auto flex items-center justify-center mb-3">
                     <UploadCloud size={24} />
                   </div>
-                  <p className="text-[14px] font-bold text-[#07172E]">
+                  <p className="text-[14px] font-bold text-[#082B3F]">
                     Click to upload or drag and drop
                   </p>
                   <p className="text-[12px] text-[#667085] mt-1">
@@ -172,7 +172,7 @@ export function UploadReportModal({
                       <FileText size={20} />
                     </div>
                     <div className="overflow-hidden">
-                      <p className="text-[13px] font-bold text-[#07172E] truncate max-w-[240px]">
+                      <p className="text-[13px] font-bold text-[#082B3F] truncate max-w-[240px]">
                         {file.name}
                       </p>
                       <p className="text-[11px] text-[#667085]">
@@ -193,7 +193,7 @@ export function UploadReportModal({
             </div>
           ) : (
             <div>
-              <label className="block text-[12px] font-semibold text-[#07172E] mb-1.5">
+              <label className="block text-[12px] font-semibold text-[#082B3F] mb-1.5">
                 Report Document URL
               </label>
               <div className="relative">
@@ -209,7 +209,7 @@ export function UploadReportModal({
                     if (e.target.value.trim()) setFile(null);
                   }}
                   placeholder="https://medzoos.com/reports/patient-cbc-123.pdf"
-                  className="w-full h-[42px] pl-10 pr-3 text-[13px] border border-[#D9DEE5] rounded-xl text-[#07172E] focus:outline-none focus:border-[#087F82]"
+                  className="w-full h-[42px] pl-10 pr-3 text-[13px] border border-[#D9DEE5] rounded-xl text-[#082B3F] focus:outline-none focus:border-[#17618E]"
                 />
               </div>
             </div>
@@ -217,7 +217,7 @@ export function UploadReportModal({
 
           {/* Pathologist Notes */}
           <div>
-            <label className="block text-[12px] font-semibold text-[#07172E] mb-1.5">
+            <label className="block text-[12px] font-semibold text-[#082B3F] mb-1.5">
               Pathologist / Lab Remarks (Optional)
             </label>
             <textarea
@@ -225,7 +225,7 @@ export function UploadReportModal({
               onChange={(e) => setNotes(e.target.value)}
               rows={2}
               placeholder="e.g. All parameters within reference limits. Verified by Dr. M. Iqbal."
-              className="w-full px-3.5 py-2.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#07172E] focus:outline-none focus:border-[#087F82]"
+              className="w-full px-3.5 py-2.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#082B3F] focus:outline-none focus:border-[#17618E]"
             />
           </div>
 
@@ -242,7 +242,7 @@ export function UploadReportModal({
             <button
               type="submit"
               disabled={isLoading || (!file && !reportUrl.trim())}
-              className="px-5 py-2.5 text-[13px] font-semibold text-white bg-[#087F82] hover:bg-[#076B6E] rounded-lg transition-all shadow-xs disabled:opacity-50 flex items-center gap-2"
+              className="px-5 py-2.5 text-[13px] font-semibold text-white bg-[#17618E] hover:bg-[#124362] rounded-lg transition-all shadow-xs disabled:opacity-50 flex items-center gap-2"
             >
               {isLoading ? (
                 <span>Uploading...</span>

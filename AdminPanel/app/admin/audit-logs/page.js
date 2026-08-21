@@ -18,7 +18,7 @@ export default function AdminAuditLogsPage() {
   if (profileLoading || logsLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <CircleNotch size={48} className="text-[#0B6E72] animate-spin mb-4" />
+        <CircleNotch size={48} className="text-[#17618E] animate-spin mb-4" />
         <p className="ml-4 text-[#0C1A2E] font-medium">Loading...</p>
       </div>
     );
@@ -29,7 +29,7 @@ export default function AdminAuditLogsPage() {
       <div className="max-w-[800px] mx-auto p-6 text-center">
         <p className="text-[#0C1A2E] text-lg mb-4">Please log in to view audit logs.</p>
         <Link href="/login">
-          <a className="px-6 py-2.5 bg-[#0B6E72] hover:bg-[#084F52] text-white rounded-lg text-sm font-bold transition-colors">Go to Login</a>
+          <a className="px-6 py-2.5 bg-[#17618E] hover:bg-[#082B3F] text-white rounded-lg text-sm font-bold transition-colors">Go to Login</a>
         </Link>
       </div>
     );
@@ -40,7 +40,7 @@ export default function AdminAuditLogsPage() {
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
           <h1 className="font-[var(--font-dm-serif-display)] text-3xl md:text-4xl text-[#0C1A2E] tracking-tight mb-2 flex items-center gap-3">
-            <ShieldCheck size={32} className="text-[#0B6E72]" /> Security & Audit Logs
+            <ShieldCheck size={32} className="text-[#17618E]" /> Security & Audit Logs
           </h1>
           <p className="text-[#0C1A2E]/60 text-sm font-medium">
             Monitor administrative actions and security events across the platform.
@@ -57,7 +57,7 @@ export default function AdminAuditLogsPage() {
               placeholder="Search by action or entity..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full h-[40px] pl-10 pr-4 rounded-lg border border-[#0C1A2E]/10 bg-white text-sm outline-none focus:border-[#0B6E72]"
+              className="w-full h-[40px] pl-10 pr-4 rounded-lg border border-[#0C1A2E]/10 bg-white text-sm outline-none focus:border-[#17618E]"
             />
           </div>
         </div>
@@ -80,7 +80,7 @@ export default function AdminAuditLogsPage() {
                 <tr><td colSpan="5" className="p-8 text-center text-[#0C1A2E]/40">No logs found.</td></tr>
               ) : (
                 filteredLogs.map((log) => (
-                  <tr key={log.id} className="hover:bg-[#E6F4F5]/30 transition-colors">
+                  <tr key={log.id} className="hover:bg-[#DEEEF9]/30 transition-colors">
                     <td className="p-4 pl-6">
                       <div className="text-sm font-medium text-[#0C1A2E] flex items-center gap-2">
                         <Clock size={16} className="text-[#0C1A2E]/40" />

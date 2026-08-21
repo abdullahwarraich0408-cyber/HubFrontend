@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Bell, Checks, Sparkle } from "@phosphor-icons/react";
 import { useInboxNotifications, formatNotificationTime } from "@/lib/hooks/useInboxNotifications";
@@ -14,6 +14,7 @@ export function NotificationInbox({
   className,
 }) {
   const [open, setOpen] = useState(false);
+  const [ringing, setRinging] = useState(false);
   const ref = useRef(null);
   const { notifications, unreadCount, markRead, markAllRead } = useInboxNotifications({
     enabled,
@@ -28,6 +29,15 @@ export function NotificationInbox({
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
 
+  useEffect(() => {
+    const handler = () => {
+      setRinging(true);
+      window.setTimeout(() => setRinging(false), 1800);
+    };
+    window.addEventListener("inbox-notification-alert", handler);
+    return () => window.removeEventListener("inbox-notification-alert", handler);
+  }, []);
+
   const isDark = variant === "dark";
 
   return (
@@ -38,11 +48,14 @@ export function NotificationInbox({
         className={
           isDark
             ? "relative p-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-200 hover:text-white hover:bg-slate-700/80 transition-colors"
-            : "relative rounded-xl p-2 text-[#334E68] transition-colors hover:bg-[#F1F7FA] hover:text-[#0B6E99]"
+            : cn(
+                "relative rounded-xl p-2 text-[#334E68] transition-colors hover:bg-[#F1F7FA] hover:text-[#0B6E99]",
+                ringing && "animate-pulse text-[#0B6E99] bg-[#F1F7FA]"
+              )
         }
         aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : "Notifications"}
       >
-        <Bell size={20} />
+        <Bell size={20} className={ringing ? "animate-bounce" : undefined} />
         {unreadCount > 0 ? (
           <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 rounded-full bg-[#EF233C] text-white text-[10px] font-bold flex items-center justify-center">
             {unreadCount > 99 ? "99+" : unreadCount}
@@ -151,10 +164,12 @@ export function NotificationInbox({
 }
 
 export function CustomerNotificationInbox({ isAuthenticated }) {
+  const getCustomerSocket = useCallback(() => getSocket("customer"), []);
+
   return (
     <NotificationInbox
       enabled={Boolean(isAuthenticated)}
-      getSocket={() => getSocket("customer")}
+      getSocket={getCustomerSocket}
     />
   );
 }

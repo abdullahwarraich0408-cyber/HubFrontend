@@ -70,7 +70,7 @@ export default function AdminPrescriptionOrdersPage() {
               placeholder="Search by order ID, customer, or pharmacy..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full h-[40px] pl-10 pr-4 rounded-lg border border-neutral-200 bg-white text-sm outline-none focus:border-[#0B6E72] focus:ring-1 focus:ring-[#0B6E72]"
+              className="w-full h-[40px] pl-10 pr-4 rounded-lg border border-neutral-200 bg-white text-sm outline-none focus:border-[#17618E] focus:ring-1 focus:ring-[#17618E]"
             />
           </div>
         </div>
@@ -115,7 +115,7 @@ export default function AdminPrescriptionOrdersPage() {
                           <button
                             type="button"
                             onClick={() => setExpandedId(isExpanded ? null : order.id)}
-                            className="inline-flex items-center gap-1 text-[13px] font-semibold text-[#0B6E72]"
+                            className="inline-flex items-center gap-1 text-[13px] font-semibold text-[#17618E]"
                           >
                             {isExpanded ? "Hide" : "View"}
                             {isExpanded ? <CaretUp size={14} /> : <CaretDown size={14} />}

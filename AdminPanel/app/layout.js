@@ -21,6 +21,16 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata = {
   title: "Admin Portal | Medzoos",
   description: "Platform administration and overview.",
+  icons: {
+    icon: [
+      { url: "/favicon-32.png?v=9", type: "image/png", sizes: "32x32" },
+      { url: "/favicon-48.png?v=9", type: "image/png", sizes: "48x48" },
+      { url: "/favicon.ico?v=9", sizes: "16x16 32x32" },
+      { url: "/icon.png?v=9", type: "image/png", sizes: "512x512" },
+    ],
+    shortcut: "/favicon-32.png?v=9",
+    apple: [{ url: "/apple-touch-icon.png?v=9", sizes: "180x180" }],
+  },
 };
 
 export default function RootLayout({ children }) {

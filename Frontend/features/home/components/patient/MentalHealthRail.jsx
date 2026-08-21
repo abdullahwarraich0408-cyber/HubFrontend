@@ -143,7 +143,7 @@ export function MentalHealthRail({ doctors = [], isLoading, isError, onRetry }) 
   return (
     <section className="relative overflow-hidden bg-[#EFF8F6] py-16 md:py-20 lg:py-24">
       <div
-        className="pointer-events-none absolute left-1/2 top-0 h-72 w-[70%] -translate-x-1/2 rounded-[100%] bg-[#087F8C]/[0.06] blur-3xl"
+        className="pointer-events-none absolute left-1/2 top-0 h-72 w-[70%] -translate-x-1/2 rounded-[100%] bg-[#17618E]/[0.06] blur-3xl"
         aria-hidden
       />
 

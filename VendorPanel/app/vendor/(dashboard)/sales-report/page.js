@@ -39,7 +39,7 @@ export default function SalesReportPage() {
     URL.revokeObjectURL(url);
   };
 
-  const colors = ["#087F82", "#2563EB", "#F79009", "#079455", "#D92D20"];
+  const colors = ["#17618E", "#2563EB", "#F79009", "#079455", "#D92D20"];
 
   return (
     <div className="space-y-6">
@@ -76,7 +76,7 @@ export default function SalesReportPage() {
                   <XAxis dataKey="date" hide />
                   <YAxis />
                   <Tooltip />
-                  <Area dataKey="revenue" stroke="#087F82" fill="#E6F4F5" />
+                  <Area dataKey="revenue" stroke="#17618E" fill="#DEEEF9" />
                 </AreaChart>
               </ResponsiveContainer>
             </ChartCard>
@@ -97,7 +97,7 @@ export default function SalesReportPage() {
                   <XAxis dataKey="name" tick={{ fontSize: 11 }} />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="value" fill="#087F82" radius={6} />
+                  <Bar dataKey="value" fill="#17618E" radius={6} />
                 </BarChart>
               </ResponsiveContainer>
             </ChartCard>

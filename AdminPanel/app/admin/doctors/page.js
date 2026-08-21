@@ -227,7 +227,7 @@ export default function AdminDoctorsPage() {
         <div className="flex items-center gap-3">
           <button 
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-[#0B6E72] hover:bg-[#084F52] text-white rounded-lg text-sm font-semibold transition-colors shadow-sm"
+            className="flex items-center gap-2 px-5 py-2.5 bg-[#17618E] hover:bg-[#082B3F] text-white rounded-lg text-sm font-semibold transition-colors shadow-sm"
           >
             <Plus size={18} weight="bold" /> 
             <span>Add Doctor</span>
@@ -244,7 +244,7 @@ export default function AdminDoctorsPage() {
               placeholder="Search doctors..." 
               value={search}
               onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-              className="w-full h-[40px] pl-10 pr-4 rounded-lg border border-[#0C1A2E]/10 bg-white text-sm outline-none focus:border-[#0B6E72]"
+              className="w-full h-[40px] pl-10 pr-4 rounded-lg border border-[#0C1A2E]/10 bg-white text-sm outline-none focus:border-[#17618E]"
             />
           </div>
         </div>
@@ -268,7 +268,7 @@ export default function AdminDoctorsPage() {
                 <tr><td colSpan="6" className="p-8 text-center text-[#0C1A2E]/40">No doctors found.</td></tr>
               ) : (
                 currentDoctors.map((doctor) => (
-                  <tr key={doctor.id} className="hover:bg-[#E6F4F5]/30 transition-colors">
+                  <tr key={doctor.id} className="hover:bg-[#DEEEF9]/30 transition-colors">
                     <td className="p-4 pl-6">
                       <div className="text-sm font-bold text-[#0C1A2E]">{doctor.name}</div>
                       <div className="text-xs text-[#0C1A2E]/50">{doctor.email}</div>
@@ -292,7 +292,7 @@ export default function AdminDoctorsPage() {
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => openScheduleModal(doctor)}
-                          className="px-3 py-1.5 flex items-center gap-1 text-xs font-semibold rounded bg-white border border-[#0B6E72]/30 text-[#0B6E72] hover:bg-[#E6F4F5]"
+                          className="px-3 py-1.5 flex items-center gap-1 text-xs font-semibold rounded bg-white border border-[#17618E]/30 text-[#17618E] hover:bg-[#DEEEF9]"
                         >
                           <CalendarBlank size={14} /> Hospitals
                         </button>
@@ -310,7 +310,7 @@ export default function AdminDoctorsPage() {
                         <button 
                           onClick={() => handleImpersonate(doctor)}
                           disabled={impersonateMutation.isPending}
-                          className="px-3 py-1.5 flex items-center gap-1 text-xs font-bold rounded bg-[#0B6E72] text-white hover:bg-[#084F52]"
+                          className="px-3 py-1.5 flex items-center gap-1 text-xs font-bold rounded bg-[#17618E] text-white hover:bg-[#082B3F]"
                           title="Magic Login"
                         >
                           <SignIn size={14} /> Log In As
@@ -344,28 +344,28 @@ export default function AdminDoctorsPage() {
             <form onSubmit={handleAddDoctor} className="p-6 flex flex-col gap-4">
               <div>
                 <label className="block text-sm font-semibold text-[#0C1A2E] mb-1.5">Doctor Name</label>
-                <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#0B6E72] text-sm" placeholder="Dr. John Doe" />
+                <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] text-sm" placeholder="Dr. John Doe" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-[#0C1A2E] mb-1.5">Email Login</label>
-                <input required type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#0B6E72] text-sm" placeholder="doctor@example.com" />
+                <input required type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] text-sm" placeholder="doctor@example.com" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-[#0C1A2E] mb-1.5">Default Password</label>
-                <input required type="password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#0B6E72] text-sm" placeholder="••••••••" />
+                <input required type="password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] text-sm" placeholder="••••••••" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-[#0C1A2E] mb-1.5">Specialty</label>
-                <input required type="text" value={formData.specialty} onChange={e => setFormData({...formData, specialty: e.target.value})} className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#0B6E72] text-sm" placeholder="e.g. Cardiologist" />
+                <input required type="text" value={formData.specialty} onChange={e => setFormData({...formData, specialty: e.target.value})} className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] text-sm" placeholder="e.g. Cardiologist" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-[#0C1A2E] mb-1.5">Experience (Years)</label>
-                  <input required type="number" value={formData.experience_years} onChange={e => setFormData({...formData, experience_years: e.target.value})} className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#0B6E72] text-sm" />
+                  <input required type="number" value={formData.experience_years} onChange={e => setFormData({...formData, experience_years: e.target.value})} className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] text-sm" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-[#0C1A2E] mb-1.5">Consultation Fee</label>
-                  <input required type="number" step="0.01" value={formData.fee} onChange={e => setFormData({...formData, fee: e.target.value})} className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#0B6E72] text-sm" />
+                  <input required type="number" step="0.01" value={formData.fee} onChange={e => setFormData({...formData, fee: e.target.value})} className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] text-sm" />
                 </div>
               </div>
               <div>
@@ -373,7 +373,7 @@ export default function AdminDoctorsPage() {
                 <select
                   value={formData.hospital_id}
                   onChange={(e) => setFormData({ ...formData, hospital_id: e.target.value })}
-                  className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#0B6E72] text-sm bg-white"
+                  className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] text-sm bg-white"
                 >
                   <option value="">Independent Practice (no hospital)</option>
                   {hospitals.filter((h) => h.is_active).map((hospital) => (
@@ -386,7 +386,7 @@ export default function AdminDoctorsPage() {
 
               <div className="flex items-center justify-end gap-3 mt-4">
                 <button type="button" onClick={() => setShowAddModal(false)} className="px-5 py-2.5 rounded-lg text-sm font-semibold text-[#0C1A2E] hover:bg-[#F6F8FA] transition-colors">Cancel</button>
-                <button type="submit" disabled={createDoctorMutation.isPending} className="px-5 py-2.5 rounded-lg text-sm font-semibold bg-[#0B6E72] text-white hover:bg-[#084F52] disabled:opacity-50 transition-colors">
+                <button type="submit" disabled={createDoctorMutation.isPending} className="px-5 py-2.5 rounded-lg text-sm font-semibold bg-[#17618E] text-white hover:bg-[#082B3F] disabled:opacity-50 transition-colors">
                   {createDoctorMutation.isPending ? "Adding..." : "Add Doctor"}
                 </button>
               </div>
@@ -430,7 +430,7 @@ export default function AdminDoctorsPage() {
                         key={location.id}
                         className={`flex items-start justify-between gap-3 p-4 rounded-xl border bg-white ${
                           editingLocationId === location.id
-                            ? "border-[#0B6E72] shadow-sm"
+                            ? "border-[#17618E] shadow-sm"
                             : "border-[#0C1A2E]/10"
                         }`}
                       >
@@ -439,7 +439,7 @@ export default function AdminDoctorsPage() {
                           {location.address && (
                             <p className="text-xs text-[#0C1A2E]/50 mt-0.5">{location.address}</p>
                           )}
-                          <p className="text-xs font-semibold text-[#0B6E72] mt-2">
+                          <p className="text-xs font-semibold text-[#17618E] mt-2">
                             {location.days?.join(" ") || "No days set"}
                           </p>
                           <p className="text-xs text-[#0C1A2E]/60 mt-1">{location.availability}</p>
@@ -450,7 +450,7 @@ export default function AdminDoctorsPage() {
                             <button
                               type="button"
                               onClick={() => startEditLocation(location)}
-                              className="p-1.5 rounded-md text-[#0C1A2E]/50 hover:text-[#0B6E72] hover:bg-[#E6F4F5]"
+                              className="p-1.5 rounded-md text-[#0C1A2E]/50 hover:text-[#17618E] hover:bg-[#DEEEF9]"
                               title="Edit"
                             >
                               <PencilSimple size={16} />
@@ -470,7 +470,7 @@ export default function AdminDoctorsPage() {
                 )}
               </div>
 
-              <form onSubmit={handleSaveLocation} className="p-5 rounded-xl border border-[#0B6E72]/20 bg-[#E6F4F5]/30 space-y-4">
+              <form onSubmit={handleSaveLocation} className="p-5 rounded-xl border border-[#17618E]/20 bg-[#DEEEF9]/30 space-y-4">
                 <h3 className="text-sm font-bold text-[#0C1A2E]">
                   {editingLocationId ? "Edit hospital schedule" : "Add hospital location"}
                 </h3>
@@ -483,7 +483,7 @@ export default function AdminDoctorsPage() {
                       value={locationForm.hospital_id}
                       onChange={(e) => setLocationForm({ ...locationForm, hospital_id: e.target.value })}
                       disabled={Boolean(editingLocationId)}
-                      className="w-full h-10 px-3 rounded-lg border border-[#0C1A2E]/10 text-sm bg-white outline-none focus:border-[#0B6E72] disabled:bg-[#F6F8FA]"
+                      className="w-full h-10 px-3 rounded-lg border border-[#0C1A2E]/10 text-sm bg-white outline-none focus:border-[#17618E] disabled:bg-[#F6F8FA]"
                     >
                       <option value="">Select hospital</option>
                       {hospitals.filter((h) => h.is_active).map((hospital) => (
@@ -499,7 +499,7 @@ export default function AdminDoctorsPage() {
                       type="number"
                       value={locationForm.fee}
                       onChange={(e) => setLocationForm({ ...locationForm, fee: e.target.value })}
-                      className="w-full h-10 px-3 rounded-lg border border-[#0C1A2E]/10 text-sm outline-none focus:border-[#0B6E72]"
+                      className="w-full h-10 px-3 rounded-lg border border-[#0C1A2E]/10 text-sm outline-none focus:border-[#17618E]"
                       placeholder={scheduleDoctor.fee ? String(scheduleDoctor.fee) : "2500"}
                     />
                   </div>
@@ -515,8 +515,8 @@ export default function AdminDoctorsPage() {
                         onClick={() => toggleDay(day)}
                         className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
                           locationForm.days.includes(day)
-                            ? "bg-[#0B6E72] text-white border-[#0B6E72]"
-                            : "bg-white text-[#0C1A2E]/70 border-[#0C1A2E]/15 hover:border-[#0B6E72]/40"
+                            ? "bg-[#17618E] text-white border-[#17618E]"
+                            : "bg-white text-[#0C1A2E]/70 border-[#0C1A2E]/15 hover:border-[#17618E]/40"
                         }`}
                       >
                         {day.slice(0, 3)}
@@ -531,7 +531,7 @@ export default function AdminDoctorsPage() {
                     type="text"
                     value={locationForm.slots}
                     onChange={(e) => setLocationForm({ ...locationForm, slots: e.target.value })}
-                    className="w-full h-10 px-3 rounded-lg border border-[#0C1A2E]/10 text-sm outline-none focus:border-[#0B6E72]"
+                    className="w-full h-10 px-3 rounded-lg border border-[#0C1A2E]/10 text-sm outline-none focus:border-[#17618E]"
                     placeholder="09:00 AM - 01:00 PM"
                   />
                 </div>
@@ -540,7 +540,7 @@ export default function AdminDoctorsPage() {
                   <button
                     type="submit"
                     disabled={createLocationMutation.isPending || updateLocationMutation.isPending}
-                    className="flex-1 min-w-[180px] h-11 rounded-lg bg-[#0B6E72] text-white text-sm font-semibold hover:bg-[#084F52] disabled:opacity-50"
+                    className="flex-1 min-w-[180px] h-11 rounded-lg bg-[#17618E] text-white text-sm font-semibold hover:bg-[#082B3F] disabled:opacity-50"
                   >
                     {createLocationMutation.isPending || updateLocationMutation.isPending
                       ? "Saving..."

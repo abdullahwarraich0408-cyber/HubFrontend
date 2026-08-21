@@ -46,7 +46,7 @@ export default function AdminAnalyticsPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-white p-6 rounded-[16px] border border-neutral-200 shadow-sm">
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-12 h-12 rounded-xl bg-[#0B6E72]/10 text-[#0B6E72] flex items-center justify-center">
+            <div className="w-12 h-12 rounded-xl bg-[#17618E]/10 text-[#17618E] flex items-center justify-center">
               <Users size={24} weight="fill" />
             </div>
             <div>
@@ -108,7 +108,7 @@ export default function AdminAnalyticsPage() {
                   contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
                   labelStyle={{ fontWeight: 'bold', color: '#0C1A2E' }}
                 />
-                <Bar dataKey="orders" fill="#0B6E72" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="orders" fill="#17618E" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           )}

@@ -52,7 +52,7 @@ const STATUS_PIE_COLORS = {
   [BOOKING_STATUSES.PROCESSING]: "#2563EB",
   [BOOKING_STATUSES.SAMPLE_COLLECTED]: "#EA580C",
   [BOOKING_STATUSES.COLLECTOR_ASSIGNED]: "#7C3AED",
-  [BOOKING_STATUSES.ACCEPTED]: "#087F82",
+  [BOOKING_STATUSES.ACCEPTED]: "#17618E",
   [BOOKING_STATUSES.NEW]: "#3B82F6",
   [BOOKING_STATUSES.CANCELLED]: "#94A3B8",
   [BOOKING_STATUSES.REJECTED]: "#EF233C",
@@ -167,7 +167,7 @@ export default function LabReportsPage() {
       {/* Header & Date Range Filter */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-[30px] md:text-[34px] font-heading font-bold text-[#07172E] tracking-tight">
+          <h1 className="text-[30px] md:text-[34px] font-heading font-bold text-[#082B3F] tracking-tight">
             Reports & Analytics
           </h1>
           <p className="text-[14px] text-[#667085] mt-1.5 font-normal">
@@ -184,8 +184,8 @@ export default function LabReportsPage() {
               onClick={() => setDateRange(range.id)}
               className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all whitespace-nowrap ${
                 dateRange === range.id
-                  ? "bg-[#087F82] text-white shadow-xs"
-                  : "text-[#667085] hover:text-[#07172E] hover:bg-neutral-50"
+                  ? "bg-[#17618E] text-white shadow-xs"
+                  : "text-[#667085] hover:text-[#082B3F] hover:bg-neutral-50"
               }`}
             >
               {range.label}
@@ -228,14 +228,14 @@ export default function LabReportsPage() {
           <div>
             <div className="flex items-center justify-between mb-5">
               <div>
-                <h2 className="text-[17px] font-bold text-[#07172E] tracking-tight">
+                <h2 className="text-[17px] font-bold text-[#082B3F] tracking-tight">
                   Top Tests
                 </h2>
                 <p className="text-[13px] text-[#667085] mt-0.5">
                   High-volume diagnostic procedures & revenue
                 </p>
               </div>
-              <span className="text-[11px] font-bold uppercase text-[#087F82] bg-teal-50 px-2.5 py-1 rounded border border-teal-200">
+              <span className="text-[11px] font-bold uppercase text-[#17618E] bg-teal-50 px-2.5 py-1 rounded border border-teal-200">
                 Performance
               </span>
             </div>
@@ -251,7 +251,7 @@ export default function LabReportsPage() {
                         <span className="w-5 text-[12px] font-bold text-[#667085]">
                           #{idx + 1}
                         </span>
-                        <span className="font-semibold text-[#07172E] max-w-[200px] truncate">
+                        <span className="font-semibold text-[#082B3F] max-w-[200px] truncate">
                           {t.name}
                         </span>
                       </div>
@@ -259,7 +259,7 @@ export default function LabReportsPage() {
                         <span className="text-[#667085] font-medium">
                           {t.count} orders
                         </span>
-                        <span className="font-bold text-[#087F82]">
+                        <span className="font-bold text-[#17618E]">
                           PKR {(Number(t.revenue) || 0).toLocaleString()}
                         </span>
                       </div>
@@ -268,7 +268,7 @@ export default function LabReportsPage() {
                     {/* Progress Bar */}
                     <div className="w-full h-2 bg-neutral-100 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-gradient-to-r from-[#087F82] to-[#7DD3D8] rounded-full transition-all duration-500"
+                        className="h-full bg-gradient-to-r from-[#17618E] to-[#7DD3D8] rounded-full transition-all duration-500"
                         style={{ width: `${t.percentage || 15}%` }}
                       />
                     </div>
@@ -284,7 +284,7 @@ export default function LabReportsPage() {
           <div>
             <div className="flex items-center justify-between mb-5">
               <div>
-                <h2 className="text-[17px] font-bold text-[#07172E] tracking-tight">
+                <h2 className="text-[17px] font-bold text-[#082B3F] tracking-tight">
                   Revenue Trend
                 </h2>
                 <p className="text-[13px] text-[#667085] mt-0.5">
@@ -295,7 +295,7 @@ export default function LabReportsPage() {
                 <span className="text-[11px] font-semibold text-[#667085] uppercase">
                   Total
                 </span>
-                <div className="text-[15px] font-bold text-[#07172E]">
+                <div className="text-[15px] font-bold text-[#082B3F]">
                   PKR {totalRevenue.toLocaleString()}
                 </div>
               </div>
@@ -312,8 +312,8 @@ export default function LabReportsPage() {
                   >
                     <defs>
                       <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#087F82" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#087F82" stopOpacity={0.0} />
+                        <stop offset="5%" stopColor="#17618E" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#17618E" stopOpacity={0.0} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F0F2F5" />
@@ -331,7 +331,7 @@ export default function LabReportsPage() {
                     />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: "#07172E",
+                        backgroundColor: "#082B3F",
                         borderRadius: "8px",
                         color: "#fff",
                         border: "none",
@@ -342,7 +342,7 @@ export default function LabReportsPage() {
                     <Area
                       type="monotone"
                       dataKey="revenue"
-                      stroke="#087F82"
+                      stroke="#17618E"
                       strokeWidth={2.5}
                       fillOpacity={1}
                       fill="url(#revGrad)"
@@ -359,7 +359,7 @@ export default function LabReportsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Status Distribution */}
         <div className="bg-white rounded-[16px] border border-[#D9DEE5] shadow-sm p-6">
-          <h2 className="text-[17px] font-bold text-[#07172E] mb-1">
+          <h2 className="text-[17px] font-bold text-[#082B3F] mb-1">
             Status Breakdown
           </h2>
           <p className="text-[13px] text-[#667085] mb-5">
@@ -389,7 +389,7 @@ export default function LabReportsPage() {
                     </Pie>
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: "#07172E",
+                        backgroundColor: "#082B3F",
                         borderRadius: "8px",
                         color: "#fff",
                         border: "none",
@@ -409,7 +409,7 @@ export default function LabReportsPage() {
                       style={{ backgroundColor: item.color }}
                     />
                     <span className="text-[#667085] truncate">{item.name}:</span>
-                    <strong className="text-[#07172E] font-semibold">{item.value}</strong>
+                    <strong className="text-[#082B3F] font-semibold">{item.value}</strong>
                   </div>
                 ))}
               </div>
@@ -420,7 +420,7 @@ export default function LabReportsPage() {
         {/* Collection Channels */}
         <div className="bg-white rounded-[16px] border border-[#D9DEE5] shadow-sm p-6 flex flex-col justify-between">
           <div>
-            <h2 className="text-[17px] font-bold text-[#07172E] mb-1">
+            <h2 className="text-[17px] font-bold text-[#082B3F] mb-1">
               Collection Channel Distribution
             </h2>
             <p className="text-[13px] text-[#667085] mb-6">
@@ -430,11 +430,11 @@ export default function LabReportsPage() {
             <div className="grid grid-cols-2 gap-4 mb-6">
               {/* Home Collection Channel */}
               <div className="p-4 rounded-xl bg-teal-50/60 border border-teal-200">
-                <div className="flex items-center gap-2 text-[#087F82] font-semibold text-[13px] mb-2">
+                <div className="flex items-center gap-2 text-[#17618E] font-semibold text-[13px] mb-2">
                   <Truck size={16} />
                   <span>Home Collection</span>
                 </div>
-                <div className="text-[26px] font-bold text-[#07172E]">
+                <div className="text-[26px] font-bold text-[#082B3F]">
                   {homeCount} <span className="text-[14px] font-medium text-[#667085]">({homeShare}%)</span>
                 </div>
                 <p className="text-[11px] text-[#667085] mt-1">
@@ -444,11 +444,11 @@ export default function LabReportsPage() {
 
               {/* Lab Visit Channel */}
               <div className="p-4 rounded-xl bg-slate-100 border border-slate-200">
-                <div className="flex items-center gap-2 text-[#07172E] font-semibold text-[13px] mb-2">
+                <div className="flex items-center gap-2 text-[#082B3F] font-semibold text-[13px] mb-2">
                   <Building2 size={16} />
                   <span>Lab Visit</span>
                 </div>
-                <div className="text-[26px] font-bold text-[#07172E]">
+                <div className="text-[26px] font-bold text-[#082B3F]">
                   {visitCount} <span className="text-[14px] font-medium text-[#667085]">({visitShare}%)</span>
                 </div>
                 <p className="text-[11px] text-[#667085] mt-1">
@@ -460,7 +460,7 @@ export default function LabReportsPage() {
             {/* Split Progress Bar */}
             <div className="w-full h-3 bg-slate-200 rounded-full overflow-hidden flex">
               <div
-                className="h-full bg-[#087F82] transition-all duration-500"
+                className="h-full bg-[#17618E] transition-all duration-500"
                 style={{ width: `${homeShare}%` }}
                 title={`Home Collection: ${homeShare}%`}
               />

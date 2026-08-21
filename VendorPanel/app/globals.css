@@ -1,23 +1,23 @@
 @import "tailwindcss";
 
 @theme {
-  /* Brand */
-  --color-brand-primary: #087F82;
-  --color-brand-dark: #076C70;
-  --color-brand-light: #E6F4F5;
-  --color-brand-mist: #F0F9FA;
-  --color-brand-highlight: #7DD3D8;
+  /* Brand — Medzoos (aligned with main website + logo) */
+  --color-brand-primary: #17618E;
+  --color-brand-dark: #082B3F;
+  --color-brand-light: #DEEEF9;
+  --color-brand-mist: #F0F6FB;
+  --color-brand-highlight: #0FA7E3;
 
   /* Ink / Dark */
-  --color-ink-900: #071A30;
-  --color-ink-800: #10243C;
-  --color-ink-headline: #07172E;
+  --color-ink-900: #082B3F;
+  --color-ink-800: #124362;
+  --color-ink-headline: #082B3F;
 
   /* Surfaces */
   --color-surface-base: #FFFFFF;
-  --color-surface-subtle: #F6F8FA;
+  --color-surface-subtle: #F0F6FB;
   --color-surface-raised: #FFFFFF;
-  --color-surface-overlay: #F0F9FA;
+  --color-surface-overlay: #F0F6FB;
   --color-surface-elevated: #FFFFFF;
 
   /* Neutrals */

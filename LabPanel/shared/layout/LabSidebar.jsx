@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  FlaskConical,
   LayoutDashboard,
   CalendarCheck,
   TestTube,
@@ -20,6 +19,7 @@ import { cn } from "@/utils/cn";
 import { partnerAuthApi } from "@/lib/api/index";
 import { useLabPortalProfile } from "@/lib/hooks/usePartnerPortal";
 import { partnerRoutes } from "@/lib/constants/partnerRoutes";
+import { PartnerBrandLockup } from "@/shared/branding/PartnerBrandMark";
 
 const STORAGE_COLLAPSE_KEY = "medzoos_lab_sidebar_collapsed";
 
@@ -73,33 +73,14 @@ export function LabSidebar({ onCollapseChange, mobileOpen, onMobileClose }) {
   };
 
   const sidebarContent = (
-    <div className="flex flex-col h-full bg-[#071A30] text-white select-none">
+    <div className="flex flex-col h-full bg-[#082B3F] text-white select-none">
       {/* Top Header */}
       <div className="h-[72px] flex items-center justify-between px-5 border-b border-white/10 shrink-0">
-        {!isCollapsed ? (
-          <Link
-            href={routes.dashboard}
-            className="flex items-center gap-3 overflow-hidden group"
-          >
-            <div className="w-9 h-9 rounded-lg bg-[#087F82]/20 flex items-center justify-center shrink-0 border border-[#087F82]/30 group-hover:scale-105 transition-transform">
-              <FlaskConical className="w-5 h-5 text-[#087F82]" />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-heading text-[20px] font-bold text-white tracking-tight leading-tight">
-                Lab Portal
-              </span>
-              <span className="text-[10px] text-white/50 tracking-wider font-semibold uppercase">
-                Medzoos
-              </span>
-            </div>
-          </Link>
-        ) : (
-          <Link href={routes.dashboard} className="mx-auto" title="Lab Portal">
-            <div className="w-9 h-9 rounded-lg bg-[#087F82]/20 flex items-center justify-center shrink-0 border border-[#087F82]/30">
-              <FlaskConical className="w-5 h-5 text-[#087F82]" />
-            </div>
-          </Link>
-        )}
+        <PartnerBrandLockup
+          href={routes.dashboard}
+          collapsed={isCollapsed}
+          title="Lab Portal"
+        />
 
         {/* Desktop Collapse Button */}
         <button
@@ -140,14 +121,14 @@ export function LabSidebar({ onCollapseChange, mobileOpen, onMobileClose }) {
                 "relative flex items-center h-[46px] rounded-lg transition-all duration-150 group",
                 isCollapsed ? "justify-center px-0" : "px-3.5",
                 isActive
-                  ? "bg-[#0A3445] text-white font-semibold shadow-xs"
-                  : "text-white/70 hover:text-white hover:bg-[#0E294B]"
+                  ? "bg-[#0A3D52] text-white font-semibold shadow-xs"
+                  : "text-white/70 hover:text-white hover:bg-[#0E2940]"
               )}
               title={isCollapsed ? item.name : undefined}
             >
               {/* Teal Accent Line on Far Left */}
               {isActive && (
-                <div className="absolute left-0 top-1.5 bottom-1.5 w-[3.5px] bg-[#087F82] rounded-r" />
+                <div className="absolute left-0 top-1.5 bottom-1.5 w-[3.5px] bg-[#17618E] rounded-r" />
               )}
 
               <Icon
@@ -155,7 +136,7 @@ export function LabSidebar({ onCollapseChange, mobileOpen, onMobileClose }) {
                 className={cn(
                   "shrink-0 transition-colors",
                   isActive
-                    ? "text-[#087F82]"
+                    ? "text-[#17618E]"
                     : "text-white/60 group-hover:text-white"
                 )}
               />
@@ -176,7 +157,7 @@ export function LabSidebar({ onCollapseChange, mobileOpen, onMobileClose }) {
       </nav>
 
       {/* Bottom Profile & Logout */}
-      <div className="p-4 border-t border-white/10 shrink-0 bg-[#071A30]">
+      <div className="p-4 border-t border-white/10 shrink-0 bg-[#082B3F]">
         <Link
           href={routes.settings}
           onClick={onMobileClose}
@@ -186,7 +167,7 @@ export function LabSidebar({ onCollapseChange, mobileOpen, onMobileClose }) {
           )}
           title={isCollapsed ? `${labName} (Settings)` : undefined}
         >
-          <div className="w-[42px] h-[42px] rounded-full bg-[#0E294B] border border-white/20 flex items-center justify-center shrink-0 shadow-inner group-hover:border-[#087F82] transition-colors">
+          <div className="w-[42px] h-[42px] rounded-full bg-[#0E2940] border border-white/20 flex items-center justify-center shrink-0 shadow-inner group-hover:border-[#17618E] transition-colors">
             <span className="text-[15px] font-bold text-white tracking-wider">
               {initials}
             </span>
@@ -197,7 +178,7 @@ export function LabSidebar({ onCollapseChange, mobileOpen, onMobileClose }) {
               <span className="text-[14px] font-bold text-white tracking-tight truncate group-hover:text-[#7DD3D8] transition-colors">
                 {labName}
               </span>
-              <span className="text-[11px] font-bold text-[#087F82] uppercase tracking-wider">
+              <span className="text-[11px] font-bold text-[#17618E] uppercase tracking-wider">
                 DIAGNOSTICS
               </span>
             </div>

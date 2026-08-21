@@ -113,7 +113,7 @@ export function ReportViewerModal({ booking, isOpen, onClose }) {
         <div className="px-6 py-3.5 border-b border-[#D9DEE5] flex items-center justify-between bg-neutral-50 shrink-0">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-            <h2 className="text-[15px] font-bold text-[#07172E]">
+            <h2 className="text-[15px] font-bold text-[#082B3F]">
               Diagnostic Lab Report · {booking.booking_number}
             </h2>
           </div>
@@ -121,7 +121,7 @@ export function ReportViewerModal({ booking, isOpen, onClose }) {
             <button
               type="button"
               onClick={handlePrint}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-[#D9DEE5] text-[#07172E] text-[12px] font-semibold hover:bg-neutral-100 shadow-2xs transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-[#D9DEE5] text-[#082B3F] text-[12px] font-semibold hover:bg-neutral-100 shadow-2xs transition-colors"
             >
               <Printer size={14} />
               <span>Print</span>
@@ -129,7 +129,7 @@ export function ReportViewerModal({ booking, isOpen, onClose }) {
             <button
               type="button"
               onClick={onClose}
-              className="text-[#667085] hover:text-[#07172E] p-1.5 rounded-lg hover:bg-neutral-200 transition-colors"
+              className="text-[#667085] hover:text-[#082B3F] p-1.5 rounded-lg hover:bg-neutral-200 transition-colors"
             >
               <X size={18} />
             </button>
@@ -137,21 +137,21 @@ export function ReportViewerModal({ booking, isOpen, onClose }) {
         </div>
 
         {/* Scrollable Printable Report Stationery */}
-        <div ref={reportRef} className="p-8 overflow-y-auto space-y-6 flex-1 bg-white text-[#07172E]">
+        <div ref={reportRef} className="p-8 overflow-y-auto space-y-6 flex-1 bg-white text-[#082B3F]">
           {/* Lab Header Stationery */}
-          <div className="flex items-start justify-between pb-6 border-b-2 border-[#07172E]">
+          <div className="flex items-start justify-between pb-6 border-b-2 border-[#082B3F]">
             <div className="flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-2xl bg-[#071A30] text-white flex items-center justify-center font-bold text-[20px] shadow-sm">
+              <div className="w-12 h-12 rounded-2xl bg-[#082B3F] text-white flex items-center justify-center font-bold text-[20px] shadow-sm">
                 IDC
               </div>
               <div>
-                <h1 className="text-[20px] font-bold text-[#07172E] tracking-tight">
+                <h1 className="text-[20px] font-bold text-[#082B3F] tracking-tight">
                   IDC Diagnostics Center
                 </h1>
                 <p className="text-[11px] text-[#667085]">
                   Plot 13-A, G-8 Markaz, Islamabad · UAN: +92 51 111 000 432
                 </p>
-                <p className="text-[10px] font-mono text-[#087F82] font-semibold mt-0.5">
+                <p className="text-[10px] font-mono text-[#17618E] font-semibold mt-0.5">
                   PMDC Reg: PMDC-LAB-2026-9901 · ISO 15189 Accredited
                 </p>
               </div>
@@ -172,25 +172,25 @@ export function ReportViewerModal({ booking, isOpen, onClose }) {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200/80 text-[12px]">
             <div>
               <span className="text-[#64748B] block text-[10px] uppercase font-semibold">Patient Name</span>
-              <strong className="font-bold text-[#07172E] text-[13px]">{booking.patient_name || booking.patient}</strong>
+              <strong className="font-bold text-[#082B3F] text-[13px]">{booking.patient_name || booking.patient}</strong>
             </div>
             <div>
               <span className="text-[#64748B] block text-[10px] uppercase font-semibold">Age / Gender</span>
-              <strong className="font-bold text-[#07172E]">{booking.patient_age ? `${booking.patient_age} yrs` : "—"} / {booking.patient_gender || "—"}</strong>
+              <strong className="font-bold text-[#082B3F]">{booking.patient_age ? `${booking.patient_age} yrs` : "—"} / {booking.patient_gender || "—"}</strong>
             </div>
             <div>
               <span className="text-[#64748B] block text-[10px] uppercase font-semibold">Sample Date</span>
-              <strong className="font-bold text-[#07172E]">{booking.date} ({booking.time})</strong>
+              <strong className="font-bold text-[#082B3F]">{booking.date} ({booking.time})</strong>
             </div>
             <div>
               <span className="text-[#64748B] block text-[10px] uppercase font-semibold">Collection Mode</span>
-              <strong className="font-bold text-[#087F82]">{booking.collection_type || booking.collection}</strong>
+              <strong className="font-bold text-[#17618E]">{booking.collection_type || booking.collection}</strong>
             </div>
           </div>
 
           {/* Test Title */}
           <div className="py-2 border-b border-[#D9DEE5]">
-            <h2 className="text-[16px] font-bold text-[#07172E] tracking-tight">
+            <h2 className="text-[16px] font-bold text-[#082B3F] tracking-tight">
               {booking.test_name || booking.test}
             </h2>
             <p className="text-[11px] text-[#667085]">
@@ -212,8 +212,8 @@ export function ReportViewerModal({ booking, isOpen, onClose }) {
             <tbody className="divide-y divide-slate-200 text-[12px]">
               {parameters.map((p, idx) => (
                 <tr key={idx} className="hover:bg-slate-50/50">
-                  <td className="py-2.5 px-3 font-semibold text-[#07172E]">{p.name}</td>
-                  <td className="py-2.5 px-3 font-bold text-[#087F82] text-[13px]">{p.value}</td>
+                  <td className="py-2.5 px-3 font-semibold text-[#082B3F]">{p.name}</td>
+                  <td className="py-2.5 px-3 font-bold text-[#17618E] text-[13px]">{p.value}</td>
                   <td className="py-2.5 px-3 text-[#64748B] font-mono">{p.unit}</td>
                   <td className="py-2.5 px-3 text-[#64748B] whitespace-pre-line">{p.ref}</td>
                   <td className="py-2.5 px-3 text-right">
@@ -235,7 +235,7 @@ export function ReportViewerModal({ booking, isOpen, onClose }) {
           {/* Pathologist Verification & Notes */}
           <div className="pt-4 border-t border-slate-200 space-y-4">
             <div className="p-3 bg-neutral-50 rounded-lg border border-neutral-200 text-[11px] text-[#667085]">
-              <strong className="text-[#07172E] block mb-0.5">Clinical Remarks:</strong>
+              <strong className="text-[#082B3F] block mb-0.5">Clinical Remarks:</strong>
               {booking.report_notes ||
                 "All biochemical parameters evaluated via automated chemiluminescence analyzer. Results correlate with clinical presentation. Electronic verification completed."}
             </div>
@@ -244,19 +244,19 @@ export function ReportViewerModal({ booking, isOpen, onClose }) {
             <div className="flex items-end justify-between pt-6">
               <div className="flex items-center gap-3">
                 <div className="w-14 h-14 border border-slate-300 rounded-lg p-1 flex items-center justify-center bg-slate-50">
-                  <QrCode size={46} className="text-[#07172E]" />
+                  <QrCode size={46} className="text-[#082B3F]" />
                 </div>
                 <div className="text-[10px] text-[#64748B]">
-                  <p className="font-semibold text-[#07172E]">Scan QR to verify report</p>
+                  <p className="font-semibold text-[#082B3F]">Scan QR to verify report</p>
                   <p>medzoos.com/verify/{booking.booking_number}</p>
                 </div>
               </div>
 
               <div className="text-right">
-                <div className="font-serif italic font-bold text-[#07172E] text-[16px] text-teal-900 border-b border-slate-300 pb-1">
+                <div className="font-serif italic font-bold text-[#082B3F] text-[16px] text-teal-900 border-b border-slate-300 pb-1">
                   Dr. M. Iqbal, MBBS, FCPS
                 </div>
-                <p className="text-[11px] font-semibold text-[#07172E] mt-0.5">
+                <p className="text-[11px] font-semibold text-[#082B3F] mt-0.5">
                   Consultant Pathologist & Lab Director
                 </p>
                 <p className="text-[10px] text-[#64748B]">PMDC # 14920-P</p>
@@ -277,7 +277,7 @@ export function ReportViewerModal({ booking, isOpen, onClose }) {
           <button
             type="button"
             onClick={handlePrint}
-            className="px-5 py-2 text-[12px] font-semibold text-white bg-[#087F82] hover:bg-[#076B6E] rounded-lg transition-all shadow-xs flex items-center gap-1.5"
+            className="px-5 py-2 text-[12px] font-semibold text-white bg-[#17618E] hover:bg-[#124362] rounded-lg transition-all shadow-xs flex items-center gap-1.5"
           >
             <Download size={14} />
             <span>Download & Print</span>

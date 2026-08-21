@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/utils/cn";
 import {
-  Stethoscope,
   LayoutDashboard,
   CalendarCheck,
   Clock,
@@ -21,6 +20,7 @@ import {
 import { partnerAuthApi } from "@/lib/api/index";
 import { useDoctorProfile } from "@/features/doctor-panel/hooks/useDoctorProfile";
 import { partnerRoutes } from "@/lib/constants/partnerRoutes";
+import { PartnerBrandLockup } from "@/shared/branding/PartnerBrandMark";
 
 export function DoctorSidebar({ mobileOpen, setMobileOpen }) {
   const pathname = usePathname();
@@ -54,7 +54,7 @@ export function DoctorSidebar({ mobileOpen, setMobileOpen }) {
 
       <aside
         className={cn(
-          "fixed left-0 top-0 h-full bg-slate-900 border-r border-slate-800/80 z-50 transition-all duration-200 ease-in-out flex flex-col shadow-xl",
+          "fixed left-0 top-0 h-full bg-[#082B3F] border-r border-white/10 z-50 transition-all duration-200 ease-in-out flex flex-col shadow-xl",
           // Mobile responsive drawer classes
           mobileOpen ? "translate-x-0 w-[260px]" : "-translate-x-full md:translate-x-0",
           // Desktop/Tablet collapse classes
@@ -62,22 +62,12 @@ export function DoctorSidebar({ mobileOpen, setMobileOpen }) {
         )}
       >
         {/* Header */}
-        <div className="h-[64px] flex items-center justify-between px-4 border-b border-slate-800/80 shrink-0">
-          <Link href={routes.dashboard} className="flex items-center gap-3 overflow-hidden">
-            <div className="w-9 h-9 rounded-xl bg-teal-600/20 border border-teal-500/30 flex items-center justify-center shrink-0">
-              <Stethoscope size={20} className="text-teal-400" />
-            </div>
-            {(!isCollapsed || mobileOpen) && (
-              <div className="flex flex-col">
-                <span className="font-semibold text-base text-white tracking-tight leading-tight">
-                  Medzoos
-                </span>
-                <span className="text-[11px] text-teal-400 font-medium tracking-wide uppercase">
-                  Doctor Panel
-                </span>
-              </div>
-            )}
-          </Link>
+        <div className="h-[64px] flex items-center justify-between px-4 border-b border-white/10 shrink-0">
+          <PartnerBrandLockup
+            href={routes.dashboard}
+            collapsed={isCollapsed && !mobileOpen}
+            title="Doctor Portal"
+          />
 
           {/* Desktop/Tablet Collapse toggle */}
           <button
@@ -118,13 +108,13 @@ export function DoctorSidebar({ mobileOpen, setMobileOpen }) {
               >
                 {/* Thin left indicator for active route */}
                 {isActive && (
-                  <div className="absolute left-0 top-1.5 bottom-1.5 w-[3px] bg-teal-400 rounded-r-full" />
+                  <div className="absolute left-0 top-1.5 bottom-1.5 w-[3px] bg-[#0FA7E3] rounded-r-full" />
                 )}
                 <Icon
                   size={19}
                   className={cn(
                     "shrink-0 transition-colors",
-                    isActive ? "text-teal-400" : "text-slate-400 group-hover:text-slate-200"
+                    isActive ? "text-[#0FA7E3]" : "text-slate-400 group-hover:text-slate-200"
                   )}
                 />
                 {(!isCollapsed || mobileOpen) && (
@@ -138,8 +128,8 @@ export function DoctorSidebar({ mobileOpen, setMobileOpen }) {
         {/* Doctor profile Footer */}
         <div className="p-3 border-t border-slate-800/80 shrink-0 bg-slate-900/50">
           <div className={cn("flex items-center gap-3", isCollapsed && !mobileOpen && "justify-center")}>
-            <div className="w-[38px] h-[38px] rounded-full bg-teal-500/10 border border-teal-500/30 flex items-center justify-center shrink-0">
-              <span className="text-xs font-bold text-teal-400">{initials || "DR"}</span>
+            <div className="w-[38px] h-[38px] rounded-full bg-[#17618E]/20 border border-[#17618E]/40 flex items-center justify-center shrink-0">
+              <span className="text-xs font-bold text-[#0FA7E3]">{initials || "DR"}</span>
             </div>
             {(!isCollapsed || mobileOpen) && (
               <div className="flex flex-col min-w-0 flex-1">

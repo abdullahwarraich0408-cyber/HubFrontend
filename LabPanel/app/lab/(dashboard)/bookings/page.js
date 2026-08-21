@@ -36,6 +36,7 @@ import { ReportViewerModal } from "@/features/bookings/components/ReportViewerMo
 import {
   useLabPortalBookings,
   useUpdateLabBookingStatus,
+  useMarkLabPaymentReceived,
   useAssignLabCollector,
   useUploadLabReport,
 } from "@/lib/hooks/usePartnerPortal";
@@ -48,6 +49,7 @@ import {
 export default function LabBookingsPage() {
   const { data: bookings = [], isLoading, refetch } = useLabPortalBookings();
   const updateStatusMutation = useUpdateLabBookingStatus();
+  const markPaymentMutation = useMarkLabPaymentReceived();
   const assignCollectorMutation = useAssignLabCollector();
   const uploadReportMutation = useUploadLabReport();
 
@@ -199,6 +201,16 @@ export default function LabBookingsPage() {
     }
   };
 
+  const handleMarkPayment = async (booking) => {
+    try {
+      await markPaymentMutation.mutateAsync({ id: booking.id });
+      toast.success("Cash payment marked as received");
+      setDetailsBooking(null);
+    } catch (err) {
+      toast.error(err.message || "Failed to mark payment");
+    }
+  };
+
   const handleAssignCollector = async (payload) => {
     try {
       await assignCollectorMutation.mutateAsync(payload);
@@ -244,7 +256,7 @@ export default function LabBookingsPage() {
             <button
               type="button"
               onClick={() => handleStatusChange(b.id, BOOKING_STATUSES.ACCEPTED)}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#087F82] hover:bg-[#076B6E] text-white text-[12px] font-semibold transition-all shadow-xs"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#17618E] hover:bg-[#124362] text-white text-[12px] font-semibold transition-all shadow-xs"
             >
               <Check size={14} />
               <span>Accept</span>
@@ -267,7 +279,7 @@ export default function LabBookingsPage() {
             <button
               type="button"
               onClick={() => setDetailsBooking(b)}
-              className="p-1.5 rounded-lg text-[#64748B] hover:text-[#07172E] hover:bg-neutral-100 transition-colors"
+              className="p-1.5 rounded-lg text-[#64748B] hover:text-[#082B3F] hover:bg-neutral-100 transition-colors"
               title="View Details"
             >
               <Eye size={16} />
@@ -299,7 +311,7 @@ export default function LabBookingsPage() {
                     "Sample collected at laboratory"
                   )
                 }
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#087F82] hover:bg-[#076B6E] text-white text-[12px] font-semibold transition-all shadow-xs"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#17618E] hover:bg-[#124362] text-white text-[12px] font-semibold transition-all shadow-xs"
               >
                 <Check size={14} />
                 <span>Sample Collected</span>
@@ -308,7 +320,7 @@ export default function LabBookingsPage() {
             <button
               type="button"
               onClick={() => setDetailsBooking(b)}
-              className="p-1.5 rounded-lg text-[#64748B] hover:text-[#07172E] hover:bg-neutral-100 transition-colors"
+              className="p-1.5 rounded-lg text-[#64748B] hover:text-[#082B3F] hover:bg-neutral-100 transition-colors"
               title="View Details"
             >
               <Eye size={16} />
@@ -336,7 +348,7 @@ export default function LabBookingsPage() {
             <button
               type="button"
               onClick={() => setAssignModalBooking(b)}
-              className="px-2 py-1.5 rounded-lg text-[#64748B] hover:text-[#07172E] hover:bg-neutral-100 text-[12px] font-medium"
+              className="px-2 py-1.5 rounded-lg text-[#64748B] hover:text-[#082B3F] hover:bg-neutral-100 text-[12px] font-medium"
               title="Reassign Collector"
             >
               Reassign
@@ -344,7 +356,7 @@ export default function LabBookingsPage() {
             <button
               type="button"
               onClick={() => setDetailsBooking(b)}
-              className="p-1.5 rounded-lg text-[#64748B] hover:text-[#07172E] hover:bg-neutral-100 transition-colors"
+              className="p-1.5 rounded-lg text-[#64748B] hover:text-[#082B3F] hover:bg-neutral-100 transition-colors"
               title="View Details"
             >
               <Eye size={16} />
@@ -372,7 +384,7 @@ export default function LabBookingsPage() {
             <button
               type="button"
               onClick={() => setDetailsBooking(b)}
-              className="p-1.5 rounded-lg text-[#64748B] hover:text-[#07172E] hover:bg-neutral-100 transition-colors"
+              className="p-1.5 rounded-lg text-[#64748B] hover:text-[#082B3F] hover:bg-neutral-100 transition-colors"
               title="View Details"
             >
               <Eye size={16} />
@@ -386,7 +398,7 @@ export default function LabBookingsPage() {
             <button
               type="button"
               onClick={() => setUploadModalBooking(b)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#087F82] hover:bg-[#076B6E] text-white text-[12px] font-semibold transition-all shadow-xs"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#17618E] hover:bg-[#124362] text-white text-[12px] font-semibold transition-all shadow-xs"
             >
               <FileUp size={13} />
               <span>Upload Report</span>
@@ -394,7 +406,7 @@ export default function LabBookingsPage() {
             <button
               type="button"
               onClick={() => setDetailsBooking(b)}
-              className="p-1.5 rounded-lg text-[#64748B] hover:text-[#07172E] hover:bg-neutral-100 transition-colors"
+              className="p-1.5 rounded-lg text-[#64748B] hover:text-[#082B3F] hover:bg-neutral-100 transition-colors"
               title="View Details"
             >
               <Eye size={16} />
@@ -429,7 +441,7 @@ export default function LabBookingsPage() {
             <button
               type="button"
               onClick={() => setUploadModalBooking(b)}
-              className="px-2 py-1.5 rounded-lg text-[#64748B] hover:text-[#07172E] hover:bg-neutral-100 text-[12px] font-medium"
+              className="px-2 py-1.5 rounded-lg text-[#64748B] hover:text-[#082B3F] hover:bg-neutral-100 text-[12px] font-medium"
               title="Replace Report"
             >
               Replace
@@ -437,7 +449,7 @@ export default function LabBookingsPage() {
             <button
               type="button"
               onClick={() => setDetailsBooking(b)}
-              className="p-1.5 rounded-lg text-[#64748B] hover:text-[#07172E] hover:bg-neutral-100 transition-colors"
+              className="p-1.5 rounded-lg text-[#64748B] hover:text-[#082B3F] hover:bg-neutral-100 transition-colors"
               title="View Details"
             >
               <Eye size={16} />
@@ -451,7 +463,7 @@ export default function LabBookingsPage() {
             <button
               type="button"
               onClick={() => setDetailsBooking(b)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#D9DEE5] text-[#087F82] hover:bg-[#E6F4F5] hover:border-[#087F82]/30 text-[12px] font-semibold transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#D9DEE5] text-[#17618E] hover:bg-[#DEEEF9] hover:border-[#17618E]/30 text-[12px] font-semibold transition-colors"
             >
               <Eye size={13} />
               <span>Details</span>
@@ -467,10 +479,10 @@ export default function LabBookingsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-[30px] md:text-[34px] font-heading font-bold text-[#07172E] tracking-tight">
+            <h1 className="text-[30px] md:text-[34px] font-heading font-bold text-[#082B3F] tracking-tight">
               Bookings
             </h1>
-            <span className="text-[12px] font-bold text-[#087F82] bg-teal-50 border border-teal-200/80 px-2.5 py-0.5 rounded-full">
+            <span className="text-[12px] font-bold text-[#17618E] bg-teal-50 border border-teal-200/80 px-2.5 py-0.5 rounded-full">
               {bookings.length} Total
             </span>
           </div>
@@ -484,12 +496,12 @@ export default function LabBookingsPage() {
           <button
             type="button"
             onClick={handleRefresh}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-[#D9DEE5] text-[#07172E] text-[13px] font-semibold hover:bg-neutral-50 shadow-2xs transition-colors"
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-[#D9DEE5] text-[#082B3F] text-[13px] font-semibold hover:bg-neutral-50 shadow-2xs transition-colors"
             title="Refresh Bookings"
           >
             <RefreshCw
               size={15}
-              className={`text-[#667085] ${isRefreshing ? "animate-spin text-[#087F82]" : ""}`}
+              className={`text-[#667085] ${isRefreshing ? "animate-spin text-[#17618E]" : ""}`}
             />
             <span>Refresh</span>
           </button>
@@ -511,7 +523,7 @@ export default function LabBookingsPage() {
             id: "ACCEPTED",
             label: "Accepted",
             count: statusCounts.ACCEPTED,
-            badge: "bg-[#087F82]",
+            badge: "bg-[#17618E]",
           },
           {
             id: "IN_PROGRESS",
@@ -543,8 +555,8 @@ export default function LabBookingsPage() {
               }}
               className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-[13px] font-semibold transition-all whitespace-nowrap border ${
                 isActive
-                  ? "bg-[#07172E] text-white border-[#07172E] shadow-xs"
-                  : "bg-white text-[#667085] border-[#D9DEE5] hover:bg-neutral-50 hover:text-[#07172E]"
+                  ? "bg-[#082B3F] text-white border-[#082B3F] shadow-xs"
+                  : "bg-white text-[#667085] border-[#D9DEE5] hover:bg-neutral-50 hover:text-[#082B3F]"
               }`}
             >
               {tab.badge && (
@@ -559,7 +571,7 @@ export default function LabBookingsPage() {
                 className={`text-[11px] px-2 py-0.5 rounded-full font-bold ${
                   isActive
                     ? "bg-white/20 text-white"
-                    : "bg-neutral-100 text-[#07172E]"
+                    : "bg-neutral-100 text-[#082B3F]"
                 }`}
               >
                 {tab.count}
@@ -595,7 +607,7 @@ export default function LabBookingsPage() {
                   setCollectionFilter(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="bg-transparent text-[13px] font-semibold text-[#07172E] focus:outline-none cursor-pointer pr-1"
+                className="bg-transparent text-[13px] font-semibold text-[#082B3F] focus:outline-none cursor-pointer pr-1"
               >
                 <option value="ALL">All Channels</option>
                 <option value="HOME">Home Collection</option>
@@ -612,7 +624,7 @@ export default function LabBookingsPage() {
                   setSortBy(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="bg-transparent text-[13px] font-semibold text-[#07172E] focus:outline-none cursor-pointer pr-1"
+                className="bg-transparent text-[13px] font-semibold text-[#082B3F] focus:outline-none cursor-pointer pr-1"
               >
                 <option value="newest">Newest First</option>
                 <option value="oldest">Oldest First</option>
@@ -641,7 +653,7 @@ export default function LabBookingsPage() {
                 <tr>
                   <td colSpan={6} className="py-16 text-center text-[#667085]">
                     <div className="flex flex-col items-center justify-center gap-2">
-                      <RefreshCw size={24} className="animate-spin text-[#087F82]" />
+                      <RefreshCw size={24} className="animate-spin text-[#17618E]" />
                       <span className="text-[14px] font-medium">Loading bookings...</span>
                     </div>
                   </td>
@@ -666,7 +678,7 @@ export default function LabBookingsPage() {
                               setCollectionFilter("ALL");
                               setCurrentPage(1);
                             }}
-                            className="px-4 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-[#07172E] text-[12px] font-semibold transition-colors"
+                            className="px-4 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-[#082B3F] text-[12px] font-semibold transition-colors"
                           >
                             Clear Filters
                           </button>
@@ -693,11 +705,11 @@ export default function LabBookingsPage() {
                       {/* Patient Profile */}
                       <td className="py-4 px-6">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 text-[#07172E] flex items-center justify-center font-bold text-[14px] shrink-0 group-hover:border-[#087F82]/40 transition-colors shadow-2xs">
+                          <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 text-[#082B3F] flex items-center justify-center font-bold text-[14px] shrink-0 group-hover:border-[#17618E]/40 transition-colors shadow-2xs">
                             {initial}
                           </div>
                           <div>
-                            <div className="font-bold text-[#07172E] text-[14px] tracking-tight leading-snug">
+                            <div className="font-bold text-[#082B3F] text-[14px] tracking-tight leading-snug">
                               {b.patient_name || b.patient}
                             </div>
                             <div className="flex items-center gap-2 mt-0.5">
@@ -705,7 +717,7 @@ export default function LabBookingsPage() {
                               <button
                                 type="button"
                                 onClick={() => handleCopyId(b.booking_number)}
-                                className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#64748B] hover:text-[#087F82] transition-colors"
+                                className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#64748B] hover:text-[#17618E] transition-colors"
                                 title="Click to copy ID"
                               >
                                 <span>{b.booking_number}</span>
@@ -727,11 +739,11 @@ export default function LabBookingsPage() {
 
                       {/* Test Name, Category & Price */}
                       <td className="py-4 px-5">
-                        <div className="font-semibold text-[#07172E] text-[13px] max-w-xs truncate leading-snug">
+                        <div className="font-semibold text-[#082B3F] text-[13px] max-w-xs truncate leading-snug">
                           {b.test_name || b.test}
                         </div>
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="text-[12px] font-bold text-[#087F82]">
+                          <span className="text-[12px] font-bold text-[#17618E]">
                             PKR {(Number(b.test_price) || 0).toLocaleString()}
                           </span>
                           {b.test_category && (
@@ -748,12 +760,12 @@ export default function LabBookingsPage() {
                           <div
                             className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[12px] font-semibold tracking-tight border ${
                               isHome
-                                ? "bg-[#E6F4F5] text-[#087F82] border-[#087F82]/20"
+                                ? "bg-[#DEEEF9] text-[#17618E] border-[#17618E]/20"
                                 : "bg-slate-100 text-slate-700 border-slate-200"
                             }`}
                           >
                             {isHome ? (
-                              <Truck size={13} className="shrink-0 text-[#087F82]" />
+                              <Truck size={13} className="shrink-0 text-[#17618E]" />
                             ) : (
                               <Building2 size={13} className="shrink-0 text-slate-600" />
                             )}
@@ -772,7 +784,7 @@ export default function LabBookingsPage() {
 
                       {/* Date & Time Slot */}
                       <td className="py-4 px-5 text-[#64748B]">
-                        <div className="font-semibold text-[#07172E] text-[13px] flex items-center gap-1.5">
+                        <div className="font-semibold text-[#082B3F] text-[13px] flex items-center gap-1.5">
                           <Calendar size={13} className="text-[#64748B]" />
                           <span>{b.date}</span>
                         </div>
@@ -819,6 +831,8 @@ export default function LabBookingsPage() {
           booking={detailsBooking}
           isOpen={Boolean(detailsBooking)}
           onClose={() => setDetailsBooking(null)}
+          onMarkPayment={handleMarkPayment}
+          markingPayment={markPaymentMutation.isPending}
         />
       )}
 

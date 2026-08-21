@@ -124,6 +124,7 @@ export function CheckoutPage() {
       );
 
       const payment = await paymentsApi.checkout({
+        purpose: "order",
         order_ids: orderIds,
         total_amount: orderTotal,
         payment_method: "stripe",

@@ -3,8 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Bell, Checks, Sparkle } from "@phosphor-icons/react";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { useVendorNotifications, useMarkVendorNotificationRead, useMarkAllVendorNotifications } from "@/lib/hooks/useApi";
 import { formatNotificationTime } from "@/lib/hooks/useInboxNotifications";
+import { showSystemNotificationBanner } from "@/lib/notifications/browserNotify";
 import { getVendorSocket } from "@/lib/socket";
 import { cn } from "@/utils/cn";
 import { partnerRoutes } from "@/lib/constants/partnerRoutes";
@@ -22,10 +25,13 @@ function notificationLink(item) {
 export function VendorNotificationInbox({ className }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
+  const queryClient = useQueryClient();
   const { data: notifications = [] } = useVendorNotifications();
   const markRead = useMarkVendorNotificationRead();
   const markAllRead = useMarkAllVendorNotifications();
   const unreadCount = notifications.filter((item) => item.status === "unread" || !item.read_at).length;
+  const seenIdsRef = useRef(new Set());
+  const hydratedRef = useRef(false);
 
   useEffect(() => {
     const onClick = (event) => {
@@ -35,6 +41,35 @@ export function VendorNotificationInbox({ className }) {
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
 
+  // Alert on newly polled vendor notifications
+  useEffect(() => {
+    if (!Array.isArray(notifications)) return;
+    if (!hydratedRef.current) {
+      notifications.forEach((item) => {
+        if (item?.id) seenIdsRef.current.add(item.id);
+      });
+      hydratedRef.current = true;
+      return;
+    }
+    for (const item of notifications) {
+      if (!item?.id || seenIdsRef.current.has(item.id)) continue;
+      seenIdsRef.current.add(item.id);
+      const unread = item.status === "unread" || !item.read_at;
+      if (!unread) continue;
+      const detail = {
+        id: item.id,
+        title: item.title,
+        message: item.message || item.body || "",
+        link: notificationLink(item),
+      };
+      window.dispatchEvent(new CustomEvent("inbox-notification-alert", { detail }));
+      const shown = showSystemNotificationBanner(detail);
+      if (!shown) {
+        toast.info(detail.title, { description: detail.message || undefined, duration: 6500 });
+      }
+    }
+  }, [notifications]);
+
   useEffect(() => {
     let socket = null;
     try {
@@ -43,10 +78,28 @@ export function VendorNotificationInbox({ className }) {
       socket = null;
     }
     if (!socket?.on) return undefined;
-    const onNew = () => {};
+
+    const onNew = (payload) => {
+      queryClient.invalidateQueries({ queryKey: ["vendor-notifications"] });
+      const item = {
+        id: payload?.id || `vendor-${Date.now()}`,
+        title: payload?.title || "New pharmacy alert",
+        message: payload?.message || payload?.body || "",
+        link: payload?.link || notificationLink(payload || {}),
+      };
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("inbox-notification-alert", { detail: item }));
+      }
+      const shown = showSystemNotificationBanner(item);
+      if (!shown) {
+        toast.info(item.title, { description: item.message || undefined, duration: 6500 });
+      }
+    };
+
+    socket.off("notification:new", onNew);
     socket.on("notification:new", onNew);
     return () => socket.off("notification:new", onNew);
-  }, []);
+  }, [queryClient]);
 
   return (
     <div className={cn("relative", className)} ref={ref}>

@@ -95,7 +95,7 @@ function DoctorPortrait({ doctor, className = "" }) {
           onError={() => setIndex((current) => current + 1)}
         />
       ) : (
-        <div className="absolute inset-0 flex items-end bg-gradient-to-br from-[#0B6E99] to-[#087F8C] p-4">
+        <div className="absolute inset-0 flex items-end bg-gradient-to-br from-[#0B6E99] to-[#17618E] p-4">
           <span className="text-[32px] font-bold tracking-tight text-white/90">
             {initialsFromName(name)}
           </span>

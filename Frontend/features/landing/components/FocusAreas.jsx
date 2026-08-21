@@ -87,7 +87,7 @@ export function FocusAreas() {
                     {area.pills.map((pill) => (
                       <span
                         key={pill}
-                        className="rounded-full border border-[#087F8C]/15 bg-[#EAF8F7] px-3 py-1.5 text-[12px] font-medium text-[#075E68]"
+                        className="rounded-full border border-[#17618E]/15 bg-[#EAF8F7] px-3 py-1.5 text-[12px] font-medium text-[#124362]"
                       >
                         {pill}
                       </span>
@@ -95,7 +95,7 @@ export function FocusAreas() {
                   </div>
                   <Link
                     href={area.href}
-                    className="group mt-7 inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#087F8C] px-5 text-[14px] font-semibold text-white transition-all hover:bg-[#075E68] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F8C]/40 focus-visible:ring-offset-2"
+                    className="group mt-7 inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#17618E] px-5 text-[14px] font-semibold text-white transition-all hover:bg-[#124362] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#17618E]/40 focus-visible:ring-offset-2"
                   >
                     {area.cta}
                     <ArrowRight

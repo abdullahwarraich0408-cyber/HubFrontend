@@ -46,7 +46,7 @@ export default function AdminOrdersPage() {
               placeholder="Search by ID, customer, or vendor..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full h-[40px] pl-10 pr-4 rounded-lg border border-neutral-200 bg-white text-sm outline-none focus:border-[#0B6E72] focus:ring-1 focus:ring-[#0B6E72]"
+              className="w-full h-[40px] pl-10 pr-4 rounded-lg border border-neutral-200 bg-white text-sm outline-none focus:border-[#17618E] focus:ring-1 focus:ring-[#17618E]"
             />
           </div>
         </div>
@@ -85,7 +85,7 @@ export default function AdminOrdersPage() {
                     <td className="p-4 text-sm font-medium text-neutral-700">
                       {order.vendor?.business_name || "Unknown"}
                     </td>
-                    <td className="p-4 text-sm font-bold text-[#0B6E72]">
+                    <td className="p-4 text-sm font-bold text-[#17618E]">
                       PKR {order.total_amount}
                     </td>
                     <td className="p-4">

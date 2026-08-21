@@ -119,15 +119,15 @@ export function RegisterPage() {
             type="checkbox"
             checked={agreeTerms}
             onChange={(e) => setAgreeTerms(e.target.checked)}
-            className="mt-0.5 h-4 w-4 rounded border-[#D7E4EA] text-[#087F8C] focus:ring-[#087F8C]"
+            className="mt-0.5 h-4 w-4 rounded border-[#D7E4EA] text-[#17618E] focus:ring-[#17618E]"
           />
           <span>
             I agree to the{" "}
-            <Link href="/terms" className="font-semibold text-[#087F8C] hover:underline">
+            <Link href="/terms" className="font-semibold text-[#17618E] hover:underline">
               Terms
             </Link>{" "}
             and{" "}
-            <Link href="/privacy" className="font-semibold text-[#087F8C] hover:underline">
+            <Link href="/privacy" className="font-semibold text-[#17618E] hover:underline">
               Privacy Policy
             </Link>
             .
@@ -144,7 +144,7 @@ export function RegisterPage() {
 
       <p className="mt-4 text-[14px] text-[#5B6B7A]">
         Already have an account?{" "}
-        <Link href="/login" className="font-semibold text-[#087F8C] hover:underline">
+        <Link href="/login" className="font-semibold text-[#17618E] hover:underline">
           Sign in
         </Link>
       </p>

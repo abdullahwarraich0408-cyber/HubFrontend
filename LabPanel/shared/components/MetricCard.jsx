@@ -12,9 +12,9 @@ export function MetricCard({
 }) {
   const colorMap = {
     teal: {
-      text: "text-[#087F82]",
-      bg: "bg-[#087F82]/10",
-      border: "border-[#087F82]/20",
+      text: "text-[#17618E]",
+      bg: "bg-[#17618E]/10",
+      border: "border-[#17618E]/20",
     },
     blue: {
       text: "text-[#2563EB]",
@@ -27,7 +27,7 @@ export function MetricCard({
       border: "border-emerald-200",
     },
     navy: {
-      text: "text-[#07172E]",
+      text: "text-[#082B3F]",
       bg: "bg-slate-100",
       border: "border-slate-200",
     },
@@ -61,7 +61,7 @@ export function MetricCard({
       </div>
 
       <div className="mt-4">
-        <div className="text-[32px] md:text-[34px] font-bold text-[#07172E] tracking-tight leading-none">
+        <div className="text-[32px] md:text-[34px] font-bold text-[#082B3F] tracking-tight leading-none">
           {value}
         </div>
         {subtitle && (

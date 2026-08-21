@@ -17,8 +17,8 @@ export function AuthVisualPanel({ variant = "default" }) {
   const copy = COPY[variant] || COPY.default;
 
   return (
-    <aside className="relative hidden h-full w-[42%] shrink-0 overflow-hidden bg-[#087F8C] lg:flex xl:w-[44%]">
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0AA3B0] via-[#087F8C] to-[#065A63]" />
+    <aside className="relative hidden h-full w-[42%] shrink-0 overflow-hidden bg-[#17618E] lg:flex xl:w-[44%]">
+      <div className="absolute inset-0 bg-gradient-to-br from-[#0FA7E3] via-[#17618E] to-[#082B3F]" />
       <svg
         className="pointer-events-none absolute inset-0 h-full w-full opacity-40"
         viewBox="0 0 400 720"
@@ -48,7 +48,7 @@ export function AuthVisualPanel({ variant = "default" }) {
           className="absolute inset-x-0 bottom-0 h-[62%] w-full object-cover object-[center_18%]"
         />
       </picture>
-      <div className="absolute inset-x-0 bottom-0 h-[62%] bg-gradient-to-t from-[#065A63]/25 via-transparent to-[#087F8C]" />
+      <div className="absolute inset-x-0 bottom-0 h-[62%] bg-gradient-to-t from-[#082B3F]/25 via-transparent to-[#17618E]" />
 
       <div className="relative z-10 flex h-full w-full flex-col justify-between p-8 xl:p-10">
         <AuthBrandMark light />

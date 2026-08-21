@@ -31,7 +31,7 @@ export default function AdminCustomersPage() {
               placeholder="Search by name or email..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full h-[40px] pl-10 pr-4 rounded-lg border border-neutral-200 bg-white text-sm outline-none focus:border-[#0B6E72] focus:ring-1 focus:ring-[#0B6E72]"
+              className="w-full h-[40px] pl-10 pr-4 rounded-lg border border-neutral-200 bg-white text-sm outline-none focus:border-[#17618E] focus:ring-1 focus:ring-[#17618E]"
             />
           </div>
         </div>
@@ -60,7 +60,7 @@ export default function AdminCustomersPage() {
                   <tr key={customer.id} className="hover:bg-neutral-50 transition-colors">
                     <td className="p-4 pl-6">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-[#E6F4F5] text-[#0B6E72] flex items-center justify-center font-bold">
+                        <div className="w-10 h-10 rounded-full bg-[#DEEEF9] text-[#17618E] flex items-center justify-center font-bold">
                           {customer.name?.charAt(0) || <UserCircle size={24} />}
                         </div>
                         <div>
@@ -76,7 +76,7 @@ export default function AdminCustomersPage() {
                     <td className="p-4 text-sm font-medium text-neutral-600">
                       {new Date(customer.created_at).toLocaleDateString()}
                     </td>
-                    <td className="p-4 text-sm font-bold text-[#0B6E72]">
+                    <td className="p-4 text-sm font-bold text-[#17618E]">
                       {customer.orders?.length || 0}
                     </td>
                   </tr>

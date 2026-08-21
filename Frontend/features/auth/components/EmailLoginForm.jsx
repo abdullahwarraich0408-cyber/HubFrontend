@@ -74,7 +74,7 @@ export function EmailLoginForm({ onSuccess }) {
           error={fieldErrors.password}
         />
         <div className="flex items-center justify-between">
-          <Link href="/forgot-password" className="text-[13px] font-semibold text-[#087F8C] hover:underline">
+          <Link href="/forgot-password" className="text-[13px] font-semibold text-[#17618E] hover:underline">
             Forgot password?
           </Link>
         </div>

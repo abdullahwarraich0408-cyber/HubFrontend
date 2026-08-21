@@ -322,6 +322,27 @@ export function useUpdateLabBookingStatus() {
   });
 }
 
+export function useMarkLabPaymentReceived() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id }) => {
+      const localUpdated = labLocalStoreApi.markPaymentReceived?.(id);
+      try {
+        const result = await labPortalApi.markPaymentReceived(id);
+        return result?.booking || localUpdated || result;
+      } catch (err) {
+        if (localUpdated) return localUpdated;
+        throw err;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["lab-portal-bookings"] });
+      queryClient.invalidateQueries({ queryKey: ["lab-portal-reports"] });
+      queryClient.invalidateQueries({ queryKey: ["lab-portal-booking"] });
+    },
+  });
+}
+
 export function useAssignLabCollector() {
   const queryClient = useQueryClient();
   return useMutation({

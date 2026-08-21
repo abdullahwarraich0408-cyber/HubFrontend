@@ -310,7 +310,7 @@ export default function AdminVendorsPage() {
           </button>
           <button 
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-[#0B6E72] hover:bg-[#084F52] text-white rounded-lg text-sm font-semibold transition-colors shadow-sm"
+            className="flex items-center gap-2 px-5 py-2.5 bg-[#17618E] hover:bg-[#082B3F] text-white rounded-lg text-sm font-semibold transition-colors shadow-sm"
           >
             <Plus size={18} weight="bold" /> 
             <span>Onboard Vendor</span>
@@ -330,7 +330,7 @@ export default function AdminVendorsPage() {
                 placeholder="Search by name or email..." 
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-                className="w-full h-[40px] pl-10 pr-4 rounded-lg border border-[#0C1A2E]/10 bg-white text-sm outline-none focus:border-[#0B6E72] focus:ring-1 focus:ring-[#0B6E72]"
+                className="w-full h-[40px] pl-10 pr-4 rounded-lg border border-[#0C1A2E]/10 bg-white text-sm outline-none focus:border-[#17618E] focus:ring-1 focus:ring-[#17618E]"
               />
             </div>
             
@@ -338,7 +338,7 @@ export default function AdminVendorsPage() {
               <select 
                 value={statusFilter}
                 onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-                className="appearance-none h-[40px] pl-4 pr-10 rounded-lg border border-[#0C1A2E]/10 bg-white text-sm font-medium text-[#0C1A2E] outline-none focus:border-[#0B6E72] focus:ring-1 focus:ring-[#0B6E72] cursor-pointer"
+                className="appearance-none h-[40px] pl-4 pr-10 rounded-lg border border-[#0C1A2E]/10 bg-white text-sm font-medium text-[#0C1A2E] outline-none focus:border-[#17618E] focus:ring-1 focus:ring-[#17618E] cursor-pointer"
               >
                 <option value="all">All Statuses</option>
                 <option value="pending">Pending / Review</option>
@@ -409,7 +409,7 @@ export default function AdminVendorsPage() {
                     type="checkbox" 
                     checked={selectedVendors.length === currentVendors.length && currentVendors.length > 0}
                     onChange={toggleAll}
-                    className="w-4 h-4 rounded border-[#0C1A2E]/20 text-[#0B6E72] focus:ring-[#0B6E72] cursor-pointer"
+                    className="w-4 h-4 rounded border-[#0C1A2E]/20 text-[#17618E] focus:ring-[#17618E] cursor-pointer"
                   />
                 </th>
                 <th className="p-4 cursor-pointer hover:text-[#0C1A2E] transition-colors" onClick={() => { setSortField('name'); setSortOrder(sortOrder==='asc'?'desc':'asc')}}>
@@ -434,18 +434,18 @@ export default function AdminVendorsPage() {
                 </tr>
               ) : (
                 currentVendors.map((vendor, idx) => (
-                  <tr key={vendor.id || idx} onClick={() => handleOpenReview(vendor)} className={`cursor-pointer hover:bg-[#E6F4F5]/30 transition-colors group ${selectedVendors.includes(vendor.id) ? 'bg-[#E6F4F5]/20' : ''}`}>
+                  <tr key={vendor.id || idx} onClick={() => handleOpenReview(vendor)} className={`cursor-pointer hover:bg-[#DEEEF9]/30 transition-colors group ${selectedVendors.includes(vendor.id) ? 'bg-[#DEEEF9]/20' : ''}`}>
                     <td className="p-4 pl-6" onClick={(e) => e.stopPropagation()}>
                       <input 
                         type="checkbox" 
                         checked={selectedVendors.includes(vendor.id)}
                         onChange={() => toggleSelection(vendor.id)}
-                        className="w-4 h-4 rounded border-[#0C1A2E]/20 text-[#0B6E72] focus:ring-[#0B6E72] cursor-pointer"
+                        className="w-4 h-4 rounded border-[#0C1A2E]/20 text-[#17618E] focus:ring-[#17618E] cursor-pointer"
                       />
                     </td>
                     <td className="p-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-[#E6F4F5] text-[#0B6E72] flex items-center justify-center font-bold">
+                        <div className="w-10 h-10 rounded-full bg-[#DEEEF9] text-[#17618E] flex items-center justify-center font-bold">
                           {vendor.business_name?.charAt(0) || vendor.name?.charAt(0) || "V"}
                         </div>
                         <div>
@@ -455,7 +455,7 @@ export default function AdminVendorsPage() {
                           </div>
                           <div className="text-xs text-[#0C1A2E]/50 font-[var(--font-jetbrains-mono)] mt-0.5 flex items-center gap-1">
                             ID: ...{vendor.id?.substring(vendor.id?.length - 8) || "N/A"}
-                            <button onClick={() => copyToClipboard(vendor.id)} className="hover:text-[#0B6E72] transition-colors" title="Copy full ID">
+                            <button onClick={() => copyToClipboard(vendor.id)} className="hover:text-[#17618E] transition-colors" title="Copy full ID">
                               <Copy size={12} />
                             </button>
                           </div>
@@ -479,7 +479,7 @@ export default function AdminVendorsPage() {
                         <button 
                           onClick={(e) => { e.stopPropagation(); handleImpersonate(vendor); }}
                           disabled={impersonateMutation.isPending}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#0B6E72] text-white text-sm font-semibold hover:bg-[#084F52] transition-colors shadow-sm"
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#17618E] text-white text-sm font-semibold hover:bg-[#082B3F] transition-colors shadow-sm"
                           title="Log In As Vendor"
                         >
                           <SignIn size={16} />
@@ -528,7 +528,7 @@ export default function AdminVendorsPage() {
                   onClick={() => setCurrentPage(page)}
                   className={`w-8 h-8 flex items-center justify-center rounded-md text-sm font-bold transition-colors ${
                     currentPage === page 
-                    ? 'bg-[#0B6E72] text-white border border-[#0B6E72]' 
+                    ? 'bg-[#17618E] text-white border border-[#17618E]' 
                     : 'bg-white border border-[#0C1A2E]/10 text-[#0C1A2E] hover:bg-[#F6F8FA]'
                   }`}
                 >
@@ -557,7 +557,7 @@ export default function AdminVendorsPage() {
                 <h2 className="text-xl font-bold text-[#0C1A2E] font-[var(--font-dm-serif-display)]">Application Details</h2>
                 <p className="text-[#0C1A2E]/60 text-sm mt-1 flex items-center gap-2 font-[var(--font-jetbrains-mono)]">
                   ID: ...{viewVendor.id?.substring(viewVendor.id?.length - 8)} 
-                  <button onClick={() => copyToClipboard(viewVendor.id)}><Copy size={14} className="hover:text-[#0B6E72]" /></button>
+                  <button onClick={() => copyToClipboard(viewVendor.id)}><Copy size={14} className="hover:text-[#17618E]" /></button>
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -574,7 +574,7 @@ export default function AdminVendorsPage() {
                   onClick={() => setIsEditing(!isEditing)} 
                   className={`flex items-center gap-1 px-3 py-1.5 rounded-lg border text-sm font-semibold transition-colors ${
                     isEditing 
-                    ? 'border-[#0B6E72] bg-[#0B6E72]/10 text-[#0B6E72]' 
+                    ? 'border-[#17618E] bg-[#17618E]/10 text-[#17618E]' 
                     : 'border-[#0C1A2E]/10 hover:bg-[#0C1A2E]/5 text-[#0C1A2E]/60 hover:text-[#0C1A2E]'
                   }`}
                 >
@@ -618,7 +618,7 @@ export default function AdminVendorsPage() {
                         type="text" 
                         value={editFormData.business_name}
                         onChange={e => setEditFormData({...editFormData, business_name: e.target.value})}
-                        className="w-full h-10 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#0B6E72] focus:ring-1 focus:ring-[#0B6E72] text-sm font-medium"
+                        className="w-full h-10 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] focus:ring-1 focus:ring-[#17618E] text-sm font-medium"
                       />
                     </div>
                     <div>
@@ -628,7 +628,7 @@ export default function AdminVendorsPage() {
                         type="email" 
                         value={editFormData.email}
                         onChange={e => setEditFormData({...editFormData, email: e.target.value})}
-                        className="w-full h-10 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#0B6E72] focus:ring-1 focus:ring-[#0B6E72] text-sm font-medium"
+                        className="w-full h-10 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] focus:ring-1 focus:ring-[#17618E] text-sm font-medium"
                       />
                     </div>
                     <div>
@@ -638,7 +638,7 @@ export default function AdminVendorsPage() {
                         type="text" 
                         value={editFormData.license_number}
                         onChange={e => setEditFormData({...editFormData, license_number: e.target.value})}
-                        className="w-full h-10 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#0B6E72] focus:ring-1 focus:ring-[#0B6E72] text-sm font-[var(--font-jetbrains-mono)]"
+                        className="w-full h-10 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] focus:ring-1 focus:ring-[#17618E] text-sm font-[var(--font-jetbrains-mono)]"
                       />
                     </div>
                     <div>
@@ -648,7 +648,7 @@ export default function AdminVendorsPage() {
                         placeholder="••••••••"
                         value={editFormData.password}
                         onChange={e => setEditFormData({...editFormData, password: e.target.value})}
-                        className="w-full h-10 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#0B6E72] focus:ring-1 focus:ring-[#0B6E72] text-sm"
+                        className="w-full h-10 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] focus:ring-1 focus:ring-[#17618E] text-sm"
                       />
                     </div>
                     <div>
@@ -658,7 +658,7 @@ export default function AdminVendorsPage() {
                         step="0.1" 
                         value={editFormData.commission_rate}
                         onChange={e => setEditFormData({...editFormData, commission_rate: e.target.value})}
-                        className="w-full h-10 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#0B6E72] focus:ring-1 focus:ring-[#0B6E72] text-sm"
+                        className="w-full h-10 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] focus:ring-1 focus:ring-[#17618E] text-sm"
                       />
                     </div>
                   </div>
@@ -696,7 +696,7 @@ export default function AdminVendorsPage() {
                     {viewVendor.documents.map((document) => (
                       <div key={document.id} className="flex items-center justify-between p-3 rounded-lg border border-[#0C1A2E]/10 bg-white">
                         <div className="flex items-center gap-2">
-                          <FileText size={20} className="text-[#0B6E72]" />
+                          <FileText size={20} className="text-[#17618E]" />
                           <div>
                             <div className="text-sm font-medium text-[#0C1A2E] capitalize">{document.type.replaceAll("_", " ")}</div>
                             <div className="text-xs text-[#0C1A2E]/50">Status: {document.status}</div>
@@ -707,7 +707,7 @@ export default function AdminVendorsPage() {
                             href={document.file_url} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="text-xs font-semibold text-[#0B6E72] hover:underline px-3 py-1.5 bg-[#E6F4F5] rounded"
+                            className="text-xs font-semibold text-[#17618E] hover:underline px-3 py-1.5 bg-[#DEEEF9] rounded"
                           >
                             View
                           </a>
@@ -721,7 +721,7 @@ export default function AdminVendorsPage() {
                               });
                               toast.success("Document verified");
                             }}
-                            className="text-xs font-semibold text-white px-3 py-1.5 bg-[#0B6E72] rounded"
+                            className="text-xs font-semibold text-white px-3 py-1.5 bg-[#17618E] rounded"
                           >
                             Verify
                           </button>
@@ -759,7 +759,7 @@ export default function AdminVendorsPage() {
                   value={internalNote}
                   onChange={(e) => setInternalNote(e.target.value)}
                   placeholder="Add a note about this application... (e.g. 'Called owner, awaiting clear license copy')"
-                  className="w-full h-24 p-3 rounded-lg border border-[#0C1A2E]/10 bg-white text-sm outline-none focus:border-[#0B6E72] focus:ring-1 focus:ring-[#0B6E72] resize-none"
+                  className="w-full h-24 p-3 rounded-lg border border-[#0C1A2E]/10 bg-white text-sm outline-none focus:border-[#17618E] focus:ring-1 focus:ring-[#17618E] resize-none"
                 />
               </div>
 
@@ -780,7 +780,7 @@ export default function AdminVendorsPage() {
                     type="button"
                     onClick={handleUpdateCredentials}
                     disabled={updateCredentialsMutation.isPending}
-                    className="flex-1 flex items-center justify-center h-11 rounded-lg bg-[#0B6E72] text-white font-semibold hover:bg-[#084F52] disabled:opacity-50 transition-colors shadow-sm"
+                    className="flex-1 flex items-center justify-center h-11 rounded-lg bg-[#17618E] text-white font-semibold hover:bg-[#082B3F] disabled:opacity-50 transition-colors shadow-sm"
                   >
                     {updateCredentialsMutation.isPending ? "Saving..." : "Save Changes"}
                   </button>
@@ -845,7 +845,7 @@ export default function AdminVendorsPage() {
                   type="text" 
                   value={formData.business_name}
                   onChange={e => setFormData({...formData, business_name: e.target.value})}
-                  className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#0B6E72] focus:ring-1 focus:ring-[#0B6E72] text-sm"
+                  className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] focus:ring-1 focus:ring-[#17618E] text-sm"
                   placeholder="e.g. HealthPlus Pharmacy"
                 />
               </div>
@@ -857,7 +857,7 @@ export default function AdminVendorsPage() {
                   type="email" 
                   value={formData.email}
                   onChange={e => setFormData({...formData, email: e.target.value})}
-                  className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#0B6E72] focus:ring-1 focus:ring-[#0B6E72] text-sm"
+                  className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] focus:ring-1 focus:ring-[#17618E] text-sm"
                   placeholder="vendor@example.com"
                 />
               </div>
@@ -869,7 +869,7 @@ export default function AdminVendorsPage() {
                   type="text" 
                   value={formData.license_number}
                   onChange={e => setFormData({...formData, license_number: e.target.value})}
-                  className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#0B6E72] focus:ring-1 focus:ring-[#0B6E72] text-sm font-[var(--font-jetbrains-mono)]"
+                  className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] focus:ring-1 focus:ring-[#17618E] text-sm font-[var(--font-jetbrains-mono)]"
                   placeholder="e.g. PHR-2024-XXXX"
                 />
               </div>
@@ -886,7 +886,7 @@ export default function AdminVendorsPage() {
                     type="button"
                     onClick={detectPharmacyLocation}
                     disabled={isDetectingLocation}
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#0B6E72] hover:text-[#084F52] disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#17618E] hover:text-[#082B3F] disabled:opacity-50"
                   >
                     {isDetectingLocation ? <Spinner size={14} className="animate-spin" /> : <MapPin size={14} />}
                     Auto detect
@@ -899,7 +899,7 @@ export default function AdminVendorsPage() {
                     type="text"
                     value={formData.address}
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#0B6E72] focus:ring-1 focus:ring-[#0B6E72] text-sm"
+                    className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] focus:ring-1 focus:ring-[#17618E] text-sm"
                     placeholder="e.g. DHA Phase 5, Street 12"
                   />
                 </div>
@@ -911,7 +911,7 @@ export default function AdminVendorsPage() {
                       required
                       value={formData.city}
                       onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                      className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#0B6E72] focus:ring-1 focus:ring-[#0B6E72] text-sm bg-white"
+                      className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] focus:ring-1 focus:ring-[#17618E] text-sm bg-white"
                     >
                       <option value="">Select city</option>
                       {SUPPORTED_CITIES.map((city) => (
@@ -927,7 +927,7 @@ export default function AdminVendorsPage() {
                       max="50"
                       value={formData.service_radius_km}
                       onChange={(e) => setFormData({ ...formData, service_radius_km: Number(e.target.value) || 10 })}
-                      className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#0B6E72] focus:ring-1 focus:ring-[#0B6E72] text-sm"
+                      className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] focus:ring-1 focus:ring-[#17618E] text-sm"
                     />
                   </div>
                 </div>
@@ -946,7 +946,7 @@ export default function AdminVendorsPage() {
                   type="password" 
                   value={formData.password}
                   onChange={e => setFormData({...formData, password: e.target.value})}
-                  className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#0B6E72] focus:ring-1 focus:ring-[#0B6E72] text-sm"
+                  className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] focus:ring-1 focus:ring-[#17618E] text-sm"
                   placeholder="••••••••"
                 />
               </div>
@@ -962,7 +962,7 @@ export default function AdminVendorsPage() {
                 <button 
                   type="submit"
                   disabled={createVendorMutation.isPending}
-                  className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#0B6E72] hover:bg-[#084F52] disabled:opacity-50 transition-colors shadow-sm"
+                  className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#17618E] hover:bg-[#082B3F] disabled:opacity-50 transition-colors shadow-sm"
                 >
                   {createVendorMutation.isPending ? "Creating..." : "Create Vendor"}
                 </button>

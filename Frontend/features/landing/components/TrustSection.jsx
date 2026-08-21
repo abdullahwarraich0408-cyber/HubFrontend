@@ -52,7 +52,7 @@ export function TrustSection() {
             return (
               <FadeIn key={item.title} delay={0.05 * index}>
                 <article className="h-full rounded-[22px] border border-[#102A43]/08 bg-[#F7FAFC] p-5 md:p-6">
-                  <span className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#087F8C] shadow-sm">
+                  <span className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#17618E] shadow-sm">
                     <Icon size={20} weight="duotone" />
                   </span>
                   <h3 className="text-[1rem] font-semibold text-[#102A43]">

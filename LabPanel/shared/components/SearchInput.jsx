@@ -20,13 +20,13 @@ export function SearchInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full h-[40px] pl-9 pr-8 text-[13px] bg-white border border-[#D9DEE5] rounded-lg text-[#07172E] placeholder:text-[#667085] focus:outline-none focus:border-[#087F82] focus:ring-1 focus:ring-[#087F82] transition-colors"
+        className="w-full h-[40px] pl-9 pr-8 text-[13px] bg-white border border-[#D9DEE5] rounded-lg text-[#082B3F] placeholder:text-[#667085] focus:outline-none focus:border-[#17618E] focus:ring-1 focus:ring-[#17618E] transition-colors"
       />
       {value && (
         <button
           type="button"
           onClick={() => onChange("")}
-          className="absolute right-2.5 text-[#667085] hover:text-[#07172E] p-0.5 rounded-full hover:bg-neutral-100 transition-colors"
+          className="absolute right-2.5 text-[#667085] hover:text-[#082B3F] p-0.5 rounded-full hover:bg-neutral-100 transition-colors"
         >
           <X size={14} />
         </button>

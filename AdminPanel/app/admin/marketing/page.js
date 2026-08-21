@@ -124,7 +124,7 @@ export default function AdminMarketingPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-[28px] font-heading font-extrabold text-ink-headline tracking-tight flex items-center gap-2">
-            <Megaphone size={28} className="text-[#0B6E72]" weight="duotone" />
+            <Megaphone size={28} className="text-[#17618E]" weight="duotone" />
             Marketing & Offers System
           </h1>
           <p className="text-[14px] text-neutral-500 mt-1">
@@ -133,7 +133,7 @@ export default function AdminMarketingPage() {
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 px-5 py-2.5 bg-[#0B6E72] hover:bg-[#084F52] text-white rounded-xl text-sm font-bold transition-colors shadow-sm cursor-pointer"
+          className="flex items-center gap-2 px-5 py-2.5 bg-[#17618E] hover:bg-[#082B3F] text-white rounded-xl text-sm font-bold transition-colors shadow-sm cursor-pointer"
         >
           <Plus size={18} weight="bold" />
           <span>Create New Offer</span>
@@ -148,7 +148,7 @@ export default function AdminMarketingPage() {
         </div>
         <div className="bg-white rounded-2xl p-5 border border-neutral-200 shadow-2xs">
           <span className="text-xs font-bold uppercase text-neutral-400">Total Redemptions</span>
-          <p className="text-3xl font-extrabold text-[#0B6E72] mt-1">{totalRedemptionsCount}</p>
+          <p className="text-3xl font-extrabold text-[#17618E] mt-1">{totalRedemptionsCount}</p>
         </div>
         <div className="bg-white rounded-2xl p-5 border border-neutral-200 shadow-2xs">
           <span className="text-xs font-bold uppercase text-neutral-400">Total Campaigns</span>
@@ -160,11 +160,11 @@ export default function AdminMarketingPage() {
       <div className="bg-white rounded-[20px] border border-neutral-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)] overflow-hidden">
         <div className="p-6 border-b border-neutral-200 flex justify-between items-center bg-neutral-50">
           <h3 className="text-lg font-bold text-ink-headline flex items-center gap-2">
-            <Tag size={20} className="text-[#0B6E72]" /> Active & Scheduled Offers
+            <Tag size={20} className="text-[#17618E]" /> Active & Scheduled Offers
           </h3>
           <button
             onClick={fetchOffers}
-            className="text-xs font-bold text-[#0B6E72] hover:underline"
+            className="text-xs font-bold text-[#17618E] hover:underline"
           >
             Refresh List
           </button>
@@ -206,7 +206,7 @@ export default function AdminMarketingPage() {
                         {offer.type?.replace("_", " ")}
                       </span>
                     </td>
-                    <td className="py-4 px-4 font-bold text-[#0B6E72]">
+                    <td className="py-4 px-4 font-bold text-[#17618E]">
                       {offer.discount_type === "PERCENTAGE"
                         ? `${offer.percentage_value || offer.discount_percentage}% OFF`
                         : offer.discount_type === "FREE_DELIVERY"
@@ -282,7 +282,7 @@ export default function AdminMarketingPage() {
                       placeholder="e.g. 15% Off All Diabetes Care Products"
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border border-neutral-200 text-sm font-semibold outline-none focus:border-[#0B6E72]"
+                      className="w-full px-4 py-2.5 rounded-xl border border-neutral-200 text-sm font-semibold outline-none focus:border-[#17618E]"
                     />
                   </div>
                   <div>
@@ -290,7 +290,7 @@ export default function AdminMarketingPage() {
                     <select
                       value={formData.type}
                       onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border border-neutral-200 text-sm font-semibold outline-none focus:border-[#0B6E72]"
+                      className="w-full px-4 py-2.5 rounded-xl border border-neutral-200 text-sm font-semibold outline-none focus:border-[#17618E]"
                     >
                       <option value="PERCENTAGE_DISCOUNT">Percentage Discount</option>
                       <option value="FIXED_DISCOUNT">Fixed PKR Discount</option>
@@ -309,7 +309,7 @@ export default function AdminMarketingPage() {
                       placeholder="e.g. Save 15% on glucose meters and test strips."
                       value={formData.short_description}
                       onChange={(e) => setFormData({ ...formData, short_description: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border border-neutral-200 text-sm outline-none focus:border-[#0B6E72]"
+                      className="w-full px-4 py-2.5 rounded-xl border border-neutral-200 text-sm outline-none focus:border-[#17618E]"
                     />
                   </div>
                 </div>
@@ -341,7 +341,7 @@ export default function AdminMarketingPage() {
                             ? setFormData({ ...formData, percentage_value: e.target.value })
                             : setFormData({ ...formData, fixed_amount: e.target.value })
                         }
-                        className="w-full px-4 py-2.5 rounded-xl border border-neutral-200 text-sm outline-none font-bold text-[#0B6E72]"
+                        className="w-full px-4 py-2.5 rounded-xl border border-neutral-200 text-sm outline-none font-bold text-[#17618E]"
                       />
                     </div>
                   </div>
@@ -402,7 +402,7 @@ export default function AdminMarketingPage() {
                         type="checkbox"
                         checked={formData.new_users_only}
                         onChange={(e) => setFormData({ ...formData, new_users_only: e.target.checked })}
-                        className="h-4 w-4 rounded text-[#0B6E72]"
+                        className="h-4 w-4 rounded text-[#17618E]"
                       />
                       <span className="text-xs font-bold text-neutral-700">Valid for First-Time Users Only</span>
                     </label>
@@ -412,7 +412,7 @@ export default function AdminMarketingPage() {
                         type="checkbox"
                         checked={formData.stackable}
                         onChange={(e) => setFormData({ ...formData, stackable: e.target.checked })}
-                        className="h-4 w-4 rounded text-[#0B6E72]"
+                        className="h-4 w-4 rounded text-[#17618E]"
                       />
                       <span className="text-xs font-bold text-neutral-700">Allow Stacking With Other Offers</span>
                     </label>
@@ -475,7 +475,7 @@ export default function AdminMarketingPage() {
                   <button
                     type="button"
                     onClick={() => setModalStep(modalStep + 1)}
-                    className="px-5 py-2.5 rounded-xl bg-[#0B6E72] hover:bg-[#084F52] text-white text-xs font-bold"
+                    className="px-5 py-2.5 rounded-xl bg-[#17618E] hover:bg-[#082B3F] text-white text-xs font-bold"
                   >
                     Next Step
                   </button>

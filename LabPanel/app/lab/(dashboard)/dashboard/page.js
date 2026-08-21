@@ -123,7 +123,7 @@ export default function LabDashboardPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-[30px] md:text-[34px] font-heading font-bold text-[#07172E] tracking-tight">
+          <h1 className="text-[30px] md:text-[34px] font-heading font-bold text-[#082B3F] tracking-tight">
             Dashboard
           </h1>
           <p className="text-[14px] text-[#667085] mt-1.5 font-normal">
@@ -135,12 +135,12 @@ export default function LabDashboardPage() {
           <button
             type="button"
             onClick={handleRefresh}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-[#D9DEE5] text-[#07172E] text-[13px] font-semibold hover:bg-neutral-50 shadow-2xs transition-colors"
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-[#D9DEE5] text-[#082B3F] text-[13px] font-semibold hover:bg-neutral-50 shadow-2xs transition-colors"
             title="Refresh Dashboard"
           >
             <RefreshCw
               size={15}
-              className={`text-[#667085] ${isRefreshing ? "animate-spin text-[#087F82]" : ""}`}
+              className={`text-[#667085] ${isRefreshing ? "animate-spin text-[#17618E]" : ""}`}
             />
             <span>Refresh</span>
           </button>
@@ -148,7 +148,7 @@ export default function LabDashboardPage() {
             type="button"
             onClick={handleSimulateOrder}
             disabled={simulateMutation.isPending}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#087F82] hover:bg-[#076B6E] text-white text-[13px] font-semibold transition-all shadow-xs"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#17618E] hover:bg-[#124362] text-white text-[13px] font-semibold transition-all shadow-xs"
           >
             <Sparkles size={15} className={simulateMutation.isPending ? "animate-spin" : ""} />
             <span>+ Simulate Order</span>
@@ -174,7 +174,7 @@ export default function LabDashboardPage() {
       <div className="bg-white rounded-[18px] border border-[#D9DEE5] shadow-sm overflow-hidden">
         <div className="px-6 py-5 border-b border-[#D9DEE5] flex items-center justify-between">
           <div>
-            <h2 className="text-[17px] font-bold text-[#07172E] tracking-tight">
+            <h2 className="text-[17px] font-bold text-[#082B3F] tracking-tight">
               Recent Bookings
             </h2>
             <p className="text-[13px] text-[#667085] mt-0.5">
@@ -183,7 +183,7 @@ export default function LabDashboardPage() {
           </div>
           <Link
             href={partnerRoutes.lab.bookings}
-            className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#087F82] hover:text-[#076B6E] hover:underline"
+            className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#17618E] hover:text-[#124362] hover:underline"
           >
             <span>View all bookings</span>
             <ArrowRight size={15} />
@@ -214,7 +214,7 @@ export default function LabDashboardPage() {
                     onClick={() => setSelectedBooking(b)}
                   >
                     <td className="py-4 px-6">
-                      <div className="font-semibold text-[#07172E]">
+                      <div className="font-semibold text-[#082B3F]">
                         {b.patient_name || b.patient}
                       </div>
                       <div className="text-[11px] text-[#667085] font-mono mt-0.5">
@@ -222,10 +222,10 @@ export default function LabDashboardPage() {
                       </div>
                     </td>
                     <td className="py-4 px-4">
-                      <div className="font-medium text-[#07172E] max-w-xs truncate">
+                      <div className="font-medium text-[#082B3F] max-w-xs truncate">
                         {b.test_name || b.test}
                       </div>
-                      <div className="text-[12px] font-bold text-[#087F82] mt-0.5">
+                      <div className="text-[12px] font-bold text-[#17618E] mt-0.5">
                         PKR {(Number(b.test_price) || 0).toLocaleString()}
                       </div>
                     </td>
@@ -233,7 +233,7 @@ export default function LabDashboardPage() {
                       <Badge status={b.collection_type || b.collection} type="collection" />
                     </td>
                     <td className="py-4 px-4 text-[#667085]">
-                      <div className="font-medium text-[#07172E]">{b.date}</div>
+                      <div className="font-medium text-[#082B3F]">{b.date}</div>
                       <div className="text-[12px] text-[#667085]">{b.time}</div>
                     </td>
                     <td className="py-4 px-4">
@@ -246,7 +246,7 @@ export default function LabDashboardPage() {
                           e.stopPropagation();
                           setSelectedBooking(b);
                         }}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#D9DEE5] text-[12px] font-semibold text-[#087F82] hover:bg-[#E6F4F5] hover:border-[#087F82]/40 transition-colors"
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#D9DEE5] text-[12px] font-semibold text-[#17618E] hover:bg-[#DEEEF9] hover:border-[#17618E]/40 transition-colors"
                       >
                         <Eye size={13} />
                         <span>Manage</span>

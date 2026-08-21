@@ -6,6 +6,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { store } from "../store";
 import { hydrateAuth, fetchProfile } from "../store/authSlice";
+import { NotificationBannerHost } from "@/shared/notifications/NotificationBannerHost";
+import { EnableNotificationsPrompt } from "@/shared/notifications/EnableNotificationsPrompt";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,7 +30,10 @@ function AuthHydrator({ children }) {
     if (!initialized || typeof window === "undefined") return;
 
     const token = localStorage.getItem("token");
-    const user = localStorage.getItem("medzoos_user") || localStorage.getItem("sehat1_user") || localStorage.getItem("pharmahub_user");
+    const user =
+      localStorage.getItem("medzoos_user") ||
+      localStorage.getItem("sehat1_user") ||
+      localStorage.getItem("pharmahub_user");
     if (token && !user) {
       dispatch(fetchProfile());
     }
@@ -51,11 +56,22 @@ function AuthHydrator({ children }) {
   return children;
 }
 
+function NotificationChrome() {
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  return (
+    <>
+      <NotificationBannerHost />
+      <EnableNotificationsPrompt enabled={Boolean(isAuthenticated)} />
+    </>
+  );
+}
+
 export function Providers({ children }) {
   return (
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
         <AuthHydrator>{children}</AuthHydrator>
+        <NotificationChrome />
         <Toaster position="top-right" richColors />
       </QueryClientProvider>
     </Provider>

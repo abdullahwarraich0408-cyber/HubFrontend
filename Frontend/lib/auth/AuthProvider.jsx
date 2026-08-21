@@ -18,6 +18,7 @@ import {
   isDevTestPhone,
 } from "@/lib/auth/testAuth";
 import { normalizePhoneNumber } from "@/lib/auth/phoneUtils";
+import { signInWithGoogleCode } from "@/lib/googleAuth";
 
 const AuthContext = createContext(null);
 
@@ -28,7 +29,6 @@ function mapSession(data) {
   };
   return { user: data.user, tokens };
 }
-
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -116,8 +116,19 @@ export function AuthProvider({ children }) {
   );
 
   const loginWithGoogle = useCallback(async () => {
-    throw new Error("Google sign-in is not available.");
-  }, []);
+    const code = await signInWithGoogleCode();
+    const data = await authApi.googleLogin({
+      code,
+      deviceId: getDeviceId(),
+      platform: "web",
+    });
+    const { user: sessionUser, tokens } = mapSession(data);
+    if (!tokens?.accessToken) {
+      throw new Error("Invalid Google authentication response");
+    }
+    applySession(sessionUser, tokens);
+    return sessionUser;
+  }, [applySession]);
 
   const loginWithApple = useCallback(async () => {
     throw new Error("Apple sign-in is not available.");

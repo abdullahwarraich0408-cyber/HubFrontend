@@ -38,7 +38,7 @@ const TIMELINE_STEPS = [
   { key: BOOKING_STATUSES.COMPLETED, label: "Completed" },
 ];
 
-export function BookingDetailsModal({ booking, isOpen, onClose }) {
+export function BookingDetailsModal({ booking, isOpen, onClose, onMarkPayment, markingPayment }) {
   const [reportViewerOpen, setReportViewerOpen] = useState(false);
 
   if (!isOpen || !booking) return null;
@@ -46,6 +46,13 @@ export function BookingDetailsModal({ booking, isOpen, onClose }) {
   const norm = normalizeStatus(booking.status);
   const isCancelled = norm === BOOKING_STATUSES.CANCELLED;
   const isRejected = norm === BOOKING_STATUSES.REJECTED;
+  const paymentStatus = String(booking.payment_status || "").toUpperCase();
+  const paymentMethod = String(booking.payment_method || "").toLowerCase();
+  const isCash =
+    paymentMethod.includes("cod") ||
+    paymentMethod.includes("cash") ||
+    paymentMethod.includes("pay at lab");
+  const needsCashConfirm = isCash && paymentStatus !== "PAID" && !isCancelled && !isRejected;
 
   const currentStep = TIMELINE_STEPS.findIndex((s) => s.key === norm);
 
@@ -60,15 +67,15 @@ export function BookingDetailsModal({ booking, isOpen, onClose }) {
           {/* Header */}
           <div className="px-7 py-5 border-b border-[#D9DEE5] flex items-center justify-between bg-neutral-50/60 shrink-0">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#E6F4F5] text-[#087F82] flex items-center justify-center font-bold">
+              <div className="w-10 h-10 rounded-xl bg-[#DEEEF9] text-[#17618E] flex items-center justify-center font-bold">
                 <FlaskConical size={20} />
               </div>
               <div>
                 <div className="flex items-center gap-2.5">
-                  <h2 className="text-[19px] font-bold text-[#07172E]">
+                  <h2 className="text-[19px] font-bold text-[#082B3F]">
                     {booking.patient_name || booking.patient}
                   </h2>
-                  <span className="text-[12px] font-mono font-bold text-[#087F82] bg-teal-50 border border-teal-200 px-2 py-0.5 rounded">
+                  <span className="text-[12px] font-mono font-bold text-[#17618E] bg-teal-50 border border-teal-200 px-2 py-0.5 rounded">
                     {booking.booking_number}
                   </span>
                 </div>
@@ -80,7 +87,7 @@ export function BookingDetailsModal({ booking, isOpen, onClose }) {
             <button
               type="button"
               onClick={onClose}
-              className="text-[#667085] hover:text-[#07172E] p-2 rounded-lg hover:bg-neutral-100 transition-colors"
+              className="text-[#667085] hover:text-[#082B3F] p-2 rounded-lg hover:bg-neutral-100 transition-colors"
             >
               <X size={18} />
             </button>
@@ -91,14 +98,14 @@ export function BookingDetailsModal({ booking, isOpen, onClose }) {
             {/* Status Timeline Stepper */}
             {!isCancelled && !isRejected ? (
               <div className="bg-white p-5 rounded-xl border border-[#D9DEE5]">
-                <h4 className="text-[13px] font-bold text-[#07172E] mb-4">
+                <h4 className="text-[13px] font-bold text-[#082B3F] mb-4">
                   Lifecycle Progress
                 </h4>
                 <div className="flex items-center justify-between relative">
                   {/* Connecting Line */}
                   <div className="absolute left-4 right-4 top-3.5 h-[2px] bg-neutral-200 -z-0" />
                   <div
-                    className="absolute left-4 top-3.5 h-[2px] bg-[#087F82] -z-0 transition-all duration-300"
+                    className="absolute left-4 top-3.5 h-[2px] bg-[#17618E] -z-0 transition-all duration-300"
                     style={{
                       width: `${Math.min(
                         100,
@@ -119,18 +126,18 @@ export function BookingDetailsModal({ booking, isOpen, onClose }) {
                         <div
                           className={`w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-bold transition-all shadow-xs ${
                             isDone
-                              ? "bg-[#087F82] text-white"
+                              ? "bg-[#17618E] text-white"
                               : "bg-white text-[#667085] border-2 border-neutral-300"
-                          } ${isCurrent ? "ring-4 ring-[#087F82]/20" : ""}`}
+                          } ${isCurrent ? "ring-4 ring-[#17618E]/20" : ""}`}
                         >
                           {isDone ? <CheckCircle2 size={15} /> : idx + 1}
                         </div>
                         <span
                           className={`text-[10px] mt-2 font-semibold text-center whitespace-nowrap hidden sm:block ${
                             isCurrent
-                              ? "text-[#087F82]"
+                              ? "text-[#17618E]"
                               : isDone
-                              ? "text-[#07172E]"
+                              ? "text-[#082B3F]"
                               : "text-[#667085]"
                           }`}
                         >
@@ -159,32 +166,32 @@ export function BookingDetailsModal({ booking, isOpen, onClose }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Patient Information */}
               <div className="bg-white p-5 rounded-xl border border-[#D9DEE5] space-y-3">
-                <div className="flex items-center gap-2 text-[#07172E] font-bold text-[14px] pb-2 border-b border-neutral-100">
-                  <User size={16} className="text-[#087F82]" />
+                <div className="flex items-center gap-2 text-[#082B3F] font-bold text-[14px] pb-2 border-b border-neutral-100">
+                  <User size={16} className="text-[#17618E]" />
                   <span>Patient Information</span>
                 </div>
                 <div className="text-[13px] space-y-2">
                   <div className="flex justify-between">
                     <span className="text-[#667085]">Name:</span>
-                    <span className="font-semibold text-[#07172E]">
+                    <span className="font-semibold text-[#082B3F]">
                       {booking.patient_name || booking.patient}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[#667085]">Phone:</span>
-                    <span className="font-medium text-[#07172E]">
+                    <span className="font-medium text-[#082B3F]">
                       {booking.patient_phone || "Not provided"}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[#667085]">Email:</span>
-                    <span className="font-medium text-[#07172E]">
+                    <span className="font-medium text-[#082B3F]">
                       {booking.patient_email || "Not provided"}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[#667085]">Gender / Age:</span>
-                    <span className="font-medium text-[#07172E]">
+                    <span className="font-medium text-[#082B3F]">
                       {booking.patient_gender || "—"} / {booking.patient_age ? `${booking.patient_age} yrs` : "—"}
                     </span>
                   </div>
@@ -193,32 +200,32 @@ export function BookingDetailsModal({ booking, isOpen, onClose }) {
 
               {/* Test Information */}
               <div className="bg-white p-5 rounded-xl border border-[#D9DEE5] space-y-3">
-                <div className="flex items-center gap-2 text-[#07172E] font-bold text-[14px] pb-2 border-b border-neutral-100">
-                  <FlaskConical size={16} className="text-[#087F82]" />
+                <div className="flex items-center gap-2 text-[#082B3F] font-bold text-[14px] pb-2 border-b border-neutral-100">
+                  <FlaskConical size={16} className="text-[#17618E]" />
                   <span>Test Details</span>
                 </div>
                 <div className="text-[13px] space-y-2">
                   <div className="flex justify-between">
                     <span className="text-[#667085]">Test Name:</span>
-                    <span className="font-semibold text-[#07172E] text-right">
+                    <span className="font-semibold text-[#082B3F] text-right">
                       {booking.test_name || booking.test}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[#667085]">Category:</span>
-                    <span className="font-medium text-[#07172E]">
+                    <span className="font-medium text-[#082B3F]">
                       {booking.test_category || "General"}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[#667085]">Price:</span>
-                    <span className="font-bold text-[#087F82]">
+                    <span className="font-bold text-[#17618E]">
                       PKR {(Number(booking.test_price) || 0).toLocaleString()}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[#667085]">Turnaround:</span>
-                    <span className="font-medium text-[#07172E]">
+                    <span className="font-medium text-[#082B3F]">
                       {booking.turnaround || "24 hours"}
                     </span>
                   </div>
@@ -227,8 +234,8 @@ export function BookingDetailsModal({ booking, isOpen, onClose }) {
 
               {/* Collection Details */}
               <div className="bg-white p-5 rounded-xl border border-[#D9DEE5] space-y-3">
-                <div className="flex items-center gap-2 text-[#07172E] font-bold text-[14px] pb-2 border-b border-neutral-100">
-                  <MapPin size={16} className="text-[#087F82]" />
+                <div className="flex items-center gap-2 text-[#082B3F] font-bold text-[14px] pb-2 border-b border-neutral-100">
+                  <MapPin size={16} className="text-[#17618E]" />
                   <span>Collection Details</span>
                 </div>
                 <div className="text-[13px] space-y-2">
@@ -238,20 +245,20 @@ export function BookingDetailsModal({ booking, isOpen, onClose }) {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[#667085]">Date & Time:</span>
-                    <span className="font-medium text-[#07172E] text-right">
+                    <span className="font-medium text-[#082B3F] text-right">
                       {booking.date} · {booking.time}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[#667085]">Address:</span>
-                    <span className="font-medium text-[#07172E] text-right max-w-[200px] leading-snug">
+                    <span className="font-medium text-[#082B3F] text-right max-w-[200px] leading-snug">
                       {booking.address || "IDC Main Lab, Islamabad"}
                     </span>
                   </div>
                   {booking.collection_city && (
                     <div className="flex justify-between">
                       <span className="text-[#667085]">City:</span>
-                      <span className="font-medium text-[#07172E]">
+                      <span className="font-medium text-[#082B3F]">
                         {booking.collection_city}
                       </span>
                     </div>
@@ -261,8 +268,8 @@ export function BookingDetailsModal({ booking, isOpen, onClose }) {
 
               {/* Billing & Collector Information */}
               <div className="bg-white p-5 rounded-xl border border-[#D9DEE5] space-y-3">
-                <div className="flex items-center gap-2 text-[#07172E] font-bold text-[14px] pb-2 border-b border-neutral-100">
-                  <CreditCard size={16} className="text-[#087F82]" />
+                <div className="flex items-center gap-2 text-[#082B3F] font-bold text-[14px] pb-2 border-b border-neutral-100">
+                  <CreditCard size={16} className="text-[#17618E]" />
                   <span>Billing & Collector</span>
                 </div>
                 <div className="text-[13px] space-y-2">
@@ -272,15 +279,31 @@ export function BookingDetailsModal({ booking, isOpen, onClose }) {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[#667085]">Payment Method:</span>
-                    <span className="font-medium text-[#07172E]">
+                    <span className="font-medium text-[#082B3F]">
                       {booking.payment_method || "Cash"}
                     </span>
                   </div>
+                  {needsCashConfirm && (
+                    <button
+                      type="button"
+                      disabled={markingPayment}
+                      onClick={() => onMarkPayment?.(booking)}
+                      className="w-full mt-2 inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg bg-[#17618E] text-white text-[12px] font-semibold hover:bg-[#124362] disabled:opacity-60"
+                    >
+                      <CreditCard size={14} />
+                      {markingPayment ? "Saving…" : "Mark cash received"}
+                    </button>
+                  )}
+                  {isCash && paymentStatus === "PAID" && (
+                    <p className="text-[11px] text-emerald-700 pt-1">
+                      Cash confirmed — PDF report can be released to the patient.
+                    </p>
+                  )}
                   <div className="flex justify-between">
                     <span className="text-[#667085]">Collector:</span>
-                    <span className="font-medium text-[#07172E]">
+                    <span className="font-medium text-[#082B3F]">
                       {booking.collector_name ? (
-                        <span className="flex items-center gap-1 text-[#087F82]">
+                        <span className="flex items-center gap-1 text-[#17618E]">
                           <Truck size={13} />
                           {booking.collector_name}
                         </span>
@@ -292,7 +315,7 @@ export function BookingDetailsModal({ booking, isOpen, onClose }) {
                   {booking.collector_phone && (
                     <div className="flex justify-between">
                       <span className="text-[#667085]">Collector Phone:</span>
-                      <span className="font-medium text-[#07172E]">
+                      <span className="font-medium text-[#082B3F]">
                         {booking.collector_phone}
                       </span>
                     </div>
@@ -310,7 +333,7 @@ export function BookingDetailsModal({ booking, isOpen, onClose }) {
                       <FileText size={20} />
                     </div>
                     <div>
-                      <h4 className="text-[14px] font-bold text-[#07172E]">
+                      <h4 className="text-[14px] font-bold text-[#082B3F]">
                         {booking.report_file_name || `${booking.booking_number}_Diagnostic_Report.pdf`}
                       </h4>
                       <p className="text-[12px] text-[#667085]">
@@ -331,7 +354,7 @@ export function BookingDetailsModal({ booking, isOpen, onClose }) {
                     <button
                       type="button"
                       onClick={() => setReportViewerOpen(true)}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#087F82] text-white text-[12px] font-semibold hover:bg-[#076B6E] transition-colors shadow-2xs"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#17618E] text-white text-[12px] font-semibold hover:bg-[#124362] transition-colors shadow-2xs"
                     >
                       <Download size={14} />
                       <span>Download</span>
@@ -344,7 +367,7 @@ export function BookingDetailsModal({ booking, isOpen, onClose }) {
             {/* Status Change History */}
             {booking.history && booking.history.length > 0 && (
               <div className="bg-white p-5 rounded-xl border border-[#D9DEE5]">
-                <h4 className="text-[13px] font-bold text-[#07172E] mb-3">
+                <h4 className="text-[13px] font-bold text-[#082B3F] mb-3">
                   Audit Status History
                 </h4>
                 <div className="space-y-3">
@@ -376,7 +399,7 @@ export function BookingDetailsModal({ booking, isOpen, onClose }) {
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2 text-[13px] font-semibold text-[#07172E] bg-white border border-[#D9DEE5] hover:bg-neutral-100 rounded-lg transition-colors shadow-xs"
+              className="px-5 py-2 text-[13px] font-semibold text-[#082B3F] bg-white border border-[#D9DEE5] hover:bg-neutral-100 rounded-lg transition-colors shadow-xs"
             >
               Close
             </button>

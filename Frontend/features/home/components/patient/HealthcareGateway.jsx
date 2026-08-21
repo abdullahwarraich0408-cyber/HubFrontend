@@ -36,7 +36,7 @@ const OFFER_BASE = [
     href: "/doctors",
     image: "/images/hero-consult-doctor.png",
     alt: "Doctor consultation available through Medzoos",
-    tone: "from-[#087F8C]/90 via-[#087F8C]/45 to-transparent",
+    tone: "from-[#17618E]/90 via-[#17618E]/45 to-transparent",
     companyFallback: "Medzoos doctors",
   },
 ];

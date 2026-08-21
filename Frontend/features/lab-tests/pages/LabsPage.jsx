@@ -25,7 +25,7 @@ const POSTER_VISUALS = [
   },
   {
     image: "/images/home-lab-sampling.png",
-    tone: "from-[#087F8C]/95 via-[#16A9E0]/45 to-transparent",
+    tone: "from-[#17618E]/95 via-[#16A9E0]/45 to-transparent",
   },
   {
     image: "/images/card-lab-tests.png",

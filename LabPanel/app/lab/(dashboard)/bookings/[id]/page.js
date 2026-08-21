@@ -25,12 +25,12 @@ export default function LabBookingDetailsPage({ params }) {
   if (!booking) {
     return (
       <div className="py-12 text-center space-y-4">
-        <p className="text-[15px] font-semibold text-[#07172E]">
+        <p className="text-[15px] font-semibold text-[#082B3F]">
           Booking not found or has been removed.
         </p>
         <Link
           href={partnerRoutes.lab.bookings}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-[#087F82] text-white rounded-lg text-[13px] font-semibold"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-[#17618E] text-white rounded-lg text-[13px] font-semibold"
         >
           <ArrowLeft size={16} />
           <span>Back to Bookings</span>
@@ -45,7 +45,7 @@ export default function LabBookingDetailsPage({ params }) {
         <button
           type="button"
           onClick={() => router.back()}
-          className="inline-flex items-center gap-2 text-[13px] font-semibold text-[#667085] hover:text-[#07172E] transition-colors"
+          className="inline-flex items-center gap-2 text-[13px] font-semibold text-[#667085] hover:text-[#082B3F] transition-colors"
         >
           <ArrowLeft size={16} />
           <span>Back to Bookings</span>
@@ -61,15 +61,15 @@ export default function LabBookingDetailsPage({ params }) {
         <div className="flex items-center justify-between pb-4 border-b border-[#D9DEE5]">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-[22px] font-bold text-[#07172E]">
+              <h1 className="text-[22px] font-bold text-[#082B3F]">
                 {booking.patient_name || booking.patient}
               </h1>
-              <span className="text-[12px] font-mono font-bold text-[#087F82] bg-teal-50 px-2.5 py-0.5 rounded border border-teal-200">
+              <span className="text-[12px] font-mono font-bold text-[#17618E] bg-teal-50 px-2.5 py-0.5 rounded border border-teal-200">
                 {booking.booking_number}
               </span>
             </div>
             <p className="text-[13px] text-[#667085] mt-1">
-              Test: <strong className="text-[#07172E] font-semibold">{booking.test_name || booking.test}</strong> · {booking.collection_type || booking.collection}
+              Test: <strong className="text-[#082B3F] font-semibold">{booking.test_name || booking.test}</strong> · {booking.collection_type || booking.collection}
             </p>
           </div>
         </div>
@@ -78,26 +78,26 @@ export default function LabBookingDetailsPage({ params }) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Patient Details */}
           <div className="p-4 bg-neutral-50/60 rounded-xl border border-neutral-200/80 space-y-2.5 text-[13px]">
-            <div className="font-bold text-[#07172E] flex items-center gap-2 mb-2 pb-1 border-b border-neutral-200/60">
-              <User size={15} className="text-[#087F82]" />
+            <div className="font-bold text-[#082B3F] flex items-center gap-2 mb-2 pb-1 border-b border-neutral-200/60">
+              <User size={15} className="text-[#17618E]" />
               <span>Patient Profile</span>
             </div>
-            <div className="flex justify-between"><span className="text-[#667085]">Name:</span><span className="font-medium text-[#07172E]">{booking.patient_name || booking.patient}</span></div>
-            <div className="flex justify-between"><span className="text-[#667085]">Phone:</span><span className="font-medium text-[#07172E]">{booking.patient_phone || "Not provided"}</span></div>
-            <div className="flex justify-between"><span className="text-[#667085]">Email:</span><span className="font-medium text-[#07172E]">{booking.patient_email || "Not provided"}</span></div>
-            <div className="flex justify-between"><span className="text-[#667085]">Gender / Age:</span><span className="font-medium text-[#07172E]">{booking.patient_gender || "—"} / {booking.patient_age ? `${booking.patient_age} yrs` : "—"}</span></div>
+            <div className="flex justify-between"><span className="text-[#667085]">Name:</span><span className="font-medium text-[#082B3F]">{booking.patient_name || booking.patient}</span></div>
+            <div className="flex justify-between"><span className="text-[#667085]">Phone:</span><span className="font-medium text-[#082B3F]">{booking.patient_phone || "Not provided"}</span></div>
+            <div className="flex justify-between"><span className="text-[#667085]">Email:</span><span className="font-medium text-[#082B3F]">{booking.patient_email || "Not provided"}</span></div>
+            <div className="flex justify-between"><span className="text-[#667085]">Gender / Age:</span><span className="font-medium text-[#082B3F]">{booking.patient_gender || "—"} / {booking.patient_age ? `${booking.patient_age} yrs` : "—"}</span></div>
           </div>
 
           {/* Test & Collection */}
           <div className="p-4 bg-neutral-50/60 rounded-xl border border-neutral-200/80 space-y-2.5 text-[13px]">
-            <div className="font-bold text-[#07172E] flex items-center gap-2 mb-2 pb-1 border-b border-neutral-200/60">
-              <FlaskConical size={15} className="text-[#087F82]" />
+            <div className="font-bold text-[#082B3F] flex items-center gap-2 mb-2 pb-1 border-b border-neutral-200/60">
+              <FlaskConical size={15} className="text-[#17618E]" />
               <span>Test & Collection Info</span>
             </div>
-            <div className="flex justify-between"><span className="text-[#667085]">Test Name:</span><span className="font-semibold text-[#07172E]">{booking.test_name || booking.test}</span></div>
-            <div className="flex justify-between"><span className="text-[#667085]">Price:</span><span className="font-bold text-[#087F82]">PKR {(Number(booking.test_price) || 0).toLocaleString()}</span></div>
-            <div className="flex justify-between"><span className="text-[#667085]">Slot:</span><span className="font-medium text-[#07172E]">{booking.date} ({booking.time})</span></div>
-            <div className="flex justify-between"><span className="text-[#667085]">Address:</span><span className="font-medium text-[#07172E] max-w-[200px] text-right">{booking.address || "Main Lab"}</span></div>
+            <div className="flex justify-between"><span className="text-[#667085]">Test Name:</span><span className="font-semibold text-[#082B3F]">{booking.test_name || booking.test}</span></div>
+            <div className="flex justify-between"><span className="text-[#667085]">Price:</span><span className="font-bold text-[#17618E]">PKR {(Number(booking.test_price) || 0).toLocaleString()}</span></div>
+            <div className="flex justify-between"><span className="text-[#667085]">Slot:</span><span className="font-medium text-[#082B3F]">{booking.date} ({booking.time})</span></div>
+            <div className="flex justify-between"><span className="text-[#667085]">Address:</span><span className="font-medium text-[#082B3F] max-w-[200px] text-right">{booking.address || "Main Lab"}</span></div>
           </div>
         </div>
 
@@ -109,7 +109,7 @@ export default function LabBookingDetailsPage({ params }) {
                 <FileText size={20} />
               </div>
               <div>
-                <p className="text-[14px] font-bold text-[#07172E]">
+                <p className="text-[14px] font-bold text-[#082B3F]">
                   {booking.report_file_name || "Diagnostic_Report.pdf"}
                 </p>
                 <p className="text-[12px] text-[#667085]">
@@ -130,7 +130,7 @@ export default function LabBookingDetailsPage({ params }) {
               <a
                 href={booking.report_url}
                 download
-                className="px-4 py-2 bg-[#087F82] text-white rounded-lg text-[12px] font-semibold hover:bg-[#076B6E] flex items-center gap-1.5"
+                className="px-4 py-2 bg-[#17618E] text-white rounded-lg text-[12px] font-semibold hover:bg-[#124362] flex items-center gap-1.5"
               >
                 <Download size={14} />
                 <span>Download</span>

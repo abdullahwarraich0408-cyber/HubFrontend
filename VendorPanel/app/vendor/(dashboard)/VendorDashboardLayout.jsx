@@ -54,7 +54,11 @@ export function VendorDashboardLayout({ children }) {
             >
               <List size={24} weight="bold" />
             </button>
-            <span className="font-heading font-extrabold text-[16px] text-ink-headline">Vendor Portal</span>
+            <img
+              src="/images/medzoos-mark.png"
+              alt="Medzoos"
+              className="h-10 w-10 sm:h-11 sm:w-11 object-contain"
+            />
             <div className="w-8 h-8 rounded-full bg-neutral-100 border border-neutral-200 flex items-center justify-center font-bold text-xs text-neutral-600 overflow-hidden">
               {vendorProfile?.logo_url ? (
                 <img src={vendorProfile.logo_url} alt="" className="w-full h-full object-cover" />

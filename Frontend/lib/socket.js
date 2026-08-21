@@ -46,6 +46,9 @@ export function getSocket(authMode) {
   if (!token) return null;
 
   if (socket && activeToken === token) {
+    if (!socket.connected) {
+      socket.connect();
+    }
     return socket;
   }
 
@@ -59,6 +62,13 @@ export function getSocket(authMode) {
     auth: { token },
     autoConnect: true,
     transports: ["websocket", "polling"],
+    reconnection: true,
+    reconnectionAttempts: 10,
+    reconnectionDelay: 1000,
+  });
+
+  socket.on("connect_error", () => {
+    // Keep quiet in UI; polling still updates the inbox.
   });
 
   return socket;

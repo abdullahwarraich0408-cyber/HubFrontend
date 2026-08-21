@@ -12,7 +12,7 @@ export function AuthLayout({ children, variant = "default" }) {
 
         <section className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-white lg:w-[58%] xl:w-[56%]">
           <div className="relative shrink-0 lg:hidden">
-            <div className="relative h-[96px] overflow-hidden bg-gradient-to-br from-[#0AA3B0] via-[#087F8C] to-[#065A63]">
+            <div className="relative h-[110px] overflow-hidden bg-gradient-to-br from-[#0FA7E3] via-[#17618E] to-[#082B3F]">
               <picture>
                 <source srcSet="/images/auth-medzoos-healthcare.webp" type="image/webp" />
                 <img
@@ -21,7 +21,7 @@ export function AuthLayout({ children, variant = "default" }) {
                   className="absolute inset-0 h-full w-full object-cover object-[center_20%] opacity-70"
                 />
               </picture>
-              <div className="absolute inset-0 bg-[#087F8C]/35" />
+              <div className="absolute inset-0 bg-[#17618E]/35" />
               <div className="relative z-10 flex h-full items-center px-5">
                 <AuthBrandMark light />
               </div>

@@ -26,14 +26,14 @@ export function Pagination({
       )}
     >
       <div className="flex items-center gap-2">
-        <span>Showing <strong className="font-semibold text-[#07172E]">{startItem}</strong> to <strong className="font-semibold text-[#07172E]">{endItem}</strong> of <strong className="font-semibold text-[#07172E]">{totalItems}</strong> entries</span>
+        <span>Showing <strong className="font-semibold text-[#082B3F]">{startItem}</strong> to <strong className="font-semibold text-[#082B3F]">{endItem}</strong> of <strong className="font-semibold text-[#082B3F]">{totalItems}</strong> entries</span>
         {onPageSizeChange && (
           <div className="flex items-center gap-1.5 ml-4">
             <span>Per page:</span>
             <select
               value={pageSize}
               onChange={(e) => onPageSizeChange(Number(e.target.value))}
-              className="h-8 px-2 bg-neutral-50 border border-[#D9DEE5] rounded text-[12px] font-medium text-[#07172E] focus:outline-none focus:border-[#087F82]"
+              className="h-8 px-2 bg-neutral-50 border border-[#D9DEE5] rounded text-[12px] font-medium text-[#082B3F] focus:outline-none focus:border-[#17618E]"
             >
               {pageSizeOptions.map((size) => (
                 <option key={size} value={size}>
@@ -50,13 +50,13 @@ export function Pagination({
           type="button"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage <= 1}
-          className="p-1.5 rounded-lg border border-[#D9DEE5] hover:bg-neutral-50 disabled:opacity-40 disabled:cursor-not-allowed text-[#07172E] transition-colors"
+          className="p-1.5 rounded-lg border border-[#D9DEE5] hover:bg-neutral-50 disabled:opacity-40 disabled:cursor-not-allowed text-[#082B3F] transition-colors"
           aria-label="Previous page"
         >
           <ChevronLeft size={16} />
         </button>
 
-        <span className="px-3 py-1 text-[13px] font-medium text-[#07172E]">
+        <span className="px-3 py-1 text-[13px] font-medium text-[#082B3F]">
           Page {currentPage} of {totalPages || 1}
         </span>
 
@@ -64,7 +64,7 @@ export function Pagination({
           type="button"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage >= totalPages}
-          className="p-1.5 rounded-lg border border-[#D9DEE5] hover:bg-neutral-50 disabled:opacity-40 disabled:cursor-not-allowed text-[#07172E] transition-colors"
+          className="p-1.5 rounded-lg border border-[#D9DEE5] hover:bg-neutral-50 disabled:opacity-40 disabled:cursor-not-allowed text-[#082B3F] transition-colors"
           aria-label="Next page"
         >
           <ChevronRight size={16} />

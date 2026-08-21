@@ -50,7 +50,7 @@ export function PhoneInput({
         className={cn(
           "flex h-[52px] items-center overflow-hidden rounded-xl border bg-white transition-all duration-200",
           "border-[#D5E0DE] hover:border-[#B7C9C6]",
-          "focus-within:border-[#087F8C] focus-within:ring-4 focus-within:ring-[#087F8C]/12",
+          "focus-within:border-[#17618E] focus-within:ring-4 focus-within:ring-[#17618E]/12",
           error && "border-[#D92D20] focus-within:border-[#D92D20] focus-within:ring-[#D92D20]/10"
         )}
       >
@@ -61,7 +61,7 @@ export function PhoneInput({
           aria-expanded={open}
           aria-label={`Country, ${country.name} ${country.dial}`}
           onClick={() => setOpen((current) => !current)}
-          className="inline-flex h-full min-w-[102px] shrink-0 items-center justify-center gap-1.5 border-r border-[#D5E0DE] px-3 text-[14px] font-semibold text-[#1A2B2A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#087F8C]"
+          className="inline-flex h-full min-w-[102px] shrink-0 items-center justify-center gap-1.5 border-r border-[#D5E0DE] px-3 text-[14px] font-semibold text-[#1A2B2A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#17618E]"
         >
           <span aria-hidden="true">{country.flag}</span>
           <span>{country.dial}</span>
@@ -85,7 +85,7 @@ export function PhoneInput({
           <button
             type="submit"
             disabled={disabled || actionDisabled || actionLoading}
-            className="mr-1.5 inline-flex h-9 min-w-[76px] items-center justify-center rounded-lg bg-[#087F8C] px-3 text-[13px] font-semibold text-white transition-colors hover:bg-[#075E5B] disabled:opacity-50"
+            className="mr-1.5 inline-flex h-9 min-w-[76px] items-center justify-center rounded-lg bg-[#17618E] px-3 text-[13px] font-semibold text-white transition-colors hover:bg-[#124362] disabled:opacity-50"
           >
             {actionLoading ? <CircleNotch size={14} className="animate-spin" /> : actionLabel}
           </button>

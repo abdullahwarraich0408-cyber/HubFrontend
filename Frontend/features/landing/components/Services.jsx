@@ -80,7 +80,7 @@ export function Services() {
                   <ul className="mt-5 space-y-2.5">
                     {service.features.map((feature) => (
                       <li key={feature} className="flex items-center gap-2.5 text-[14px] text-[#334E68]">
-                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#EAF8F7] text-[#087F8C]">
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#EAF8F7] text-[#17618E]">
                           <Check size={12} weight="bold" />
                         </span>
                         {feature}
@@ -89,7 +89,7 @@ export function Services() {
                   </ul>
                   <Link
                     href={service.href}
-                    className="group/btn mt-auto inline-flex items-center gap-1.5 pt-6 text-[14px] font-semibold text-[#087F8C] transition-colors hover:text-[#075E68]"
+                    className="group/btn mt-auto inline-flex items-center gap-1.5 pt-6 text-[14px] font-semibold text-[#17618E] transition-colors hover:text-[#124362]"
                   >
                     {service.cta}
                     <ArrowRight

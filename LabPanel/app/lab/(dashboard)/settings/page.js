@@ -251,7 +251,7 @@ export default function LabSettingsPage() {
     <div className="space-y-7 animate-in fade-in duration-200">
       {/* Header */}
       <div>
-        <h1 className="text-[30px] md:text-[34px] font-heading font-bold text-[#07172E] tracking-tight">
+        <h1 className="text-[30px] md:text-[34px] font-heading font-bold text-[#082B3F] tracking-tight">
           Settings
         </h1>
         <p className="text-[14px] text-[#667085] mt-1.5 font-normal">
@@ -277,8 +277,8 @@ export default function LabSettingsPage() {
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-4 py-3 text-[13px] font-semibold border-b-2 transition-all whitespace-nowrap ${
                 isActive
-                  ? "border-[#087F82] text-[#087F82]"
-                  : "border-transparent text-[#667085] hover:text-[#07172E] hover:border-neutral-300"
+                  ? "border-[#17618E] text-[#17618E]"
+                  : "border-transparent text-[#667085] hover:text-[#082B3F] hover:border-neutral-300"
               }`}
             >
               <Icon size={16} />
@@ -297,21 +297,21 @@ export default function LabSettingsPage() {
             className="bg-white rounded-[16px] border border-[#D9DEE5] shadow-sm p-7 space-y-5"
           >
             <div className="flex items-center gap-4 pb-4 border-b border-neutral-100">
-              <div className="w-14 h-14 rounded-2xl bg-[#071A30] text-white flex items-center justify-center text-[20px] font-bold shadow-inner">
+              <div className="w-14 h-14 rounded-2xl bg-[#082B3F] text-white flex items-center justify-center text-[20px] font-bold shadow-inner">
                 {form.name.charAt(0).toUpperCase() || "I"}
               </div>
               <div>
-                <h3 className="text-[16px] font-bold text-[#07172E]">
+                <h3 className="text-[16px] font-bold text-[#082B3F]">
                   {form.name}
                 </h3>
-                <span className="text-[11px] font-bold text-[#087F82] uppercase tracking-wider">
+                <span className="text-[11px] font-bold text-[#17618E] uppercase tracking-wider">
                   DIAGNOSTICS PARTNER
                 </span>
               </div>
             </div>
 
             <div>
-              <label className="block text-[12px] font-semibold text-[#07172E] mb-1.5">
+              <label className="block text-[12px] font-semibold text-[#082B3F] mb-1.5">
                 Lab Name <span className="text-red-500">*</span>
               </label>
               <input
@@ -320,13 +320,13 @@ export default function LabSettingsPage() {
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="IDC"
                 required
-                className="w-full h-[44px] px-3.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#07172E] focus:outline-none focus:border-[#087F82]"
+                className="w-full h-[44px] px-3.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#082B3F] focus:outline-none focus:border-[#17618E]"
               />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-[12px] font-semibold text-[#07172E] mb-1.5">
+                <label className="block text-[12px] font-semibold text-[#082B3F] mb-1.5">
                   Phone Number
                 </label>
                 <input
@@ -334,12 +334,12 @@ export default function LabSettingsPage() {
                   value={form.phone}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}
                   placeholder="+92 51 111 000 432"
-                  className="w-full h-[44px] px-3.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#07172E] focus:outline-none focus:border-[#087F82]"
+                  className="w-full h-[44px] px-3.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#082B3F] focus:outline-none focus:border-[#17618E]"
                 />
               </div>
 
               <div>
-                <label className="block text-[12px] font-semibold text-[#07172E] mb-1.5">
+                <label className="block text-[12px] font-semibold text-[#082B3F] mb-1.5">
                   Email Address
                 </label>
                 <input
@@ -347,13 +347,13 @@ export default function LabSettingsPage() {
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   placeholder="contact@idc.net.pk"
-                  className="w-full h-[44px] px-3.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#07172E] focus:outline-none focus:border-[#087F82]"
+                  className="w-full h-[44px] px-3.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#082B3F] focus:outline-none focus:border-[#17618E]"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-[12px] font-semibold text-[#07172E] mb-1.5">
+              <label className="block text-[12px] font-semibold text-[#082B3F] mb-1.5">
                 Lab Physical Address
               </label>
               <input
@@ -361,13 +361,13 @@ export default function LabSettingsPage() {
                 value={form.address}
                 onChange={(e) => setForm({ ...form, address: e.target.value })}
                 placeholder="Plot 13-A, G-8 Markaz, Islamabad"
-                className="w-full h-[44px] px-3.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#07172E] focus:outline-none focus:border-[#087F82]"
+                className="w-full h-[44px] px-3.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#082B3F] focus:outline-none focus:border-[#17618E]"
               />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-[12px] font-semibold text-[#07172E] mb-1.5">
+                <label className="block text-[12px] font-semibold text-[#082B3F] mb-1.5">
                   Primary City
                 </label>
                 <input
@@ -375,12 +375,12 @@ export default function LabSettingsPage() {
                   value={form.city}
                   onChange={(e) => setForm({ ...form, city: e.target.value })}
                   placeholder="Islamabad"
-                  className="w-full h-[44px] px-3.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#07172E] focus:outline-none focus:border-[#087F82]"
+                  className="w-full h-[44px] px-3.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#082B3F] focus:outline-none focus:border-[#17618E]"
                 />
               </div>
 
               <div>
-                <label className="block text-[12px] font-semibold text-[#07172E] mb-1.5">
+                <label className="block text-[12px] font-semibold text-[#082B3F] mb-1.5">
                   License / Registration No.
                 </label>
                 <input
@@ -388,20 +388,20 @@ export default function LabSettingsPage() {
                   value={form.license}
                   onChange={(e) => setForm({ ...form, license: e.target.value })}
                   placeholder="PMDC-LAB-2026-9901"
-                  className="w-full h-[44px] px-3.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#07172E] focus:outline-none focus:border-[#087F82]"
+                  className="w-full h-[44px] px-3.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#082B3F] focus:outline-none focus:border-[#17618E]"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-[12px] font-semibold text-[#07172E] mb-1.5">
+              <label className="block text-[12px] font-semibold text-[#082B3F] mb-1.5">
                 About Laboratory
               </label>
               <textarea
                 value={form.bio}
                 onChange={(e) => setForm({ ...form, bio: e.target.value })}
                 rows={3}
-                className="w-full px-3.5 py-2.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#07172E] focus:outline-none focus:border-[#087F82]"
+                className="w-full px-3.5 py-2.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#082B3F] focus:outline-none focus:border-[#17618E]"
               />
             </div>
 
@@ -409,7 +409,7 @@ export default function LabSettingsPage() {
               <button
                 type="submit"
                 disabled={updateProfileMutation.isPending}
-                className="px-6 py-2.5 bg-[#087F82] hover:bg-[#076B6E] text-white text-[13px] font-semibold rounded-xl transition-all shadow-xs disabled:opacity-50"
+                className="px-6 py-2.5 bg-[#17618E] hover:bg-[#124362] text-white text-[13px] font-semibold rounded-xl transition-all shadow-xs disabled:opacity-50"
               >
                 {updateProfileMutation.isPending ? "Saving..." : "Save Changes"}
               </button>
@@ -426,7 +426,7 @@ export default function LabSettingsPage() {
             {/* Home Collection Toggle */}
             <div className="p-4 rounded-xl bg-teal-50/60 border border-teal-200 flex items-center justify-between">
               <div>
-                <span className="text-[14px] font-bold text-[#07172E] block">
+                <span className="text-[14px] font-bold text-[#082B3F] block">
                   Home Collection Service
                 </span>
                 <span className="text-[12px] text-[#667085]">
@@ -442,20 +442,20 @@ export default function LabSettingsPage() {
                   }
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#087F82]" />
+                <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#17618E]" />
               </label>
             </div>
 
             {/* Collection Cities (Tag/Chip input) */}
             <div>
-              <label className="block text-[12px] font-semibold text-[#07172E] mb-1.5">
+              <label className="block text-[12px] font-semibold text-[#082B3F] mb-1.5">
                 Collection Areas (Cities)
               </label>
               <div className="flex flex-wrap items-center gap-2 p-3 bg-neutral-50/70 border border-[#D9DEE5] rounded-xl min-h-[52px]">
                 {form.collectionCities.map((city) => (
                   <span
                     key={city}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-[#D9DEE5] text-[#07172E] text-[12px] font-semibold rounded-lg shadow-2xs"
+                    className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-[#D9DEE5] text-[#082B3F] text-[12px] font-semibold rounded-lg shadow-2xs"
                   >
                     <span>{city}</span>
                     <button
@@ -480,12 +480,12 @@ export default function LabSettingsPage() {
                       }
                     }}
                     placeholder="Add city & press Enter..."
-                    className="w-full text-[12px] bg-transparent text-[#07172E] placeholder:text-[#667085] focus:outline-none"
+                    className="w-full text-[12px] bg-transparent text-[#082B3F] placeholder:text-[#667085] focus:outline-none"
                   />
                   <button
                     type="button"
                     onClick={handleAddCity}
-                    className="p-1 rounded bg-[#087F82] text-white text-[11px] font-bold hover:bg-[#076B6E]"
+                    className="p-1 rounded bg-[#17618E] text-white text-[11px] font-bold hover:bg-[#124362]"
                   >
                     <Plus size={14} />
                   </button>
@@ -499,7 +499,7 @@ export default function LabSettingsPage() {
             {/* Collection Fees */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-[12px] font-semibold text-[#07172E] mb-1.5">
+                <label className="block text-[12px] font-semibold text-[#082B3F] mb-1.5">
                   Home Collection Fee (PKR)
                 </label>
                 <input
@@ -509,12 +509,12 @@ export default function LabSettingsPage() {
                   onChange={(e) =>
                     setForm({ ...form, collectionFee: Number(e.target.value) })
                   }
-                  className="w-full h-[42px] px-3.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#07172E] focus:outline-none focus:border-[#087F82]"
+                  className="w-full h-[42px] px-3.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#082B3F] focus:outline-none focus:border-[#17618E]"
                 />
               </div>
 
               <div>
-                <label className="block text-[12px] font-semibold text-[#07172E] mb-1.5">
+                <label className="block text-[12px] font-semibold text-[#082B3F] mb-1.5">
                   Free Collection Minimum Order (PKR)
                 </label>
                 <input
@@ -527,7 +527,7 @@ export default function LabSettingsPage() {
                       freeDeliveryThreshold: Number(e.target.value),
                     })
                   }
-                  className="w-full h-[42px] px-3.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#07172E] focus:outline-none focus:border-[#087F82]"
+                  className="w-full h-[42px] px-3.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#082B3F] focus:outline-none focus:border-[#17618E]"
                 />
               </div>
             </div>
@@ -535,13 +535,13 @@ export default function LabSettingsPage() {
             {/* Structured Operating Hours */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <label className="text-[13px] font-bold text-[#07172E]">
+                <label className="text-[13px] font-bold text-[#082B3F]">
                   Operating Hours
                 </label>
                 <button
                   type="button"
                   onClick={() => handleApplySameHours("Monday")}
-                  className="text-[11px] font-semibold text-[#087F82] hover:underline"
+                  className="text-[11px] font-semibold text-[#17618E] hover:underline"
                 >
                   Apply Monday hours to all days
                 </button>
@@ -560,7 +560,7 @@ export default function LabSettingsPage() {
                       key={day}
                       className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-1.5 border-b border-neutral-200/50 last:border-0"
                     >
-                      <span className="w-24 font-semibold text-[#07172E]">
+                      <span className="w-24 font-semibold text-[#082B3F]">
                         {day}
                       </span>
 
@@ -598,7 +598,7 @@ export default function LabSettingsPage() {
                             onChange={(e) =>
                               handleHourChange(day, "closed", e.target.checked)
                             }
-                            className="rounded text-[#087F82]"
+                            className="rounded text-[#17618E]"
                           />
                           <span>Closed</span>
                         </label>
@@ -613,7 +613,7 @@ export default function LabSettingsPage() {
               <button
                 type="submit"
                 disabled={updateProfileMutation.isPending}
-                className="px-6 py-2.5 bg-[#087F82] hover:bg-[#076B6E] text-white text-[13px] font-semibold rounded-xl transition-all shadow-xs disabled:opacity-50"
+                className="px-6 py-2.5 bg-[#17618E] hover:bg-[#124362] text-white text-[13px] font-semibold rounded-xl transition-all shadow-xs disabled:opacity-50"
               >
                 {updateProfileMutation.isPending ? "Saving..." : "Save Changes"}
               </button>
@@ -626,7 +626,7 @@ export default function LabSettingsPage() {
           <div className="bg-white rounded-[16px] border border-[#D9DEE5] shadow-sm p-7 space-y-5">
             <div className="flex items-center justify-between pb-4 border-b border-neutral-100">
               <div>
-                <h3 className="text-[16px] font-bold text-[#07172E]">
+                <h3 className="text-[16px] font-bold text-[#082B3F]">
                   Sample Collectors & Phlebotomists
                 </h3>
                 <p className="text-[12px] text-[#667085]">
@@ -647,7 +647,7 @@ export default function LabSettingsPage() {
                   });
                   setCollectorModalOpen(true);
                 }}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#087F82] hover:bg-[#076B6E] text-white text-[12px] font-semibold shadow-xs transition-colors"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#17618E] hover:bg-[#124362] text-white text-[12px] font-semibold shadow-xs transition-colors"
               >
                 <Plus size={15} />
                 <span>Add Collector</span>
@@ -671,7 +671,7 @@ export default function LabSettingsPage() {
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="font-semibold text-[#07172E] text-[13px]">
+                          <span className="font-semibold text-[#082B3F] text-[13px]">
                             {c.name}
                           </span>
                           <span
@@ -706,7 +706,7 @@ export default function LabSettingsPage() {
                           });
                           setCollectorModalOpen(true);
                         }}
-                        className="p-1.5 text-[#667085] hover:text-[#087F82] rounded-lg hover:bg-neutral-100"
+                        className="p-1.5 text-[#667085] hover:text-[#17618E] rounded-lg hover:bg-neutral-100"
                         title="Edit collector"
                       >
                         <Edit2 size={15} />
@@ -733,7 +733,7 @@ export default function LabSettingsPage() {
             onSubmit={handleSaveProfile}
             className="bg-white rounded-[16px] border border-[#D9DEE5] shadow-sm p-7 space-y-5"
           >
-            <h3 className="text-[16px] font-bold text-[#07172E] pb-3 border-b border-neutral-100">
+            <h3 className="text-[16px] font-bold text-[#082B3F] pb-3 border-b border-neutral-100">
               Notification Preferences
             </h3>
 
@@ -765,7 +765,7 @@ export default function LabSettingsPage() {
                   className="flex items-start justify-between gap-4 p-3 rounded-xl hover:bg-neutral-50 cursor-pointer"
                 >
                   <div>
-                    <span className="text-[13px] font-bold text-[#07172E] block">
+                    <span className="text-[13px] font-bold text-[#082B3F] block">
                       {item.title}
                     </span>
                     <span className="text-[12px] text-[#667085]">
@@ -784,7 +784,7 @@ export default function LabSettingsPage() {
                         },
                       })
                     }
-                    className="w-4 h-4 rounded text-[#087F82] border-[#D9DEE5] focus:ring-[#087F82] mt-1"
+                    className="w-4 h-4 rounded text-[#17618E] border-[#D9DEE5] focus:ring-[#17618E] mt-1"
                   />
                 </label>
               ))}
@@ -794,7 +794,7 @@ export default function LabSettingsPage() {
               <button
                 type="submit"
                 disabled={updateProfileMutation.isPending}
-                className="px-6 py-2.5 bg-[#087F82] hover:bg-[#076B6E] text-white text-[13px] font-semibold rounded-xl transition-all shadow-xs disabled:opacity-50"
+                className="px-6 py-2.5 bg-[#17618E] hover:bg-[#124362] text-white text-[13px] font-semibold rounded-xl transition-all shadow-xs disabled:opacity-50"
               >
                 {updateProfileMutation.isPending ? "Saving..." : "Save Preferences"}
               </button>
@@ -808,12 +808,12 @@ export default function LabSettingsPage() {
             onSubmit={handleChangePassword}
             className="bg-white rounded-[16px] border border-[#D9DEE5] shadow-sm p-7 space-y-5"
           >
-            <h3 className="text-[16px] font-bold text-[#07172E] pb-3 border-b border-neutral-100">
+            <h3 className="text-[16px] font-bold text-[#082B3F] pb-3 border-b border-neutral-100">
               Change Account Password
             </h3>
 
             <div>
-              <label className="block text-[12px] font-semibold text-[#07172E] mb-1.5">
+              <label className="block text-[12px] font-semibold text-[#082B3F] mb-1.5">
                 Current Password
               </label>
               <input
@@ -823,12 +823,12 @@ export default function LabSettingsPage() {
                   setPasswordForm({ ...passwordForm, current: e.target.value })
                 }
                 placeholder="••••••••"
-                className="w-full h-[42px] px-3.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#07172E] focus:outline-none focus:border-[#087F82]"
+                className="w-full h-[42px] px-3.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#082B3F] focus:outline-none focus:border-[#17618E]"
               />
             </div>
 
             <div>
-              <label className="block text-[12px] font-semibold text-[#07172E] mb-1.5">
+              <label className="block text-[12px] font-semibold text-[#082B3F] mb-1.5">
                 New Password
               </label>
               <input
@@ -838,12 +838,12 @@ export default function LabSettingsPage() {
                   setPasswordForm({ ...passwordForm, new: e.target.value })
                 }
                 placeholder="••••••••"
-                className="w-full h-[42px] px-3.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#07172E] focus:outline-none focus:border-[#087F82]"
+                className="w-full h-[42px] px-3.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#082B3F] focus:outline-none focus:border-[#17618E]"
               />
             </div>
 
             <div>
-              <label className="block text-[12px] font-semibold text-[#07172E] mb-1.5">
+              <label className="block text-[12px] font-semibold text-[#082B3F] mb-1.5">
                 Confirm New Password
               </label>
               <input
@@ -853,14 +853,14 @@ export default function LabSettingsPage() {
                   setPasswordForm({ ...passwordForm, confirm: e.target.value })
                 }
                 placeholder="••••••••"
-                className="w-full h-[42px] px-3.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#07172E] focus:outline-none focus:border-[#087F82]"
+                className="w-full h-[42px] px-3.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#082B3F] focus:outline-none focus:border-[#17618E]"
               />
             </div>
 
             <div className="pt-2">
               <button
                 type="submit"
-                className="px-6 py-2.5 bg-[#087F82] hover:bg-[#076B6E] text-white text-[13px] font-semibold rounded-xl transition-all shadow-xs"
+                className="px-6 py-2.5 bg-[#17618E] hover:bg-[#124362] text-white text-[13px] font-semibold rounded-xl transition-all shadow-xs"
               >
                 Update Password
               </button>
@@ -874,13 +874,13 @@ export default function LabSettingsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150">
           <div className="bg-white rounded-[20px] border border-[#D9DEE5] shadow-2xl w-full max-w-md p-6 overflow-hidden">
             <div className="flex items-center justify-between pb-4 border-b border-[#D9DEE5]">
-              <h3 className="text-[17px] font-bold text-[#07172E]">
+              <h3 className="text-[17px] font-bold text-[#082B3F]">
                 {editingCollector ? "Edit Collector" : "Add Sample Collector"}
               </h3>
               <button
                 type="button"
                 onClick={() => setCollectorModalOpen(false)}
-                className="text-[#667085] hover:text-[#07172E] p-1.5 rounded-lg"
+                className="text-[#667085] hover:text-[#082B3F] p-1.5 rounded-lg"
               >
                 <X size={18} />
               </button>
@@ -888,7 +888,7 @@ export default function LabSettingsPage() {
 
             <form onSubmit={handleSaveCollector} className="space-y-4 pt-5">
               <div>
-                <label className="block text-[12px] font-semibold text-[#07172E] mb-1.5">
+                <label className="block text-[12px] font-semibold text-[#082B3F] mb-1.5">
                   Collector Name <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -899,12 +899,12 @@ export default function LabSettingsPage() {
                   }
                   placeholder="e.g. Ali Raza"
                   required
-                  className="w-full h-[42px] px-3.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#07172E] focus:outline-none focus:border-[#087F82]"
+                  className="w-full h-[42px] px-3.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#082B3F] focus:outline-none focus:border-[#17618E]"
                 />
               </div>
 
               <div>
-                <label className="block text-[12px] font-semibold text-[#07172E] mb-1.5">
+                <label className="block text-[12px] font-semibold text-[#082B3F] mb-1.5">
                   Phone Number <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -915,12 +915,12 @@ export default function LabSettingsPage() {
                   }
                   placeholder="e.g. +92 300 5551234"
                   required
-                  className="w-full h-[42px] px-3.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#07172E] focus:outline-none focus:border-[#087F82]"
+                  className="w-full h-[42px] px-3.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#082B3F] focus:outline-none focus:border-[#17618E]"
                 />
               </div>
 
               <div>
-                <label className="block text-[12px] font-semibold text-[#07172E] mb-1.5">
+                <label className="block text-[12px] font-semibold text-[#082B3F] mb-1.5">
                   City / Assigned Area
                 </label>
                 <input
@@ -930,7 +930,7 @@ export default function LabSettingsPage() {
                     setCollectorForm({ ...collectorForm, city: e.target.value })
                   }
                   placeholder="e.g. Islamabad"
-                  className="w-full h-[42px] px-3.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#07172E] focus:outline-none focus:border-[#087F82]"
+                  className="w-full h-[42px] px-3.5 text-[13px] border border-[#D9DEE5] rounded-xl text-[#082B3F] focus:outline-none focus:border-[#17618E]"
                 />
               </div>
 
@@ -942,9 +942,9 @@ export default function LabSettingsPage() {
                   onChange={(e) =>
                     setCollectorForm({ ...collectorForm, active: e.target.checked })
                   }
-                  className="rounded text-[#087F82]"
+                  className="rounded text-[#17618E]"
                 />
-                <label htmlFor="collectorActive" className="text-[13px] font-medium text-[#07172E] cursor-pointer">
+                <label htmlFor="collectorActive" className="text-[13px] font-medium text-[#082B3F] cursor-pointer">
                   Active (Available for dispatching)
                 </label>
               </div>
@@ -959,7 +959,7 @@ export default function LabSettingsPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 text-[13px] font-semibold text-white bg-[#087F82] hover:bg-[#076B6E] rounded-lg"
+                  className="px-5 py-2 text-[13px] font-semibold text-white bg-[#17618E] hover:bg-[#124362] rounded-lg"
                 >
                   {editingCollector ? "Save Collector" : "Add Collector"}
                 </button>

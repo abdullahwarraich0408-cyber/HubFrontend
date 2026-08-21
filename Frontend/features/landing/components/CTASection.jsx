@@ -9,7 +9,7 @@ export function CTASection() {
     <section className="pb-16 pt-4 md:pb-20 lg:pb-24">
       <div className="landing-container">
         <FadeIn>
-          <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#087F8C] via-[#0A8F9C] to-[#0B6E7A] px-6 py-12 text-center text-white shadow-[0_24px_60px_rgba(8,127,140,0.28)] md:px-12 md:py-16">
+          <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#17618E] via-[#0FA7E3] to-[#124362] px-6 py-12 text-center text-white shadow-[0_24px_60px_rgba(8,127,140,0.28)] md:px-12 md:py-16">
             <div
               className="pointer-events-none absolute -left-10 top-8 h-40 w-40 rounded-full bg-white/10 blur-2xl"
               aria-hidden
@@ -34,7 +34,7 @@ export function CTASection() {
               <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
                 <Link
                   href="/signup"
-                  className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-white px-6 text-[15px] font-semibold text-[#087F8C] transition-all hover:bg-[#EAF8F7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                  className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-white px-6 text-[15px] font-semibold text-[#17618E] transition-all hover:bg-[#EAF8F7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
                 >
                   Create Free Account
                   <ArrowRight

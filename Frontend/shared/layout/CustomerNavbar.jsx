@@ -161,7 +161,7 @@ export function CustomerNavbar() {
         )}
       >
         <div className="home-container mx-auto px-3 sm:px-6">
-          <div className="flex h-16 md:h-[72px] items-center justify-between gap-1.5 sm:gap-4">
+          <div className="flex h-[72px] md:h-[80px] items-center justify-between gap-1.5 sm:gap-4">
             {/* Left: Brand Logo & Mobile Menu Button */}
             <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               <button

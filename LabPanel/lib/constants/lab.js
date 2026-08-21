@@ -34,8 +34,8 @@ export const STATUS_BADGE_STYLES = {
     label: "New",
   },
   [BOOKING_STATUSES.ACCEPTED]: {
-    bg: "bg-[#E6F4F5] text-[#087F82] border border-[#087F82]/30 font-semibold",
-    dot: "bg-[#087F82]",
+    bg: "bg-[#DEEEF9] text-[#17618E] border border-[#17618E]/30 font-semibold",
+    dot: "bg-[#17618E]",
     label: "Accepted",
   },
   [BOOKING_STATUSES.COLLECTOR_ASSIGNED]: {
@@ -80,8 +80,8 @@ export const STATUS_BADGE_STYLES = {
     label: "New",
   },
   confirmed: {
-    bg: "bg-[#E6F4F5] text-[#087F82] border border-[#087F82]/30 font-semibold",
-    dot: "bg-[#087F82]",
+    bg: "bg-[#DEEEF9] text-[#17618E] border border-[#17618E]/30 font-semibold",
+    dot: "bg-[#17618E]",
     label: "Accepted",
   },
   collector_assigned: {

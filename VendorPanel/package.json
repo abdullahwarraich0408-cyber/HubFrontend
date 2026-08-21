@@ -24,6 +24,7 @@
     "@tiptap/starter-kit": "^3.26.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
+    "firebase": "^12.18.0",
     "framer-motion": "^12.40.0",
     "next": "16.2.7",
     "react": "19.2.4",

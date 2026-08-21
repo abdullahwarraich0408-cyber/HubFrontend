@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   Menu,
-  FlaskConical,
   Bell,
   PlusCircle,
   Check,
@@ -104,11 +103,17 @@ export function LabDashboardLayout({ children }) {
               <button
                 type="button"
                 onClick={() => setMobileOpen(true)}
-                className="md:hidden p-2 rounded-lg text-[#07172E] hover:bg-neutral-100"
+                className="md:hidden p-2 rounded-lg text-[#082B3F] hover:bg-neutral-100"
                 aria-label="Open menu"
               >
                 <Menu size={22} />
               </button>
+
+              <img
+                src="/images/medzoos-mark.png"
+                alt="Medzoos"
+                className="h-10 w-10 object-contain md:hidden"
+              />
 
               {/* Lab Branch Indicator */}
               <div className="hidden sm:flex items-center gap-2.5">
@@ -116,10 +121,10 @@ export function LabDashboardLayout({ children }) {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
-                <span className="text-[13px] font-semibold text-[#07172E]">
+                <span className="text-[13px] font-semibold text-[#082B3F]">
                   {labName} Diagnostics
                 </span>
-                <span className="text-[11px] font-bold text-[#087F82] bg-teal-50 border border-teal-200/80 px-2 py-0.5 rounded uppercase">
+                <span className="text-[11px] font-bold text-[#17618E] bg-[#DEEEF9] border border-[#17618E]/30 px-2 py-0.5 rounded uppercase">
                   Islamabad Main
                 </span>
               </div>
@@ -132,7 +137,7 @@ export function LabDashboardLayout({ children }) {
                 type="button"
                 onClick={handleSimulateOrder}
                 disabled={simulateMutation.isPending}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#E6F4F5] hover:bg-teal-100 text-[#087F82] border border-[#087F82]/30 text-[12px] font-bold transition-all shadow-2xs cursor-pointer active:scale-95"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#DEEEF9] hover:bg-teal-100 text-[#17618E] border border-[#17618E]/30 text-[12px] font-bold transition-all shadow-2xs cursor-pointer active:scale-95"
                 title="Simulate a live patient test booking"
               >
                 <Sparkles size={14} className={simulateMutation.isPending ? "animate-spin" : ""} />
@@ -144,7 +149,7 @@ export function LabDashboardLayout({ children }) {
                 <button
                   type="button"
                   onClick={() => setNotifsOpen(!notifsOpen)}
-                  className="relative p-2 rounded-xl text-[#64748B] hover:text-[#07172E] hover:bg-neutral-100 transition-colors"
+                  className="relative p-2 rounded-xl text-[#64748B] hover:text-[#082B3F] hover:bg-neutral-100 transition-colors"
                   aria-label="Notifications"
                 >
                   <Bell size={19} />
@@ -160,7 +165,7 @@ export function LabDashboardLayout({ children }) {
                   <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl border border-[#D9DEE5] shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
                     <div className="p-3.5 border-b border-[#D9DEE5] flex items-center justify-between bg-neutral-50/80">
                       <div className="flex items-center gap-2">
-                        <span className="text-[13px] font-bold text-[#07172E]">
+                        <span className="text-[13px] font-bold text-[#082B3F]">
                           Notifications
                         </span>
                         {unreadCount > 0 && (
@@ -173,7 +178,7 @@ export function LabDashboardLayout({ children }) {
                         <button
                           type="button"
                           onClick={markAllAsRead}
-                          className="text-[11px] font-semibold text-[#087F82] hover:underline"
+                          className="text-[11px] font-semibold text-[#17618E] hover:underline"
                         >
                           Mark read
                         </button>
@@ -206,7 +211,7 @@ export function LabDashboardLayout({ children }) {
                             }`}
                           >
                             <div className="flex items-start justify-between gap-2">
-                              <span className="font-bold text-[#07172E]">
+                              <span className="font-bold text-[#082B3F]">
                                 {n.title}
                               </span>
                               <span className="text-[10px] text-[#64748B] shrink-0">

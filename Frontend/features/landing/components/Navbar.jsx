@@ -73,7 +73,7 @@ export function Navbar() {
           >
             <button
               type="button"
-              className="inline-flex items-center gap-1 rounded-lg px-3 py-2 text-[14px] font-medium text-[#52606D] transition-colors hover:bg-[#EAF8F7] hover:text-[#087F8C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F8C]/40"
+              className="inline-flex items-center gap-1 rounded-lg px-3 py-2 text-[14px] font-medium text-[#52606D] transition-colors hover:bg-[#EAF8F7] hover:text-[#17618E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#17618E]/40"
               aria-expanded={servicesOpen}
               aria-haspopup="true"
             >
@@ -109,19 +109,19 @@ export function Navbar() {
         <div className="flex items-center gap-2 sm:gap-3">
           <Link
             href="/login"
-            className="hidden rounded-xl px-3 py-2 text-[14px] font-semibold text-[#102A43] transition-colors hover:bg-[#EAF8F7] hover:text-[#087F8C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F8C]/40 sm:inline-flex"
+            className="hidden rounded-xl px-3 py-2 text-[14px] font-semibold text-[#102A43] transition-colors hover:bg-[#EAF8F7] hover:text-[#17618E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#17618E]/40 sm:inline-flex"
           >
             Log In
           </Link>
           <Link
             href="/signup"
-            className="inline-flex h-10 items-center justify-center rounded-xl bg-[#087F8C] px-4 text-[14px] font-semibold text-white shadow-sm transition-all hover:bg-[#075E68] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F8C]/40 focus-visible:ring-offset-2 sm:h-11 sm:px-5"
+            className="inline-flex h-10 items-center justify-center rounded-xl bg-[#17618E] px-4 text-[14px] font-semibold text-white shadow-sm transition-all hover:bg-[#124362] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#17618E]/40 focus-visible:ring-offset-2 sm:h-11 sm:px-5"
           >
             Get Started
           </Link>
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#102A43]/10 text-[#102A43] transition-colors hover:bg-[#EAF8F7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F8C]/40 xl:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#102A43]/10 text-[#102A43] transition-colors hover:bg-[#EAF8F7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#17618E]/40 xl:hidden"
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileOpen}
             onClick={() => setMobileOpen((v) => !v)}
@@ -155,7 +155,7 @@ export function Navbar() {
               <Link
                 href="/signup"
                 onClick={() => setMobileOpen(false)}
-                className="inline-flex h-11 items-center justify-center rounded-xl bg-[#087F8C] text-[14px] font-semibold text-white"
+                className="inline-flex h-11 items-center justify-center rounded-xl bg-[#17618E] text-[14px] font-semibold text-white"
               >
                 Get Started
               </Link>
@@ -171,7 +171,7 @@ function NavItem({ href, label }) {
   return (
     <Link
       href={href}
-      className="rounded-lg px-3 py-2 text-[14px] font-medium text-[#52606D] transition-colors hover:bg-[#EAF8F7] hover:text-[#087F8C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F8C]/40"
+      className="rounded-lg px-3 py-2 text-[14px] font-medium text-[#52606D] transition-colors hover:bg-[#EAF8F7] hover:text-[#17618E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#17618E]/40"
     >
       {label}
     </Link>

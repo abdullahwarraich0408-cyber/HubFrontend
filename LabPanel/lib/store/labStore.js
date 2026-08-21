@@ -839,6 +839,20 @@ export const labLocalStoreApi = {
         if (norm === BOOKING_STATUSES.SAMPLE_COLLECTED && !updated.sample_collected_at) {
           updated.sample_collected_at = new Date().toISOString();
         }
+        // Cash at lab: payment received when sample is taken at counter
+        const method = String(updated.payment_method || "").toLowerCase();
+        if (
+          ["cod", "cash", "cash on collection", "pay at lab"].some((m) => method.includes(m)) &&
+          String(updated.payment_status || "").toUpperCase() !== "PAID" &&
+          [
+            BOOKING_STATUSES.SAMPLE_COLLECTED,
+            BOOKING_STATUSES.PROCESSING,
+            BOOKING_STATUSES.REPORT_READY,
+            BOOKING_STATUSES.COMPLETED,
+          ].includes(norm)
+        ) {
+          updated.payment_status = "PAID";
+        }
         if (norm === BOOKING_STATUSES.PROCESSING && !updated.processing_started_at) {
           updated.processing_started_at = new Date().toISOString();
         }
@@ -862,6 +876,34 @@ export const labLocalStoreApi = {
       });
     }
 
+    return updatedBooking;
+  },
+  markPaymentReceived: (id) => {
+    const store = getLocalStore();
+    let updatedBooking = null;
+
+    store.bookings = (store.bookings || []).map((b) => {
+      if (b.id === id || b.booking_number === id) {
+        const updated = {
+          ...b,
+          payment_status: "PAID",
+          updated_at: new Date().toISOString(),
+          history: [
+            ...(b.history || []),
+            {
+              status: b.status,
+              changed_at: new Date().toISOString(),
+              note: "Cash payment marked as received at lab",
+            },
+          ],
+        };
+        updatedBooking = updated;
+        return updated;
+      }
+      return b;
+    });
+
+    saveLocalStore(store);
     return updatedBooking;
   },
   assignCollector: (bookingId, { collector_id, collector_name, collector_phone, note }) => {

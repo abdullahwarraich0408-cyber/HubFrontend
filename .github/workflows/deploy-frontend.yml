@@ -38,7 +38,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
           cache-dependency-path: '${{ matrix.panel.dir }}/package-lock.json'
 
@@ -125,9 +125,9 @@ jobs:
               curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
             fi
             [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-            nvm install 20
-            nvm use 20
-            nvm alias default 20
+            nvm install 22
+            nvm use 22
+            nvm alias default 22
 
             # Get the actual node binary path for PM2
             NODE_PATH=$(which node)
@@ -140,8 +140,8 @@ jobs:
             tar -xzf deploy-bundle.tar.gz
             rm deploy-bundle.tar.gz
 
-            # Stop all existing crash-looping processes
-            pm2 delete all 2>/dev/null || true
+            # Stop all existing crash-looping frontend processes
+            pm2 delete frontend adminpanel doctorpanel labpanel vendorpanel 2>/dev/null || true
 
             declare -A PANELS
             PANELS=(

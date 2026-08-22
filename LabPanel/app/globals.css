@@ -1,57 +1,90 @@
 @import "tailwindcss";
 
+:root {
+  --sidebar: #082B3F;
+  --sidebar-active: #0A3D52;
+  --sidebar-hover: #0E2940;
+  --primary: #17618E;
+  --primary-dark: #124362;
+  --primary-light: #DEEEF9;
+  --primary-mist: #F0F6FB;
+  --background: #F0F6FB;
+  --card: #FFFFFF;
+  --heading: #082B3F;
+  --muted: #667085;
+  --border: #D9DEE5;
+  --danger: #EF233C;
+  --danger-bg: #FEE2E2;
+  --danger-text: #991B1B;
+  --success: #079455;
+  --success-bg: #DCFCE7;
+  --success-text: #166534;
+  --blue: #2563EB;
+  --blue-bg: #DBEAFE;
+  --blue-text: #1E40AF;
+  --purple: #7C3AED;
+  --purple-bg: #EDE9FE;
+  --purple-text: #5B21B6;
+  --orange: #EA580C;
+  --orange-bg: #FFEDD5;
+  --orange-text: #9A3412;
+}
+
 @theme {
-  /* Brand */
-  --color-brand-primary: #0B6E72;
-  --color-brand-dark: #084F52;
-  --color-brand-light: #E6F4F5;
-  --color-brand-mist: #F0F9FA;
-  --color-brand-highlight: #7DD3D8;
+  /* Brand — Medzoos */
+  --color-brand-primary: #17618E;
+  --color-brand-dark: #082B3F;
+  --color-brand-light: #DEEEF9;
+  --color-brand-mist: #F0F6FB;
+  --color-brand-highlight: #0FA7E3;
+
+  /* Sidebar */
+  --color-sidebar: #082B3F;
+  --color-sidebar-active: #0A3D52;
+  --color-sidebar-hover: #0E2940;
 
   /* Ink / Dark */
-  --color-ink-900: #0C1A2E;
-  --color-ink-800: #152845;
-  --color-ink-headline: #0C1A2E;
+  --color-ink-900: #082B3F;
+  --color-ink-800: #124362;
+  --color-ink-headline: #082B3F;
 
   /* Surfaces */
-  --color-surface-base: #FFFFFF;
+  --color-surface-base: #F6F8FA;
   --color-surface-subtle: #F6F8FA;
   --color-surface-raised: #FFFFFF;
-  --color-surface-overlay: #F0F9FA;
+  --color-surface-overlay: #F0F6FB;
   --color-surface-elevated: #FFFFFF;
 
   /* Neutrals */
-  --color-neutral-100: #F7F8FA;
+  --color-neutral-100: #F6F8FA;
   --color-neutral-200: #E5E7EB;
-  --color-neutral-300: #D1D5DB;
-  --color-neutral-500: #6B7280;
-  --color-neutral-600: #4B5563;
-  --color-neutral-800: #1F2937;
-  --color-neutral-900: #111827;
+  --color-neutral-300: #D9DEE5;
+  --color-neutral-500: #667085;
+  --color-neutral-600: #475467;
+  --color-neutral-800: #1D2939;
+  --color-neutral-900: #082B3F;
 
   /* Status */
-  --color-status-success: #0F9D58;
+  --color-status-success: #079455;
   --color-status-success-bg: #DCFCE7;
-  --color-status-success-text: #14532D;
+  --color-status-success-text: #166534;
   --color-status-warning: #D97706;
   --color-status-warning-bg: #FEF3C7;
-  --color-status-warning-text: #78350F;
-  --color-status-danger: #DC2626;
+  --color-status-warning-text: #92400E;
+  --color-status-danger: #EF233C;
   --color-status-danger-bg: #FEE2E2;
-  --color-status-danger-text: #7F1D1D;
+  --color-status-danger-text: #991B1B;
   --color-status-info: #2563EB;
   --color-status-info-bg: #DBEAFE;
-  --color-status-info-text: #1E3A8A;
-  --color-status-shipped-bg: #EDE9FE;
-  --color-status-shipped-text: #4C1D95;
+  --color-status-info-text: #1E40AF;
+  --color-status-purple: #7C3AED;
+  --color-status-purple-bg: #EDE9FE;
+  --color-status-purple-text: #5B21B6;
+  --color-status-orange: #EA580C;
+  --color-status-orange-bg: #FFEDD5;
+  --color-status-orange-text: #9A3412;
   --color-status-cancelled-bg: #F3F4F6;
   --color-status-cancelled-text: #374151;
-
-  /* Accent */
-  --color-accent-gold: #B8860B;
-  --color-accent-gold-bg: #FEF9C3;
-  --color-accent-gold-text: #713F12;
-  --color-rating: #EAB308;
 
   /* Typography */
   --font-heading: var(--font-dm-serif-display), Georgia, serif;

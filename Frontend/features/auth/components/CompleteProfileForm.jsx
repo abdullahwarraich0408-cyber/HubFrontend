@@ -79,8 +79,8 @@ export function CompleteProfileForm({ loading, error, onSubmit }) {
                 className={cn(
                   "flex min-h-[48px] cursor-pointer items-center justify-center rounded-[14px] border px-3 text-[14px] font-semibold transition-colors",
                   form.gender === item.value
-                    ? "border-[#087F8C] bg-[#EAF8F7] text-[#075E5B]"
-                    : "border-[#D7E4EA] bg-[#F7FBFC] text-[#172525] hover:border-[#087F8C]/30"
+                    ? "border-[#17618E] bg-[#EAF8F7] text-[#124362]"
+                    : "border-[#D7E4EA] bg-[#F7FBFC] text-[#172525] hover:border-[#17618E]/30"
                 )}
               >
                 <input

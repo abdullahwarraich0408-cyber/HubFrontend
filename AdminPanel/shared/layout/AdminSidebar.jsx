@@ -22,7 +22,8 @@ import {
   Stethoscope,
   Flag,
   Globe,
-  MagnifyingGlass
+  MagnifyingGlass,
+  EnvelopeSimple,
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
 
@@ -49,6 +50,7 @@ const navGroups = [
     title: "OPERATIONS",
     items: [
       { name: "Orders & Fulfillment", path: "/admin/orders", icon: Package },
+      { name: "Leads & Inquiries", path: "/admin/inquiries", icon: EnvelopeSimple },
       { name: "Prescription Orders", path: "/admin/prescription-orders", icon: Pill },
       { name: "Financial & Payouts", path: "/admin/finance", icon: CurrencyDollar },
       { name: "Analytics & Reports", path: "/admin/analytics", icon: ChartLineUp },
@@ -127,27 +129,24 @@ export function AdminSidebar() {
   })).filter(g => g.items.length > 0);
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-[270px] bg-[#0A0F1D] text-white flex flex-col z-50 font-[var(--font-plus-jakarta-sans)] border-r border-white/10 select-none overflow-hidden">
+    <aside className="fixed left-0 top-0 h-full w-[270px] bg-[#082B3F] text-white flex flex-col z-50 font-[var(--font-plus-jakarta-sans)] border-r border-white/10 select-none overflow-hidden">
       
       {/* Brand Header */}
-      <div className="h-[76px] flex items-center px-6 shrink-0 border-b border-white/10">
-        <Link href="/admin" className="flex items-center gap-3.5 group w-full">
-          <div className="w-9 h-9 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center shrink-0 group-hover:bg-white/20 transition-colors">
-            <ShieldCheck size={20} className="text-white" weight="fill" />
-          </div>
-          <div className="flex flex-col">
-            <div className="flex items-center gap-2">
-              <span className="font-[var(--font-dm-serif-display)] text-xl font-semibold tracking-tight text-white">
-                Medzoos
-              </span>
-              <span className="px-1.5 py-0.5 text-[9px] font-mono font-bold tracking-widest uppercase bg-white/10 text-white/80 rounded border border-white/15">
-                PRO
-              </span>
-            </div>
-            <span className="text-[10px] font-medium text-white/40 uppercase tracking-widest mt-0.5">
-              Admin Portal
+      <div className="h-[76px] flex items-center px-5 shrink-0 border-b border-white/10">
+        <Link href="/admin" className="flex flex-col gap-1.5 group w-full min-w-0">
+          <div className="flex items-center gap-2">
+            <img
+              src="/images/medzoos-wordmark-on-dark.png"
+              alt="Medzoos"
+              className="h-9 sm:h-10 w-auto max-w-[200px] object-contain object-left"
+            />
+            <span className="px-1.5 py-0.5 text-[9px] font-mono font-bold tracking-widest uppercase bg-[#17618E]/30 text-[#0FA7E3] rounded border border-[#17618E]/40">
+              PRO
             </span>
           </div>
+          <span className="text-[10px] font-medium text-white/45 uppercase tracking-widest pl-0.5">
+            Admin Portal
+          </span>
         </Link>
       </div>
 

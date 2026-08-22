@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Envelope, Lock, GoogleLogo, AppleLogo, Storefront, ShieldCheck, TrendUp, ArrowRight } from "@phosphor-icons/react";
+import { Envelope, Lock, GoogleLogo, AppleLogo, ShieldCheck, TrendUp, ArrowRight } from "@phosphor-icons/react";
 import { Button } from "@/shared/components/Button";
 import { Input } from "@/shared/components/Input";
 import { toast } from "sonner";
@@ -59,8 +59,12 @@ export function VendorLoginPage() {
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTAiIGN5PSIxMCIgcj0iMSIgZmlsbD0icmdiYSgyNTUsIDI1NSwgMjU1LCAwLjA1KSIvPjwvc3ZnPg==')] opacity-60"></div>
 
           <div className="relative z-10 mt-4">
-            <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md mb-8 border border-white/10 shadow-lg">
-              <Storefront size={24} weight="fill" className="text-white" />
+            <div className="mb-8">
+              <img
+                src="/images/medzoos-wordmark-on-dark.png"
+                alt="Medzoos"
+                className="h-9 sm:h-10 md:h-11 w-auto object-contain mb-6"
+              />
             </div>
             <h2 className="text-[36px] font-[var(--font-heading)] font-extrabold text-white mb-4 leading-[1.2] tracking-tight">
               Vendor Portal <br /> for Medzoos.
@@ -89,6 +93,11 @@ export function VendorLoginPage() {
         {/* Right Side: Form */}
         <div className="w-full lg:w-[55%] p-8 md:p-14 flex flex-col justify-center">
           <div className="mb-8 text-center md:text-left">
+            <img
+              src="/images/medzoos-mark.png"
+              alt="Medzoos"
+              className="h-10 w-10 sm:h-11 sm:w-11 object-contain mb-4 mx-auto md:mx-0"
+            />
             <h1 className="text-[30px] font-[var(--font-heading)] font-extrabold text-[var(--color-ink-headline)] mb-2 tracking-tight">
               Vendor Login
             </h1>

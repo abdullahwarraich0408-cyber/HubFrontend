@@ -43,7 +43,7 @@ export function LandingImage({
       >
         <div className="absolute inset-0 opacity-40">
           <div className="absolute -right-8 -top-8 h-40 w-40 rounded-full bg-white/50 blur-2xl" />
-          <div className="absolute -bottom-10 left-6 h-32 w-32 rounded-full bg-[#087F8C]/15 blur-2xl" />
+          <div className="absolute -bottom-10 left-6 h-32 w-32 rounded-full bg-[#17618E]/15 blur-2xl" />
         </div>
       </div>
     );

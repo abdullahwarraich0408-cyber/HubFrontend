@@ -41,7 +41,7 @@ export default function SiteDetailsPage() {
 
   return (
     <div className="animate-in fade-in zoom-in-95 duration-500 max-w-[720px]">
-      <Link href="/admin/content" className="inline-flex items-center gap-1 text-[13px] text-[#0B6E72] font-semibold mb-4">
+      <Link href="/admin/content" className="inline-flex items-center gap-1 text-[13px] text-[#17618E] font-semibold mb-4">
         <ArrowLeft size={14} /> Content hub
       </Link>
       <h1 className="text-[28px] font-heading font-extrabold text-ink-headline tracking-tight">
@@ -78,7 +78,7 @@ export default function SiteDetailsPage() {
           ))}
           <button
             type="submit"
-            className="h-11 rounded-lg bg-[#0B6E72] text-white text-sm font-semibold flex items-center justify-center gap-2"
+            className="h-11 rounded-lg bg-[#17618E] text-white text-sm font-semibold flex items-center justify-center gap-2"
           >
             <FloppyDisk size={16} />
             {updateSettings.isPending ? "Saving..." : "Save site details"}

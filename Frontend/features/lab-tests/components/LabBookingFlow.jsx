@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { toast } from "sonner";
@@ -13,11 +13,13 @@ import {
   House,
   Buildings,
   FileArrowUp,
+  CreditCard,
 } from "@phosphor-icons/react";
 import { Button } from "@/shared/components/Button";
 import { Input } from "@/shared/components/Input";
 import { TIME_SLOTS } from "../data/mockLabTests";
 import { useLabTestTimeSlots, useBookLabTest, useUploadDocument, useReadPrescription } from "@/lib/hooks/useApi";
+import { paymentsApi } from "@/lib/api/index";
 import { openSignInModal } from "@/lib/authModalEvents";
 
 const STEPS = [
@@ -45,9 +47,18 @@ export function LabBookingFlow({ test }) {
   const [prescriptionUrl, setPrescriptionUrl] = useState("");
   const [prescriptionOcr, setPrescriptionOcr] = useState(null);
   const [readingPrescription, setReadingPrescription] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("stripe");
+  const [paying, setPaying] = useState(false);
 
   const next = () => setStep((s) => Math.min(4, s + 1));
   const detailsValid = patient.name.trim() && patient.phone.trim() && (collectionType === "VISIT_LAB" || address.line.trim());
+
+  // Home collection must be prepaid; visit-lab can use cash at counter
+  useEffect(() => {
+    if (collectionType === "HOME" && paymentMethod === "cod") {
+      setPaymentMethod("stripe");
+    }
+  }, [collectionType, paymentMethod]);
 
   const handleReadPrescription = async (e) => {
     const file = e.target.files?.[0];
@@ -86,23 +97,44 @@ export function LabBookingFlow({ test }) {
       return;
     }
 
+    setPaying(true);
     try {
-      await bookLabTest.mutateAsync({
+      const method = collectionType === "HOME" ? "stripe" : paymentMethod;
+      const booking = await bookLabTest.mutateAsync({
         lab_test_id: test.id,
         patient_name: patient.name,
         patient_gender: patient.gender,
         patient_age: patient.age ? Number(patient.age) : undefined,
         collection_type: collectionType,
         time_slot: selectedSlot,
-        payment_method: "cod",
+        payment_method: method,
         collection_date: new Date(collectionDate).toISOString(),
         collection_address: collectionType === "HOME" ? { ...address, phone: patient.phone } : undefined,
         prescription_url: prescriptionUrl || undefined,
       });
-      toast.success("Lab test booked successfully");
+
+      if (method === "stripe") {
+        const bookingId = booking.booking?.id || booking.id;
+        toast.message("Redirecting to Stripe to pay…");
+        const payment = await paymentsApi.checkout({
+          purpose: "lab",
+          booking_ids: [bookingId],
+          payment_method: "stripe",
+          frontend_url: typeof window !== "undefined" ? window.location.origin : undefined,
+        });
+        if (payment.checkoutUrl) {
+          window.location.href = payment.checkoutUrl;
+          return;
+        }
+        throw new Error("Stripe checkout URL was not returned");
+      }
+
+      toast.success("Booked — pay cash at the lab when your sample is collected");
       next();
     } catch (error) {
       toast.error(error.message || "Could not book lab test");
+    } finally {
+      setPaying(false);
     }
   };
 
@@ -250,11 +282,46 @@ export function LabBookingFlow({ test }) {
             <div className="flex justify-between"><span>Collection</span><span>{collectionType === "HOME" ? "Home" : "Lab visit"}</span></div>
             <div className="flex justify-between"><span>Patient</span><span>{patient.name}</span></div>
           </div>
+
+          <div className="mb-4 space-y-2">
+            <p className="text-[13px] font-bold flex items-center gap-2">
+              <CreditCard size={16} /> Payment
+            </p>
+            {(collectionType === "HOME"
+              ? [{ id: "stripe", label: "Pay online (Stripe)", note: `PKR ${Number(test.price || 0).toLocaleString()}` }]
+              : [
+                  { id: "stripe", label: "Pay online (Stripe)", note: `PKR ${Number(test.price || 0).toLocaleString()}` },
+                  { id: "cod", label: "Pay cash at lab", note: `PKR ${Number(test.price || 0).toLocaleString()}` },
+                ]
+            ).map((method) => (
+              <button
+                key={method.id}
+                type="button"
+                onClick={() => setPaymentMethod(method.id)}
+                className={`w-full flex items-center justify-between p-3 rounded-[12px] border-2 text-left ${
+                  paymentMethod === method.id
+                    ? "border-brand-primary bg-brand-mist"
+                    : "border-neutral-200"
+                }`}
+              >
+                <span className="text-[14px] font-semibold">{method.label}</span>
+                <span className="text-[13px] font-bold">{method.note}</span>
+              </button>
+            ))}
+          </div>
+
           <p className="text-[12px] text-neutral-500 mb-4 flex items-center gap-1.5">
-            <LockKey size={14} /> Pay on collection — no online payment required for now.
+            <LockKey size={14} />
+            {collectionType === "HOME" || paymentMethod === "stripe"
+              ? "PDF report unlocks after Stripe payment."
+              : "Pay at the lab counter when your sample is collected. Lab staff will mark payment paid — then your PDF report unlocks."}
           </p>
-          <Button className="w-full h-[48px]" disabled={!selectedSlot || bookLabTest.isPending} onClick={handleConfirmBooking}>
-            {bookLabTest.isPending ? "Confirming..." : "Confirm Booking"}
+          <Button className="w-full h-[48px]" disabled={!selectedSlot || bookLabTest.isPending || paying} onClick={handleConfirmBooking}>
+            {bookLabTest.isPending || paying
+              ? "Processing..."
+              : paymentMethod === "stripe"
+                ? "Book & pay with Stripe"
+                : "Book — pay cash at lab"}
           </Button>
         </div>
       )}
@@ -265,7 +332,9 @@ export function LabBookingFlow({ test }) {
             <Check size={32} weight="bold" className="text-status-success" />
           </div>
           <h3 className="text-[20px] font-bold mb-2">Booking Confirmed</h3>
-          <p className="text-neutral-500 mb-6">Track your order status in Orders. Report will appear in Reports when ready.</p>
+          <p className="text-neutral-500 mb-6">
+            Visit the lab for sample collection and pay cash at the counter. Your PDF report appears in Reports after the lab confirms payment.
+          </p>
           <div className="flex gap-3">
             <Button variant="secondary" className="flex-1" onClick={() => router.push("/orders")}>View Orders</Button>
             <Button className="flex-1" onClick={() => router.push("/account/reports")}>My Reports</Button>

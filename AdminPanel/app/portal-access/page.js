@@ -1,35 +1,44 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { LockKey, Envelope, ShieldCheck, ArrowRight } from "@phosphor-icons/react";
-import { api, post } from "@/lib/api/client";
+import { useState, useEffect } from "react";
+import { Envelope, Lock, ShieldCheck, SquaresFour, ArrowRight } from "@phosphor-icons/react";
+import { Button } from "@/shared/components/Button";
+import { Input } from "@/shared/components/Input";
+import { post } from "@/lib/api/client";
 import { toast } from "sonner";
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.search.includes("expired=true")) {
+      const timer = setTimeout(() => {
+        toast.error("Your session has expired. Please log in again.");
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   const handleAdminLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // 1. Authenticate with backend directly via post helper
       const response = await post("/auth/login", { email, password });
-      
+
       const user = response?.user || response?.data?.user;
       const tokens = response?.tokens || response?.data?.tokens;
 
-      // 2. Check if the logged-in user actually has admin privileges
-      if (!user || user.role !== 'admin') {
-        try { await post("/auth/logout"); } catch (_) {}
+      if (!user || user.role !== "admin") {
+        try {
+          await post("/auth/logout");
+        } catch (_) {}
         throw new Error("Access Denied: You do not have administrator privileges.");
       }
 
-      // 3. Store tokens and session info in localStorage
       if (tokens?.accessToken) {
         localStorage.setItem("token", tokens.accessToken);
       }
@@ -45,10 +54,7 @@ export default function AdminLoginPage() {
       }
 
       toast.success("Admin access granted. Welcome to the portal.");
-      
-      // 4. Redirect to the admin dashboard (HARD RELOAD to clear React Query cache)
       window.location.href = "/admin";
-      
     } catch (err) {
       toast.error(err.message || "Authentication failed. Invalid credentials.");
     } finally {
@@ -57,89 +63,128 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0C1A2E] font-[var(--font-plus-jakarta-sans)] p-4 relative overflow-hidden">
-      
-      {/* Abstract Background for Admin Portal */}
-      <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-[#0B6E72]/20 rounded-full blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-[#0C1A2E]/50 rounded-full blur-[120px] pointer-events-none" />
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 bg-[var(--color-surface-subtle)] relative overflow-hidden font-[var(--font-plus-jakarta-sans)]">
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[var(--color-brand-light)]/20 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[var(--color-brand-primary)]/10 rounded-full blur-[100px] pointer-events-none" />
 
-      <div className="w-full max-w-[440px] bg-white rounded-2xl shadow-2xl overflow-hidden relative z-10 animate-in fade-in zoom-in-95 duration-500">
-        
-        {/* Header */}
-        <div className="bg-[#F6F8FA] p-8 pb-6 border-b border-[#0C1A2E]/10 flex flex-col items-center text-center">
-          <div className="w-14 h-14 bg-[#0C1A2E] rounded-xl flex items-center justify-center shadow-lg mb-6 relative">
-            <ShieldCheck size={28} weight="fill" className="text-white relative z-10" />
-            <div className="absolute inset-0 bg-white/20 rounded-xl blur animate-pulse" />
+      <div className="w-full max-w-[960px] bg-white rounded-[24px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] border border-[var(--color-neutral-200)] flex overflow-hidden relative z-10 animate-in fade-in zoom-in-95 duration-500">
+        {/* Left brand panel */}
+        <div className="hidden lg:flex w-[45%] bg-gradient-to-br from-[var(--color-brand-primary)] to-[var(--color-brand-dark)] p-12 relative flex-col justify-between overflow-hidden">
+          <div className="absolute top-[-10%] right-[-10%] w-72 h-72 bg-white/20 rounded-full blur-[80px]" />
+          <div className="absolute bottom-[-10%] left-[-10%] w-64 h-64 bg-white/10 rounded-full blur-[60px]" />
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTAiIGN5PSIxMCIgcj0iMSIgZmlsbD0icmdiYSgyNTUsIDI1NSwgMjU1LCAwLjA1KSIvPjwvc3ZnPg==')] opacity-60" />
+
+          <div className="relative z-10 mt-4">
+            <div className="mb-8">
+              <img
+                src="/images/medzoos-wordmark-on-dark.png"
+                alt="Medzoos"
+                className="h-9 sm:h-10 md:h-11 w-auto object-contain mb-6"
+              />
+            </div>
+            <h2 className="text-[36px] font-[var(--font-heading)] font-extrabold text-white mb-4 leading-[1.2] tracking-tight">
+              Admin Portal <br /> for Medzoos.
+            </h2>
+            <p className="text-[15px] text-white/80 leading-relaxed max-w-[320px]">
+              Manage vendors, doctors, labs, orders, and platform operations from one secure console.
+            </p>
           </div>
-          <h1 className="text-2xl font-[var(--font-dm-serif-display)] font-bold text-[#0C1A2E] tracking-tight">
-            Restricted Portal
-          </h1>
-          <p className="text-[#0C1A2E]/60 text-sm mt-2 font-medium">
-            Authorized personnel only. Please verify your identity to access the system.
-          </p>
+
+          <div className="relative z-10 space-y-5 mb-4">
+            <div className="flex items-center gap-4 text-white">
+              <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center backdrop-blur-md border border-white/10 shadow-inner">
+                <ShieldCheck size={20} weight="fill" className="text-[var(--color-brand-light)]" />
+              </div>
+              <span className="text-[14px] font-medium tracking-wide">Restricted administrator access</span>
+            </div>
+            <div className="flex items-center gap-4 text-white">
+              <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center backdrop-blur-md border border-white/10 shadow-inner">
+                <SquaresFour size={20} weight="fill" className="text-white" />
+              </div>
+              <span className="text-[14px] font-medium tracking-wide">Full marketplace oversight</span>
+            </div>
+          </div>
         </div>
 
-        {/* Form */}
-        <div className="p-8">
+        {/* Right form */}
+        <div className="w-full lg:w-[55%] p-8 md:p-14 flex flex-col justify-center">
+          <div className="mb-8 text-center md:text-left">
+            <img
+              src="/images/medzoos-mark.png"
+              alt="Medzoos"
+              className="h-10 w-10 sm:h-11 sm:w-11 object-contain mb-4 mx-auto md:mx-0"
+            />
+            <h1 className="text-[30px] font-[var(--font-heading)] font-extrabold text-[var(--color-ink-headline)] mb-2 tracking-tight">
+              Admin Login
+            </h1>
+            <p className="text-[14px] text-[var(--color-neutral-500)]">
+              Enter your credentials to access the admin dashboard.
+            </p>
+          </div>
+
           <form onSubmit={handleAdminLogin} className="space-y-5">
-            
-            <div className="space-y-1.5">
-              <label className="text-sm font-bold text-[#0C1A2E]">Administrator Email</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Envelope size={18} className="text-[#0C1A2E]/40" />
+            <Input
+              label="Administrator Email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="admin@medzoos.com"
+              leftIcon={<Envelope size={18} />}
+              required
+            />
+
+            <Input
+              label="Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+              leftIcon={<Lock size={18} />}
+              required
+            />
+
+            <div className="flex items-center justify-between pt-1 pb-2">
+              <label className="flex items-center gap-2.5 cursor-pointer group">
+                <div className="relative flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="peer sr-only"
+                  />
+                  <div className="w-[18px] h-[18px] rounded-[4px] border-[1.5px] border-[var(--color-neutral-300)] bg-white peer-checked:bg-[var(--color-brand-primary)] peer-checked:border-[var(--color-brand-primary)] transition-all flex items-center justify-center group-hover:border-[var(--color-brand-primary)]">
+                    <svg
+                      className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={3}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
                 </div>
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@medzoos.com"
-                  className="w-full h-12 pl-10 pr-4 rounded-lg border border-[#0C1A2E]/10 bg-[#F6F8FA] text-[#0C1A2E] text-sm outline-none focus:bg-white focus:border-[#0B6E72] focus:ring-1 focus:ring-[#0B6E72] transition-all font-medium"
-                />
-              </div>
+                <span className="text-[13px] font-medium text-[var(--color-neutral-600)] group-hover:text-[var(--color-neutral-900)] transition-colors">
+                  Remember me
+                </span>
+              </label>
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-sm font-bold text-[#0C1A2E]">Master Password</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <LockKey size={18} className="text-[#0C1A2E]/40" />
-                </div>
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••••••"
-                  className="w-full h-12 pl-10 pr-4 rounded-lg border border-[#0C1A2E]/10 bg-[#F6F8FA] text-[#0C1A2E] text-sm outline-none focus:bg-white focus:border-[#0B6E72] focus:ring-1 focus:ring-[#0B6E72] transition-all font-[var(--font-jetbrains-mono)]"
-                />
-              </div>
-            </div>
-
-            <button
+            <Button
               type="submit"
               disabled={loading}
-              className="w-full h-12 mt-4 bg-[#0C1A2E] hover:bg-[#0C1A2E]/90 text-white rounded-lg text-sm font-bold shadow-md hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed transition-all flex items-center justify-center group"
+              className="w-full h-[48px] text-[14px] font-bold mt-2 rounded-[var(--radius-md)] bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-dark)] text-white transition-all shadow-[0_4px_12px_rgba(23,97,142,0.15)] hover:shadow-[0_6px_16px_rgba(23,97,142,0.25)] flex justify-center items-center group border-none"
             >
-              {loading ? (
-                "Authenticating..."
-              ) : (
-                <>
-                  Authenticate Securely
-                  <ArrowRight size={18} weight="bold" className="ml-2 group-hover:translate-x-1 transition-transform" />
-                </>
-              )}
-            </button>
-
+              {loading ? "Signing in..." : "Login to Dashboard"}
+              <ArrowRight size={18} className="ml-2 group-hover:translate-x-1 transition-transform" />
+            </Button>
           </form>
 
-          <div className="mt-8 pt-6 border-t border-[#0C1A2E]/10 flex items-center justify-center gap-2 text-xs font-semibold text-[#0C1A2E]/40">
-            <ShieldCheck size={14} weight="fill" />
-            256-bit Encrypted Connection
+          <div className="mt-8 pt-6 border-t border-[var(--color-neutral-200)] flex items-center justify-center gap-2 text-[12px] font-semibold text-[var(--color-neutral-500)]">
+            <ShieldCheck size={14} weight="fill" className="text-[var(--color-brand-primary)]" />
+            Restricted access · Encrypted connection
           </div>
         </div>
-
       </div>
     </div>
   );

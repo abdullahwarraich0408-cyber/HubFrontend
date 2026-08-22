@@ -123,7 +123,7 @@ export default function AdminHospitalsPage() {
         </div>
         <button
           onClick={openCreate}
-          className="flex items-center gap-2 px-5 py-2.5 bg-[#0B6E72] hover:bg-[#084F52] text-white rounded-lg text-sm font-semibold transition-colors shadow-sm"
+          className="flex items-center gap-2 px-5 py-2.5 bg-[#17618E] hover:bg-[#082B3F] text-white rounded-lg text-sm font-semibold transition-colors shadow-sm"
         >
           <Plus size={18} weight="bold" />
           <span>Add Hospital</span>
@@ -142,7 +142,7 @@ export default function AdminHospitalsPage() {
                 setSearch(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full h-[40px] pl-10 pr-4 rounded-lg border border-[#0C1A2E]/10 bg-white text-sm outline-none focus:border-[#0B6E72]"
+              className="w-full h-[40px] pl-10 pr-4 rounded-lg border border-[#0C1A2E]/10 bg-white text-sm outline-none focus:border-[#17618E]"
             />
           </div>
         </div>
@@ -173,10 +173,10 @@ export default function AdminHospitalsPage() {
                 </tr>
               ) : (
                 currentItems.map((hospital) => (
-                  <tr key={hospital.id} className="hover:bg-[#E6F4F5]/30 transition-colors">
+                  <tr key={hospital.id} className="hover:bg-[#DEEEF9]/30 transition-colors">
                     <td className="p-4 pl-6">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-[#E6F4F5] flex items-center justify-center text-[#0B6E72]">
+                        <div className="w-10 h-10 rounded-lg bg-[#DEEEF9] flex items-center justify-center text-[#17618E]">
                           <Buildings size={20} weight="duotone" />
                         </div>
                         <div>
@@ -205,7 +205,7 @@ export default function AdminHospitalsPage() {
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => openEdit(hospital)}
-                          className="p-1.5 text-[#0C1A2E]/60 hover:text-[#0B6E72]"
+                          className="p-1.5 text-[#0C1A2E]/60 hover:text-[#17618E]"
                           title="Edit"
                         >
                           <PencilSimple size={18} weight="bold" />
@@ -253,7 +253,7 @@ export default function AdminHospitalsPage() {
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#0B6E72] text-sm"
+                  className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] text-sm"
                   placeholder="Cheema Heart Complex"
                 />
               </div>
@@ -264,7 +264,7 @@ export default function AdminHospitalsPage() {
                     type="text"
                     value={formData.city}
                     onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#0B6E72] text-sm"
+                    className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] text-sm"
                     placeholder="Lahore"
                   />
                 </div>
@@ -274,7 +274,7 @@ export default function AdminHospitalsPage() {
                     type="text"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#0B6E72] text-sm"
+                    className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] text-sm"
                     placeholder="+92 42 1234567"
                   />
                 </div>
@@ -285,7 +285,7 @@ export default function AdminHospitalsPage() {
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#0B6E72] text-sm"
+                  className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] text-sm"
                   placeholder="info@hospital.com"
                 />
               </div>
@@ -295,7 +295,7 @@ export default function AdminHospitalsPage() {
                   type="text"
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#0B6E72] text-sm"
+                  className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] text-sm"
                   placeholder="Street address"
                 />
               </div>
@@ -305,7 +305,7 @@ export default function AdminHospitalsPage() {
                   rows={3}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#0B6E72] text-sm resize-none"
+                  className="w-full px-3 py-2 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] text-sm resize-none"
                   placeholder="Brief description of the hospital"
                 />
               </div>
@@ -316,7 +316,7 @@ export default function AdminHospitalsPage() {
                     type="url"
                     value={formData.logo}
                     onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
-                    className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#0B6E72] text-sm"
+                    className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] text-sm"
                     placeholder="https://..."
                   />
                 </div>
@@ -326,7 +326,7 @@ export default function AdminHospitalsPage() {
                     type="url"
                     value={formData.cover_image}
                     onChange={(e) => setFormData({ ...formData, cover_image: e.target.value })}
-                    className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#0B6E72] text-sm"
+                    className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] text-sm"
                     placeholder="https://..."
                   />
                 </div>
@@ -343,7 +343,7 @@ export default function AdminHospitalsPage() {
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="px-5 py-2.5 rounded-lg text-sm font-semibold bg-[#0B6E72] text-white hover:bg-[#084F52] disabled:opacity-50 transition-colors"
+                  className="px-5 py-2.5 rounded-lg text-sm font-semibold bg-[#17618E] text-white hover:bg-[#082B3F] disabled:opacity-50 transition-colors"
                 >
                   {isSaving ? "Saving..." : editingId ? "Save Changes" : "Create Hospital"}
                 </button>

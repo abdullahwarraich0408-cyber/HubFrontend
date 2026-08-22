@@ -153,7 +153,7 @@ function SlideEditor({ slide }) {
             className="h-10 w-full rounded-lg border border-neutral-200 cursor-pointer"
           />
         </label>
-        <label className="flex items-center justify-center gap-2 h-10 rounded-lg border border-dashed border-neutral-300 text-[12px] font-semibold text-[#0B6E72] cursor-pointer hover:bg-[#E6F4F5]">
+        <label className="flex items-center justify-center gap-2 h-10 rounded-lg border border-dashed border-neutral-300 text-[12px] font-semibold text-[#17618E] cursor-pointer hover:bg-[#DEEEF9]">
           <UploadSimple size={16} weight="bold" />
           {uploading ? "Uploading..." : "Change picture"}
           <input
@@ -167,7 +167,7 @@ function SlideEditor({ slide }) {
         <button
           type="submit"
           disabled={updateSlide.isPending}
-          className="flex items-center justify-center gap-2 h-10 rounded-lg bg-[#0B6E72] hover:bg-[#084F52] text-white text-[13px] font-semibold"
+          className="flex items-center justify-center gap-2 h-10 rounded-lg bg-[#17618E] hover:bg-[#082B3F] text-white text-[13px] font-semibold"
         >
           <FloppyDisk size={16} weight="bold" />
           {updateSlide.isPending ? "Saving..." : "Save poster"}
@@ -214,11 +214,11 @@ export default function AdminHomePostersPage() {
   return (
     <div className="animate-in fade-in zoom-in-95 duration-500 max-w-[1280px]">
       <div className="mb-8">
-        <Link href="/admin/content" className="text-[13px] text-[#0B6E72] font-semibold">
+        <Link href="/admin/content" className="text-[13px] text-[#17618E] font-semibold">
           ← Content hub
         </Link>
         <h1 className="text-[28px] font-heading font-extrabold text-ink-headline tracking-tight flex items-center gap-2 mt-2">
-          <Images size={28} className="text-[#0B6E72]" />
+          <Images size={28} className="text-[#17618E]" />
           Home posters
         </h1>
         <p className="text-[14px] text-neutral-500 mt-1">

@@ -39,7 +39,7 @@ export function SocialLogin({ onSuccess }) {
         type="button"
         onClick={() => run("google", loginWithGoogle)}
         disabled={Boolean(loading)}
-        className="inline-flex h-[52px] w-full items-center justify-center gap-2 rounded-xl border border-[#D5E0DE] bg-white text-[15px] font-semibold text-[#1A2B2A] transition-all hover:bg-[#F7FBFA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F8C] disabled:opacity-60"
+        className="inline-flex h-[52px] w-full items-center justify-center gap-2 rounded-xl border border-[#D5E0DE] bg-white text-[15px] font-semibold text-[#1A2B2A] transition-all hover:bg-[#F7FBFA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#17618E] disabled:opacity-60"
       >
         <GoogleLogo size={18} weight="bold" />
         {loading === "google" ? "Connecting..." : "Sign in with Google"}
@@ -49,7 +49,7 @@ export function SocialLogin({ onSuccess }) {
           type="button"
           onClick={() => run("apple", loginWithApple)}
           disabled={Boolean(loading)}
-          className="inline-flex h-[52px] w-full items-center justify-center gap-2 rounded-xl border border-[#D5E0DE] bg-[#1A2B2A] text-[15px] font-semibold text-white transition-all hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F8C] disabled:opacity-60"
+          className="inline-flex h-[52px] w-full items-center justify-center gap-2 rounded-xl border border-[#D5E0DE] bg-[#1A2B2A] text-[15px] font-semibold text-white transition-all hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#17618E] disabled:opacity-60"
         >
           <AppleLogo size={18} weight="fill" />
           {loading === "apple" ? "Connecting..." : "Continue with Apple"}

@@ -101,7 +101,7 @@ export default function AdminLabsPage() {
         <div className="flex items-center gap-3">
           <button 
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-[#0B6E72] hover:bg-[#084F52] text-white rounded-lg text-sm font-semibold transition-colors shadow-sm"
+            className="flex items-center gap-2 px-5 py-2.5 bg-[#17618E] hover:bg-[#082B3F] text-white rounded-lg text-sm font-semibold transition-colors shadow-sm"
           >
             <Plus size={18} weight="bold" /> 
             <span>Add Lab Partner</span>
@@ -118,7 +118,7 @@ export default function AdminLabsPage() {
               placeholder="Search labs..." 
               value={search}
               onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-              className="w-full h-[40px] pl-10 pr-4 rounded-lg border border-[#0C1A2E]/10 bg-white text-sm outline-none focus:border-[#0B6E72]"
+              className="w-full h-[40px] pl-10 pr-4 rounded-lg border border-[#0C1A2E]/10 bg-white text-sm outline-none focus:border-[#17618E]"
             />
           </div>
         </div>
@@ -140,7 +140,7 @@ export default function AdminLabsPage() {
                 <tr><td colSpan="4" className="p-8 text-center text-[#0C1A2E]/40">No labs found.</td></tr>
               ) : (
                 currentLabs.map((lab) => (
-                  <tr key={lab.id} className="hover:bg-[#E6F4F5]/30 transition-colors">
+                  <tr key={lab.id} className="hover:bg-[#DEEEF9]/30 transition-colors">
                     <td className="p-4 pl-6">
                       <div className="text-sm font-bold text-[#0C1A2E]">{lab.name}</div>
                       <div className="text-xs text-[#0C1A2E]/50">{lab.email}</div>
@@ -177,7 +177,7 @@ export default function AdminLabsPage() {
                         <button 
                           onClick={() => handleImpersonate(lab)}
                           disabled={impersonateMutation.isPending}
-                          className="px-3 py-1.5 flex items-center gap-1 text-xs font-bold rounded bg-[#0B6E72] text-white hover:bg-[#084F52]"
+                          className="px-3 py-1.5 flex items-center gap-1 text-xs font-bold rounded bg-[#17618E] text-white hover:bg-[#082B3F]"
                           title="Magic Login"
                         >
                           <SignIn size={14} /> Log In As
@@ -211,24 +211,24 @@ export default function AdminLabsPage() {
             <form onSubmit={handleAddLab} className="p-6 flex flex-col gap-4">
               <div>
                 <label className="block text-sm font-semibold text-[#0C1A2E] mb-1.5">Lab Name</label>
-                <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#0B6E72] text-sm" placeholder="e.g. City Diagnostics Lab" />
+                <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] text-sm" placeholder="e.g. City Diagnostics Lab" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-[#0C1A2E] mb-1.5">Email Login</label>
-                <input required type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#0B6E72] text-sm" placeholder="lab@example.com" />
+                <input required type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] text-sm" placeholder="lab@example.com" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-[#0C1A2E] mb-1.5">Default Password</label>
-                <input required type="password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#0B6E72] text-sm" placeholder="••••••••" />
+                <input required type="password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] text-sm" placeholder="••••••••" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-[#0C1A2E] mb-1.5">License Number</label>
-                <input required type="text" value={formData.license_number} onChange={e => setFormData({...formData, license_number: e.target.value})} className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#0B6E72] text-sm" placeholder="e.g. LAB-12345" />
+                <input required type="text" value={formData.license_number} onChange={e => setFormData({...formData, license_number: e.target.value})} className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] text-sm" placeholder="e.g. LAB-12345" />
               </div>
 
               <div className="flex items-center justify-end gap-3 mt-4">
                 <button type="button" onClick={() => setShowAddModal(false)} className="px-5 py-2.5 rounded-lg text-sm font-semibold text-[#0C1A2E] hover:bg-[#F6F8FA] transition-colors">Cancel</button>
-                <button type="submit" disabled={createLabMutation.isPending} className="px-5 py-2.5 rounded-lg text-sm font-semibold bg-[#0B6E72] text-white hover:bg-[#084F52] disabled:opacity-50 transition-colors">
+                <button type="submit" disabled={createLabMutation.isPending} className="px-5 py-2.5 rounded-lg text-sm font-semibold bg-[#17618E] text-white hover:bg-[#082B3F] disabled:opacity-50 transition-colors">
                   {createLabMutation.isPending ? "Adding..." : "Add Lab Partner"}
                 </button>
               </div>

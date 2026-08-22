@@ -44,9 +44,9 @@ export function QuickServiceSearch() {
                   <FadeIn key={option.title} delay={0.05 * index}>
                     <Link
                       href={option.href}
-                      className="group flex items-start gap-4 rounded-2xl border border-[#102A43]/08 bg-[#F7FAFC] p-4 transition-all duration-300 hover:-translate-y-1 hover:border-[#087F8C]/45 hover:bg-white hover:shadow-[0_12px_32px_rgba(8,127,140,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F8C]/40 sm:flex-col sm:items-center sm:p-5 sm:text-center md:p-6"
+                      className="group flex items-start gap-4 rounded-2xl border border-[#102A43]/08 bg-[#F7FAFC] p-4 transition-all duration-300 hover:-translate-y-1 hover:border-[#17618E]/45 hover:bg-white hover:shadow-[0_12px_32px_rgba(8,127,140,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#17618E]/40 sm:flex-col sm:items-center sm:p-5 sm:text-center md:p-6"
                     >
-                      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#EAF8F7] text-[#087F8C] transition-colors group-hover:bg-[#087F8C] group-hover:text-white">
+                      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#EAF8F7] text-[#17618E] transition-colors group-hover:bg-[#17618E] group-hover:text-white">
                         <Icon size={24} weight="duotone" />
                       </span>
                       <span>

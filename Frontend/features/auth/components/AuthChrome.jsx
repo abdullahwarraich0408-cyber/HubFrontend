@@ -3,21 +3,20 @@
 import Link from "next/link";
 import { cn } from "@/utils/cn";
 
+const WORDMARK = "h-9 sm:h-10 md:h-11 w-auto object-contain";
+
 export function AuthBrandMark({ href = "/", light = false, className }) {
   return (
-    <Link href={href} className={cn("inline-flex items-center", className)} aria-label="Medzoos home">
-      <span
-        className={cn(
-          "inline-flex items-center rounded-xl",
-          light && "bg-white px-3 py-2 shadow-[0_4px_16px_rgba(0,0,0,0.08)]"
-        )}
-      >
-        <img
-          src="/images/medzoos-wordmark.png"
-          alt="Medzoos"
-          className="h-8 w-auto sm:h-9"
-        />
-      </span>
+    <Link
+      href={href}
+      className={cn("inline-flex items-center", className)}
+      aria-label="Medzoos home"
+    >
+      <img
+        src={light ? "/images/medzoos-wordmark-on-dark.png" : "/images/medzoos-wordmark.png"}
+        alt="Medzoos"
+        className={WORDMARK}
+      />
     </Link>
   );
 }
@@ -26,7 +25,7 @@ export function AuthPageHeader({ kicker, title, description, className }) {
   return (
     <header className={cn("mb-5", className)}>
       {kicker ? (
-        <p className="mb-1.5 text-[13px] font-semibold text-[#087F8C]">{kicker}</p>
+        <p className="mb-1.5 text-[13px] font-semibold text-[#17618E]">{kicker}</p>
       ) : null}
       <h1 className="text-[24px] font-bold leading-[1.2] tracking-tight text-[#1A2B2A] sm:text-[28px]">
         {title}
@@ -56,7 +55,7 @@ export function AuthBackLink({ href = "/login", children = "Back to Sign In" }) 
   return (
     <Link
       href={href}
-      className="mt-6 inline-flex items-center gap-2 text-[14px] font-semibold text-[#5B6B7A] transition-colors hover:text-[#087F8C]"
+      className="mt-6 inline-flex items-center gap-2 text-[14px] font-semibold text-[#5B6B7A] transition-colors hover:text-[#17618E]"
     >
       {children}
     </Link>

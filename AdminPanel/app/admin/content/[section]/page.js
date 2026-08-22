@@ -238,7 +238,7 @@ function ItemForm({ item, sectionKey, fields, onSaved }) {
         Visible on app / website
       </label>
       {fields.includes("image_url") && (
-        <label className="flex items-center justify-center gap-2 h-10 rounded-lg border border-dashed border-neutral-300 text-[12px] font-semibold text-[#0B6E72] cursor-pointer">
+        <label className="flex items-center justify-center gap-2 h-10 rounded-lg border border-dashed border-neutral-300 text-[12px] font-semibold text-[#17618E] cursor-pointer">
           <UploadSimple size={16} />
           {uploading ? "Uploading..." : "Change picture"}
           <input type="file" accept="image/*" className="hidden" onChange={handleUpload} />
@@ -247,7 +247,7 @@ function ItemForm({ item, sectionKey, fields, onSaved }) {
       <div className="flex gap-2 pt-1">
         <button
           type="submit"
-          className="flex-1 h-10 rounded-lg bg-[#0B6E72] text-white text-[13px] font-semibold flex items-center justify-center gap-2"
+          className="flex-1 h-10 rounded-lg bg-[#17618E] text-white text-[13px] font-semibold flex items-center justify-center gap-2"
         >
           <FloppyDisk size={16} />
           Save
@@ -296,7 +296,7 @@ export default function ContentSectionPage() {
 
   return (
     <div className="animate-in fade-in zoom-in-95 duration-500 max-w-[1200px]">
-      <Link href="/admin/content" className="inline-flex items-center gap-1 text-[13px] text-[#0B6E72] font-semibold mb-4">
+      <Link href="/admin/content" className="inline-flex items-center gap-1 text-[13px] text-[#17618E] font-semibold mb-4">
         <ArrowLeft size={14} /> Content hub
       </Link>
       <div className="flex items-start justify-between gap-4 mb-6">
@@ -308,7 +308,7 @@ export default function ContentSectionPage() {
         </div>
         <button
           onClick={handleAdd}
-          className="flex items-center gap-2 h-10 px-4 rounded-lg bg-[#0B6E72] text-white text-sm font-semibold"
+          className="flex items-center gap-2 h-10 px-4 rounded-lg bg-[#17618E] text-white text-sm font-semibold"
         >
           <Plus size={16} weight="bold" />
           Add

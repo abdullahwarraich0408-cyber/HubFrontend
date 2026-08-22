@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -23,6 +23,7 @@ import { BookingAuthModal } from "./BookingAuthModal";
 import { BookConsultModal } from "./BookConsultModal";
 import { buildDoctorConsultOptions } from "../utils/consultOptions";
 import { useBookDoctorAppointment } from "@/lib/hooks/useApi";
+import { paymentsApi } from "@/lib/api/index";
 import { openSignInModal } from "@/lib/authModalEvents";
 
 function formatBookingDate(dateStr) {
@@ -122,10 +123,18 @@ export function AppointmentFlow({
   const [bookedAppointment, setBookedAppointment] = useState(null);
 
   const consultType = selectedOption?.type;
+  const isOnlineConsult = consultType === "online";
   const appointmentDateIso = useMemo(
     () => buildAppointmentIso(selectedDate, selectedSlot),
     [selectedDate, selectedSlot]
   );
+
+  // Online video has no cash handoff — always Stripe
+  useEffect(() => {
+    if (isOnlineConsult && paymentMethod === "cod") {
+      setPaymentMethod("card");
+    }
+  }, [isOnlineConsult, paymentMethod]);
 
   const hasCustomerSession = () => isAuthenticated || hasAuthSession();
 
@@ -152,10 +161,11 @@ export function AppointmentFlow({
     }
 
     try {
+      const method = paymentMethod === "card" ? "stripe" : paymentMethod;
       const appointment = await bookAppointment.mutateAsync({
         doctor_id: doctor.id,
         slot: selectedSlot,
-        payment_method: paymentMethod,
+        payment_method: method,
         appointment_date: appointmentDateIso,
         reason: purpose === "consultation" ? "Normal Consultation" : "Surgery / Procedure Visit",
         preferred_consultation_mode: consultType,
@@ -166,7 +176,25 @@ export function AppointmentFlow({
             ? selectedOption.practiceLocationId
             : undefined,
       });
-      setBookedAppointment(appointment.appointment || appointment);
+      const booked = appointment.appointment || appointment;
+      setBookedAppointment(booked);
+
+      if (method === "stripe") {
+        const appointmentId = booked.id || booked.appointment_id;
+        toast.message("Redirecting to Stripe to pay…");
+        const payment = await paymentsApi.checkout({
+          purpose: "appointment",
+          appointment_id: appointmentId,
+          payment_method: "stripe",
+          frontend_url: typeof window !== "undefined" ? window.location.origin : undefined,
+        });
+        if (payment.checkoutUrl) {
+          window.location.href = payment.checkoutUrl;
+          return;
+        }
+        throw new Error("Stripe checkout URL was not returned");
+      }
+
       toast.success("Appointment booked successfully");
       setStep(3);
     } catch (error) {
@@ -337,10 +365,27 @@ export function AppointmentFlow({
                 Select payment method
               </p>
               <div className="space-y-2">
-                {[
-                  { id: "card", label: "Online Payment", note: `PKR ${selectedOption.fee.toLocaleString()}` },
-                  { id: "cod", label: consultType === "in_person" ? "Pay cash at clinic" : "Pay after consultation", note: `PKR ${selectedOption.fee.toLocaleString()}` },
-                ].map((method) => (
+                {(isOnlineConsult
+                  ? [
+                      {
+                        id: "card",
+                        label: "Pay online (Stripe)",
+                        note: `PKR ${selectedOption.fee.toLocaleString()}`,
+                      },
+                    ]
+                  : [
+                      {
+                        id: "card",
+                        label: "Pay online (Stripe)",
+                        note: `PKR ${selectedOption.fee.toLocaleString()}`,
+                      },
+                      {
+                        id: "cod",
+                        label: "Pay cash at clinic",
+                        note: `PKR ${selectedOption.fee.toLocaleString()}`,
+                      },
+                    ]
+                ).map((method) => (
                   <button
                     key={method.id}
                     type="button"
@@ -356,11 +401,18 @@ export function AppointmentFlow({
                   </button>
                 ))}
               </div>
+              {isOnlineConsult && (
+                <p className="text-[12px] text-[var(--color-neutral-500)] mt-2">
+                  Online video consults are prepaid — cash is only for in-clinic visits.
+                </p>
+              )}
             </div>
 
             <div className="flex items-center gap-2 text-[12px] text-[var(--color-neutral-500)]">
               <LockKey size={14} />
-              Secure payment · pending until doctor confirms
+              {paymentMethod === "card"
+                ? "Secured by Stripe sandbox · card details never touch Medzoos"
+                : "Pay at the clinic reception when you arrive"}
             </div>
           </div>
 
@@ -395,7 +447,11 @@ export function AppointmentFlow({
                 disabled={bookAppointment.isPending || !patientName.trim()}
                 onClick={handleConfirmBooking}
               >
-                {bookAppointment.isPending ? "Processing..." : "Confirm booking"}
+                {bookAppointment.isPending
+                  ? "Processing..."
+                  : paymentMethod === "card"
+                    ? "Book & pay with Stripe"
+                    : "Confirm booking"}
               </Button>
             </div>
           </div>

@@ -37,6 +37,8 @@ const nextConfig = {
   async redirects() {
     return [
       { source: "/", destination: "/vendor", permanent: false },
+      { source: "/vendor/reports", destination: "/vendor/sales-report", permanent: false },
+      { source: "/vendor/settings", destination: "/vendor/account-settings", permanent: false },
     ];
   },
 };

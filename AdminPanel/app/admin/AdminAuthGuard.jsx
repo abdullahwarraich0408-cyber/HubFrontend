@@ -26,7 +26,7 @@ export default function AdminAuthGuard({ children }) {
   if (!isAuthorized) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#0C1A2E]">
-        <CircleNotch size={48} className="text-[#0B6E72] animate-spin mb-4" />
+        <CircleNotch size={48} className="text-[#17618E] animate-spin mb-4" />
         <p className="text-white font-medium animate-pulse">Verifying Access...</p>
       </div>
     );

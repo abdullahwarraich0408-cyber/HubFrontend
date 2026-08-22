@@ -10,7 +10,7 @@ export function ProviderCTA() {
       <div className="landing-container">
         <FadeIn>
           <div className="relative overflow-hidden rounded-[28px] border border-[#102A43]/10 bg-[#102A43] px-6 py-10 text-white md:px-10 md:py-12 lg:px-14">
-            <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-[#087F8C]/30 blur-3xl" aria-hidden />
+            <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-[#17618E]/30 blur-3xl" aria-hidden />
             <div className="pointer-events-none absolute -bottom-20 left-10 h-48 w-48 rounded-full bg-[#3B82F6]/20 blur-3xl" aria-hidden />
 
             <div className="relative max-w-2xl">

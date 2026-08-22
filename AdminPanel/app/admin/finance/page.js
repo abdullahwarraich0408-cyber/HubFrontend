@@ -36,7 +36,7 @@ export default function AdminFinancePage() {
             <p className="text-sm text-neutral-500 font-medium mb-1">Realized Revenue (Completed)</p>
             <h3 className="text-3xl font-bold text-ink-headline">PKR {completedRevenue.toLocaleString()}</h3>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-[#0B6E72]/10 text-[#0B6E72] flex items-center justify-center">
+          <div className="w-12 h-12 rounded-xl bg-[#17618E]/10 text-[#17618E] flex items-center justify-center">
             <ArrowUpRight size={24} weight="bold" />
           </div>
         </div>
@@ -75,7 +75,7 @@ export default function AdminFinancePage() {
                     <td className="p-4 text-sm font-medium text-neutral-700">
                       {order.vendor?.business_name || "Unknown Vendor"}
                     </td>
-                    <td className="p-4 text-sm font-bold text-[#0B6E72]">
+                    <td className="p-4 text-sm font-bold text-[#17618E]">
                       PKR {order.total_amount}
                     </td>
                     <td className="p-4 text-sm font-medium capitalize text-neutral-600">
@@ -121,7 +121,7 @@ export default function AdminFinancePage() {
                     <td className="p-4 text-sm text-neutral-600">
                       {new Date(settlement.period_start).toLocaleDateString()} - {new Date(settlement.period_end).toLocaleDateString()}
                     </td>
-                    <td className="p-4 text-sm font-bold text-[#0B6E72]">
+                    <td className="p-4 text-sm font-bold text-[#17618E]">
                       PKR {Number(settlement.net_amount || 0).toLocaleString()}
                     </td>
                     <td className="p-4 text-sm capitalize text-neutral-600">{settlement.status}</td>
@@ -129,7 +129,7 @@ export default function AdminFinancePage() {
                       {settlement.status !== "released" ? (
                         <button
                           onClick={() => releaseSettlement.mutate({ id: settlement.id })}
-                          className="px-3 py-2 rounded-lg bg-[#0B6E72] text-white text-xs font-semibold"
+                          className="px-3 py-2 rounded-lg bg-[#17618E] text-white text-xs font-semibold"
                         >
                           Release
                         </button>

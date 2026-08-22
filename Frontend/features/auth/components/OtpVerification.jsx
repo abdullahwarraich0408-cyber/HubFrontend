@@ -69,7 +69,7 @@ export function OtpVerification({
             type="button"
             onClick={handleResend}
             disabled={sending}
-            className="font-semibold text-[#087F8C] hover:underline disabled:opacity-60"
+            className="font-semibold text-[#17618E] hover:underline disabled:opacity-60"
           >
             {sending ? "Sending a new code..." : "Resend OTP"}
           </button>
@@ -77,7 +77,7 @@ export function OtpVerification({
         <button
           type="button"
           onClick={onChangeNumber}
-          className="block w-full font-semibold text-[#6B7C7B] hover:text-[#087F8C]"
+          className="block w-full font-semibold text-[#6B7C7B] hover:text-[#17618E]"
         >
           Change phone number
         </button>

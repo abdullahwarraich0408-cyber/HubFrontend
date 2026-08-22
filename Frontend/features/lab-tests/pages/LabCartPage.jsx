@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { toast } from "sonner";
+import { CreditCard, LockKey } from "@phosphor-icons/react";
 import { Button } from "@/shared/components/Button";
 import { Input } from "@/shared/components/Input";
 import {
@@ -14,6 +15,7 @@ import {
   removeFromLabCart,
 } from "@/lib/labCart";
 import { useCreateLabOrder, useLabTestTimeSlots } from "@/lib/hooks/useApi";
+import { paymentsApi } from "@/lib/api/index";
 import { TIME_SLOTS } from "../data/mockLabTests";
 import { openSignInModal } from "@/lib/authModalEvents";
 
@@ -31,6 +33,8 @@ export function LabCartPage() {
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [collectionDate, setCollectionDate] = useState(new Date().toISOString().slice(0, 10));
   const [prescriptionUrl, setPrescriptionUrl] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("stripe");
+  const [paying, setPaying] = useState(false);
 
   useEffect(() => {
     setCart(getLabCart());
@@ -46,6 +50,12 @@ export function LabCartPage() {
       setAddress((a) => ({ ...a, phone: user.phone }));
     }
   }, [user]);
+
+  useEffect(() => {
+    if (collectionType === "HOME" && paymentMethod === "cod") {
+      setPaymentMethod("stripe");
+    }
+  }, [collectionType, paymentMethod]);
 
   const groups = groupCartByLab(cart);
   const total = cart.reduce((sum, t) => sum + (t.price || 0), 0);
@@ -65,8 +75,10 @@ export function LabCartPage() {
       return;
     }
 
+    setPaying(true);
     try {
-      await createOrder.mutateAsync({
+      const method = collectionType === "HOME" ? "stripe" : paymentMethod;
+      const result = await createOrder.mutateAsync({
         lab_test_ids: cart.map((t) => t.id),
         patient_name: patient.name,
         patient_gender: patient.gender,
@@ -75,14 +87,56 @@ export function LabCartPage() {
         collection_address: collectionType === "HOME" ? { ...address, phone: patient.phone } : undefined,
         collection_date: new Date(collectionDate).toISOString(),
         time_slot: selectedSlot,
-        payment_method: "cod",
+        payment_method: method,
         prescription_url: prescriptionUrl || undefined,
       });
+
+      if (method === "stripe") {
+        const bookings = result.orders || [];
+        const bookingIds = bookings.map((b) => b.id).filter(Boolean);
+        const groupIds = result.order_groups || [];
+        toast.message("Redirecting to Stripe to pay…");
+
+        if (groupIds.length === 1) {
+          const payment = await paymentsApi.checkout({
+            purpose: "lab",
+            order_group_id: groupIds[0],
+            payment_method: "stripe",
+            frontend_url: typeof window !== "undefined" ? window.location.origin : undefined,
+          });
+          clearLabCart();
+          if (payment.checkoutUrl) {
+            window.location.href = payment.checkoutUrl;
+            return;
+          }
+          throw new Error("Stripe checkout URL was not returned");
+        }
+
+        if (bookingIds.length) {
+          const payment = await paymentsApi.checkout({
+            purpose: "lab",
+            booking_ids: bookingIds,
+            payment_method: "stripe",
+            frontend_url: typeof window !== "undefined" ? window.location.origin : undefined,
+          });
+          clearLabCart();
+          if (payment.checkoutUrl) {
+            window.location.href = payment.checkoutUrl;
+            return;
+          }
+          throw new Error("Stripe checkout URL was not returned");
+        }
+
+        throw new Error("No lab bookings to pay for");
+      }
+
       clearLabCart();
-      toast.success("Lab order placed successfully");
+      toast.success("Booked — pay cash at the lab when your sample is collected");
       router.push("/orders");
     } catch (e) {
       toast.error(e.message || "Checkout failed");
+    } finally {
+      setPaying(false);
     }
   };
 
@@ -91,98 +145,181 @@ export function LabCartPage() {
       <div className="max-w-2xl mx-auto px-4 py-16 text-center">
         <h1 className="text-[24px] font-bold mb-2">Your lab cart is empty</h1>
         <p className="text-neutral-500 mb-6">Browse tests and add them to cart.</p>
-        <Link href="/lab-tests"><Button>Browse Lab Tests</Button></Link>
+        <Link href="/lab-tests">
+          <Button>Browse Lab Tests</Button>
+        </Link>
       </div>
     );
   }
 
   return (
     <div className="max-w-[960px] mx-auto px-4 py-8">
-      <h1 className="text-[28px] font-bold mb-6">Lab Test Checkout</h1>
+      <h1 className="text-[28px] font-bold mb-6">Lab Cart</h1>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="space-y-4">
+      <div className="grid lg:grid-cols-[1fr_360px] gap-8">
+        <div className="space-y-6">
           {groups.map((group) => (
-            <div key={group.labPartnerId || group.lab} className="bg-white border rounded-[16px] p-5">
-              <h3 className="font-bold mb-3">{group.lab}</h3>
-              {group.tests.map((test) => (
-                <div key={test.id} className="flex justify-between py-2 border-b last:border-0 text-[14px]">
-                  <span>{test.name}</span>
-                  <div className="flex items-center gap-3">
-                    <span className="font-bold">PKR {test.price?.toLocaleString()}</span>
-                    <button onClick={() => { removeFromLabCart(test.id); setCart(getLabCart()); }} className="text-status-danger text-[12px]">Remove</button>
-                  </div>
-                </div>
-              ))}
+            <div key={group.labPartnerId || group.lab || "lab"} className="bg-white border border-neutral-200 rounded-[16px] p-5">
+              <h2 className="text-[16px] font-bold mb-3">{group.lab || "Lab"}</h2>
+              <ul className="space-y-3">
+                {group.tests.map((t) => (
+                  <li key={t.id} className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-[14px] font-semibold">{t.name}</p>
+                      <p className="text-[12px] text-neutral-500">
+                        PKR {Number(t.price || 0).toLocaleString()}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      className="text-[12px] text-red-600 font-semibold"
+                      onClick={() => {
+                        removeFromLabCart(t.id);
+                        setCart(getLabCart());
+                      }}
+                    >
+                      Remove
+                    </button>
+                  </li>
+                ))}
+              </ul>
             </div>
           ))}
+
+          <div className="bg-white border border-neutral-200 rounded-[16px] p-5 space-y-4">
+            <h2 className="text-[16px] font-bold">Patient & collection</h2>
+            <Input
+              placeholder="Patient name"
+              value={patient.name}
+              onChange={(e) => setPatient({ ...patient, name: e.target.value })}
+            />
+            <div className="grid grid-cols-2 gap-3">
+              <Input
+                placeholder="Gender"
+                value={patient.gender}
+                onChange={(e) => setPatient({ ...patient, gender: e.target.value })}
+              />
+              <Input
+                placeholder="Age"
+                value={patient.age}
+                onChange={(e) => setPatient({ ...patient, age: e.target.value })}
+              />
+            </div>
+            <Input
+              placeholder="Phone"
+              value={patient.phone}
+              onChange={(e) => setPatient({ ...patient, phone: e.target.value })}
+            />
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setCollectionType("HOME")}
+                className={`flex-1 py-2 rounded-[10px] border text-[13px] font-semibold ${
+                  collectionType === "HOME" ? "border-brand-primary bg-brand-mist" : "border-neutral-200"
+                }`}
+              >
+                Home
+              </button>
+              <button
+                type="button"
+                onClick={() => setCollectionType("VISIT_LAB")}
+                className={`flex-1 py-2 rounded-[10px] border text-[13px] font-semibold ${
+                  collectionType === "VISIT_LAB"
+                    ? "border-brand-primary bg-brand-mist"
+                    : "border-neutral-200"
+                }`}
+              >
+                Visit lab
+              </button>
+            </div>
+            {collectionType === "HOME" && (
+              <>
+                <Input
+                  placeholder="Address"
+                  value={address.line}
+                  onChange={(e) => setAddress({ ...address, line: e.target.value })}
+                />
+                <Input
+                  placeholder="City"
+                  value={address.city}
+                  onChange={(e) => setAddress({ ...address, city: e.target.value })}
+                />
+              </>
+            )}
+            <Input type="date" value={collectionDate} onChange={(e) => setCollectionDate(e.target.value)} />
+            <div className="grid grid-cols-2 gap-2">
+              {timeSlots.map((slot) => (
+                <button
+                  key={slot}
+                  type="button"
+                  onClick={() => setSelectedSlot(slot)}
+                  className={`py-2 rounded-[10px] border text-[12px] font-semibold ${
+                    selectedSlot === slot ? "border-brand-primary bg-brand-mist" : "border-neutral-200"
+                  }`}
+                >
+                  {slot}
+                </button>
+              ))}
+            </div>
+            <Input
+              placeholder="Prescription URL (optional)"
+              value={prescriptionUrl}
+              onChange={(e) => setPrescriptionUrl(e.target.value)}
+            />
+            {hasFasting && <p className="text-[12px] text-amber-700">Some tests require fasting.</p>}
+          </div>
         </div>
 
-        <div className="bg-white border rounded-[16px] p-5 space-y-4">
-          <h3 className="font-bold">Patient details</h3>
-          <Input placeholder="Full name" value={patient.name} onChange={(e) => setPatient({ ...patient, name: e.target.value })} />
-          <div className="grid grid-cols-2 gap-3">
-            <Input placeholder="Gender" value={patient.gender} onChange={(e) => setPatient({ ...patient, gender: e.target.value })} />
-            <Input placeholder="Age" type="number" value={patient.age} onChange={(e) => setPatient({ ...patient, age: e.target.value })} />
-          </div>
-          <Input placeholder="Phone" value={patient.phone} onChange={(e) => setPatient({ ...patient, phone: e.target.value })} />
-
-          <h3 className="font-bold pt-2">Collection</h3>
-          <div className="flex gap-2">
-            {["HOME", "VISIT_LAB"].map((type) => (
-              <button
-                key={type}
-                onClick={() => setCollectionType(type)}
-                className={`flex-1 py-2 rounded-[10px] border text-[13px] font-semibold ${collectionType === type ? "border-brand-primary bg-brand-mist text-brand-primary" : "border-neutral-200"}`}
-              >
-                {type === "HOME" ? "Home Collection" : "Visit Lab"}
-              </button>
-            ))}
-          </div>
-
-          {collectionType === "HOME" && (
-            <>
-              <textarea
-                value={address.line}
-                onChange={(e) => setAddress({ ...address, line: e.target.value })}
-                placeholder="Street address"
-                rows={2}
-                className="w-full px-4 py-3 border rounded-[12px] text-[14px]"
-              />
-              <Input placeholder="City" value={address.city} onChange={(e) => setAddress({ ...address, city: e.target.value })} />
-            </>
-          )}
-
-          <Input type="date" value={collectionDate} onChange={(e) => setCollectionDate(e.target.value)} />
-          <div className="grid grid-cols-2 gap-2">
-            {timeSlots.map((slot) => (
-              <button
-                key={slot}
-                onClick={() => setSelectedSlot(slot)}
-                className={`py-2 px-2 rounded-[10px] border text-[12px] ${selectedSlot === slot ? "border-brand-primary bg-brand-mist" : "border-neutral-200"}`}
-              >
-                {slot}
-              </button>
-            ))}
-          </div>
-
-          <Input placeholder="Prescription URL (optional)" value={prescriptionUrl} onChange={(e) => setPrescriptionUrl(e.target.value)} />
-
-          {hasFasting && (
-            <p className="text-[12px] text-amber-700 bg-amber-50 p-3 rounded-[10px]">
-              One or more tests require fasting. Please follow preparation instructions.
-            </p>
-          )}
-
-          <div className="border-t pt-4 flex justify-between font-bold text-[18px]">
+        <div className="bg-white border border-neutral-200 rounded-[16px] p-5 h-fit sticky top-24 space-y-4">
+          <h2 className="text-[16px] font-bold">Checkout</h2>
+          <div className="flex justify-between text-[14px]">
             <span>Total</span>
-            <span className="text-brand-primary">PKR {total.toLocaleString()}</span>
+            <span className="font-bold">PKR {total.toLocaleString()}</span>
           </div>
 
-          <p className="text-[12px] text-neutral-500 mb-4">Pay on collection — no online payment required for now.</p>
+          <div className="space-y-2">
+            <p className="text-[13px] font-bold flex items-center gap-2">
+              <CreditCard size={16} /> Payment
+            </p>
+            {(collectionType === "HOME"
+              ? [{ id: "stripe", label: "Pay online (Stripe)" }]
+              : [
+                  { id: "stripe", label: "Pay online (Stripe)" },
+                  { id: "cod", label: "Pay cash at lab" },
+                ]
+            ).map((method) => (
+              <button
+                key={method.id}
+                type="button"
+                onClick={() => setPaymentMethod(method.id)}
+                className={`w-full text-left px-3 py-2.5 rounded-[10px] border-2 text-[13px] font-semibold ${
+                  paymentMethod === method.id
+                    ? "border-brand-primary bg-brand-mist"
+                    : "border-neutral-200"
+                }`}
+              >
+                {method.label}
+              </button>
+            ))}
+          </div>
 
-          <Button className="w-full h-[48px]" disabled={createOrder.isPending} onClick={handleCheckout}>
-            {createOrder.isPending ? "Placing order..." : "Place Lab Order"}
+          <p className="text-[12px] text-neutral-500 flex items-center gap-1.5">
+            <LockKey size={14} />
+            {collectionType === "HOME" || paymentMethod === "stripe"
+              ? "PDF report unlocks after Stripe payment."
+              : "Lab staff mark cash received when sample is collected — then PDF unlocks."}
+          </p>
+
+          <Button
+            className="w-full h-[48px]"
+            disabled={createOrder.isPending || paying}
+            onClick={handleCheckout}
+          >
+            {createOrder.isPending || paying
+              ? "Processing..."
+              : paymentMethod === "stripe"
+                ? "Pay with Stripe"
+                : "Book — pay cash at lab"}
           </Button>
         </div>
       </div>

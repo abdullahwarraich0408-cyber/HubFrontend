@@ -6,7 +6,7 @@ import { PartnerAuthGuard } from "@/shared/components/PartnerAuthGuard";
 import { DoctorSidebar } from "@/shared/layout/DoctorSidebar";
 import { DoctorNotifications } from "@/features/doctor-panel/components/DoctorNotifications";
 import { useDoctorProfile } from "@/features/doctor-panel/hooks/useDoctorProfile";
-import { Menu, Stethoscope, Clock, Sparkles } from "lucide-react";
+import { Menu, Clock, Sparkles } from "lucide-react";
 import { partnerRoutes } from "@/lib/constants/partnerRoutes";
 
 export function DoctorDashboardLayout({ children }) {
@@ -42,9 +42,11 @@ export function DoctorDashboardLayout({ children }) {
                 </div>
 
                 <div className="md:hidden flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-teal-400 to-cyan-400 text-slate-950 flex items-center justify-center font-extrabold shadow-md shadow-teal-400/30">
-                    <Stethoscope size={18} />
-                  </div>
+                  <img
+                    src="/images/medzoos-mark-on-dark.png"
+                    alt="Medzoos"
+                    className="h-10 w-10 object-contain"
+                  />
                   <span className="font-extrabold text-sm text-white tracking-tight">Medzoos</span>
                 </div>
               </div>

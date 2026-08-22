@@ -38,7 +38,7 @@ export function LabSection() {
 
           <FadeIn delay={0.1}>
             <div>
-              <p className="mb-3 text-[13px] font-semibold uppercase tracking-[0.14em] text-[#087F8C]">
+              <p className="mb-3 text-[13px] font-semibold uppercase tracking-[0.14em] text-[#17618E]">
                 Home Collection
               </p>
               <h2 className="font-sans text-[clamp(1.75rem,3vw,2.4rem)] font-semibold leading-[1.2] tracking-tight text-[#102A43]">
@@ -57,7 +57,7 @@ export function LabSection() {
                       key={feature.label}
                       className="flex items-center gap-3 rounded-2xl border border-[#102A43]/08 bg-[#F7FAFC] px-3.5 py-3"
                     >
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-[#087F8C] shadow-sm">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-[#17618E] shadow-sm">
                         <Icon size={18} weight="duotone" />
                       </span>
                       <span className="text-[14px] font-medium text-[#334E68]">
@@ -70,7 +70,7 @@ export function LabSection() {
 
               <Link
                 href="/lab-tests"
-                className="group mt-8 inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#087F8C] px-5 text-[14px] font-semibold text-white transition-all hover:bg-[#075E68] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F8C]/40 focus-visible:ring-offset-2"
+                className="group mt-8 inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#17618E] px-5 text-[14px] font-semibold text-white transition-all hover:bg-[#124362] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#17618E]/40 focus-visible:ring-offset-2"
               >
                 Find Lab Tests
                 <ArrowRight

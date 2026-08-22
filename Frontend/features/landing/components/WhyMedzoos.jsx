@@ -49,7 +49,7 @@ export function WhyMedzoos() {
             return (
               <FadeIn key={benefit.title} delay={0.06 * index}>
                 <article className="h-full rounded-[22px] border border-[#102A43]/08 bg-white p-6">
-                  <span className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl border border-[#087F8C]/20 bg-transparent text-[#087F8C]">
+                  <span className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl border border-[#17618E]/20 bg-transparent text-[#17618E]">
                     <Icon size={22} weight="regular" />
                   </span>
                   <h3 className="text-[1.05rem] font-semibold text-[#102A43]">

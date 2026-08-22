@@ -1,23 +1,23 @@
 @import "tailwindcss";
 
 @theme {
-  /* Brand */
-  --color-brand-primary: #0B6E72;
-  --color-brand-dark: #084F52;
-  --color-brand-light: #E6F4F5;
-  --color-brand-mist: #F0F9FA;
-  --color-brand-highlight: #7DD3D8;
+  /* Brand — Medzoos (aligned with main website + logo) */
+  --color-brand-primary: #17618E;
+  --color-brand-dark: #082B3F;
+  --color-brand-light: #DEEEF9;
+  --color-brand-mist: #F0F6FB;
+  --color-brand-highlight: #0FA7E3;
 
   /* Ink / Dark */
-  --color-ink-900: #0C1A2E;
-  --color-ink-800: #152845;
-  --color-ink-headline: #0C1A2E;
+  --color-ink-900: #082B3F;
+  --color-ink-800: #124362;
+  --color-ink-headline: #082B3F;
 
   /* Surfaces */
   --color-surface-base: #FFFFFF;
-  --color-surface-subtle: #F6F8FA;
+  --color-surface-subtle: #F0F6FB;
   --color-surface-raised: #FFFFFF;
-  --color-surface-overlay: #F0F9FA;
+  --color-surface-overlay: #F0F6FB;
   --color-surface-elevated: #FFFFFF;
 
   /* Neutrals */
@@ -30,13 +30,13 @@
   --color-neutral-900: #111827;
 
   /* Status */
-  --color-status-success: #0F9D58;
+  --color-status-success: #079455;
   --color-status-success-bg: #DCFCE7;
   --color-status-success-text: #14532D;
-  --color-status-warning: #D97706;
+  --color-status-warning: #F79009;
   --color-status-warning-bg: #FEF3C7;
   --color-status-warning-text: #78350F;
-  --color-status-danger: #DC2626;
+  --color-status-danger: #D92D20;
   --color-status-danger-bg: #FEE2E2;
   --color-status-danger-text: #7F1D1D;
   --color-status-info: #2563EB;

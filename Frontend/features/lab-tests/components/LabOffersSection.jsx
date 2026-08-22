@@ -8,9 +8,9 @@ import { mapLabToFrontend } from "@/lib/mappers/labTest";
 
 const ACCENTS = [
   { bar: "bg-[#16A9E0]", wash: "from-[#E8F7FC] to-white", icon: "bg-[#16A9E0]/15 text-[#0B6E99]" },
-  { bar: "bg-[#7DD3C7]", wash: "from-[#EAF8F6] to-white", icon: "bg-[#7DD3C7]/25 text-[#087F8C]" },
+  { bar: "bg-[#7DD3C7]", wash: "from-[#EAF8F6] to-white", icon: "bg-[#7DD3C7]/25 text-[#17618E]" },
   { bar: "bg-[#0B6E99]", wash: "from-[#E8F0F5] to-white", icon: "bg-[#0B6E99]/12 text-[#073B4C]" },
-  { bar: "bg-[#087F8C]", wash: "from-[#E6F4F5] to-white", icon: "bg-[#087F8C]/15 text-[#062F3D]" },
+  { bar: "bg-[#17618E]", wash: "from-[#E6F4F5] to-white", icon: "bg-[#17618E]/15 text-[#062F3D]" },
 ];
 
 function getLabName(test) {

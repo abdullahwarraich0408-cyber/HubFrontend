@@ -25,12 +25,13 @@ export const metadata = {
   applicationName: "Medzoos",
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "48x48" },
-      { url: "/favicon-32.png", type: "image/png", sizes: "32x32" },
-      { url: "/icon.png", type: "image/png", sizes: "512x512" },
+      { url: "/favicon-32.png?v=9", type: "image/png", sizes: "32x32" },
+      { url: "/favicon-48.png?v=9", type: "image/png", sizes: "48x48" },
+      { url: "/favicon.ico?v=9", sizes: "16x16 32x32" },
+      { url: "/icon.png?v=9", type: "image/png", sizes: "512x512" },
     ],
-    shortcut: "/favicon.ico",
-    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+    shortcut: "/favicon-32.png?v=9",
+    apple: [{ url: "/apple-touch-icon.png?v=9", sizes: "180x180" }],
   },
   openGraph: {
     title: "Medzoos | Medicines, Doctors & Lab Tests in Pakistan",

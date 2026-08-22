@@ -42,7 +42,7 @@ export function PasswordInput({
             "h-[52px] w-full rounded-xl border bg-white pr-12 text-[15px] text-[#1A2B2A] outline-none transition-all duration-200",
             "placeholder:text-[#9AADAB]",
             "border-[#D5E0DE] hover:border-[#B7C9C6]",
-            "focus:border-[#087F8C] focus:ring-4 focus:ring-[#087F8C]/12",
+            "focus:border-[#17618E] focus:ring-4 focus:ring-[#17618E]/12",
             leftIcon ? "pl-11" : "pl-4",
             error && "border-[#D92D20] bg-white focus:border-[#D92D20] focus:ring-[#D92D20]/10"
           )}
@@ -51,7 +51,7 @@ export function PasswordInput({
         <button
           type="button"
           onClick={() => setVisible((v) => !v)}
-          className="absolute inset-y-0 right-1.5 flex w-11 items-center justify-center rounded-[10px] text-[#627D98] transition-colors hover:text-[#102A43] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F8C]"
+          className="absolute inset-y-0 right-1.5 flex w-11 items-center justify-center rounded-[10px] text-[#627D98] transition-colors hover:text-[#102A43] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#17618E]"
           aria-label={visible ? "Hide password" : "Show password"}
           aria-pressed={visible}
         >

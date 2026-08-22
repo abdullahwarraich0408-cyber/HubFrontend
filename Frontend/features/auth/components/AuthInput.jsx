@@ -39,7 +39,7 @@ export function AuthInput({
             "h-[52px] w-full rounded-xl border bg-white px-4 text-[15px] text-[#1A2B2A] outline-none transition-all duration-200",
             "placeholder:text-[#9AADAB]",
             "border-[#D5E0DE] hover:border-[#B7C9C6]",
-            "focus:border-[#087F8C] focus:ring-4 focus:ring-[#087F8C]/12",
+            "focus:border-[#17618E] focus:ring-4 focus:ring-[#17618E]/12",
             leftIcon && "pl-11",
             error && "border-[#D92D20] bg-white focus:border-[#D92D20] focus:ring-[#D92D20]/10",
             inputClassName

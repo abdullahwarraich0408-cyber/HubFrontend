@@ -42,29 +42,41 @@ export function Footer() {
             </p>
             <div className="flex items-center gap-2.5">
               <Link
-                href="#"
-                className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center text-slate-200 hover:bg-[#0D9488] hover:text-white transition-all"
+                href={settings.social_facebook || "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-full bg-[#1877F2] flex items-center justify-center text-white shadow-sm hover:brightness-110 hover:scale-105 transition-all"
                 aria-label="Facebook"
               >
                 <FacebookLogo size={18} weight="fill" />
               </Link>
               <Link
-                href="#"
-                className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center text-slate-200 hover:bg-[#0D9488] hover:text-white transition-all"
+                href={settings.social_instagram || "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-full flex items-center justify-center text-white shadow-sm hover:brightness-110 hover:scale-105 transition-all"
+                style={{
+                  background:
+                    "radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%)",
+                }}
                 aria-label="Instagram"
               >
                 <InstagramLogo size={18} weight="fill" />
               </Link>
               <Link
-                href="#"
-                className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center text-slate-200 hover:bg-[#0D9488] hover:text-white transition-all"
-                aria-label="Twitter"
+                href={settings.social_twitter || "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-full bg-[#000000] flex items-center justify-center text-white shadow-sm hover:brightness-125 hover:scale-105 transition-all"
+                aria-label="X (Twitter)"
               >
                 <TwitterLogo size={18} weight="fill" />
               </Link>
               <Link
-                href="#"
-                className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center text-slate-200 hover:bg-[#0D9488] hover:text-white transition-all"
+                href={settings.social_linkedin || "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-full bg-[#0A66C2] flex items-center justify-center text-white shadow-sm hover:brightness-110 hover:scale-105 transition-all"
                 aria-label="LinkedIn"
               >
                 <LinkedinLogo size={18} weight="fill" />

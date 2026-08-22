@@ -40,7 +40,7 @@ export function HowItWorks() {
 
         <div className="relative mt-12 md:mt-14">
           <div
-            className="pointer-events-none absolute left-[16%] right-[16%] top-[52px] hidden h-px bg-gradient-to-r from-transparent via-[#087F8C]/30 to-transparent lg:block"
+            className="pointer-events-none absolute left-[16%] right-[16%] top-[52px] hidden h-px bg-gradient-to-r from-transparent via-[#17618E]/30 to-transparent lg:block"
             aria-hidden
           />
           <ol className="grid gap-5 md:grid-cols-3 md:gap-6">
@@ -50,10 +50,10 @@ export function HowItWorks() {
                 <FadeIn key={step.number} delay={0.08 * index}>
                   <li className="relative rounded-[24px] border border-[#102A43]/08 bg-white p-6 shadow-[0_8px_28px_rgba(16,42,67,0.04)] md:p-7">
                     <div className="mb-5 flex items-center justify-between">
-                      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EAF8F7] text-[#087F8C]">
+                      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EAF8F7] text-[#17618E]">
                         <Icon size={24} weight="duotone" />
                       </span>
-                      <span className="font-sans text-[2rem] font-semibold leading-none text-[#087F8C]/20">
+                      <span className="font-sans text-[2rem] font-semibold leading-none text-[#17618E]/20">
                         {step.number}
                       </span>
                     </div>

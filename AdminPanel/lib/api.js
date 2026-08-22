@@ -82,6 +82,12 @@ async function apiFetch(path, options = {}) {
 }
 
 export const api = {
+  get: (path, options) => apiFetch(path, { ...options, method: 'GET' }),
+  post: (path, body, options) => apiFetch(path, { ...options, method: 'POST', body: body instanceof FormData ? body : JSON.stringify(body) }),
+  put: (path, body, options) => apiFetch(path, { ...options, method: 'PUT', body: body instanceof FormData ? body : JSON.stringify(body) }),
+  patch: (path, body, options) => apiFetch(path, { ...options, method: 'PATCH', body: body instanceof FormData ? body : JSON.stringify(body) }),
+  delete: (path, options) => apiFetch(path, { ...options, method: 'DELETE' }),
+
   // 🔐 Authentication API
   auth: {
     login: async (email, password) => {

@@ -55,6 +55,9 @@ export const labPortalApi = {
 export const authApi = {
   register: (data) => api.post("/auth/register", data),
   login: (data) => api.post("/auth/login", data),
+  firebaseLogin: (data) => api.post("/auth/firebase", data),
+  googleLogin: (data) => api.post("/auth/google", data),
+  appleLogin: (data) => api.post("/auth/apple", data),
   refresh: (data) => api.post("/auth/refresh", data),
   devLogin: (data) => api.post("/auth/dev-login", data),
   me: () => api.get("/auth/me"),
@@ -284,6 +287,17 @@ export const hospitalsApi = {
 
 export const healthApi = {
   check: () => api.get("/health"),
+};
+
+export const notificationsApi = {
+  list: () => api.get("/notifications"),
+  markRead: (id) => api.patch(`/notifications/${id}/read`),
+  markAllRead: () => api.post("/notifications/read-all", {}),
+  registerDeviceToken: (data) => api.post("/notifications/device-token", data),
+};
+
+export const inquiriesApi = {
+  submit: (data) => api.post("/inquiries", data),
 };
 
 export const telehealthApi = {

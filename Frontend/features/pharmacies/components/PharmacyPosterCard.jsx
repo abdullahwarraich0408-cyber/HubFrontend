@@ -51,7 +51,7 @@ export function PharmacyPosterCard({ pharmacy }) {
               {pharmacy.name}
             </span>
             {pharmacy.verified ? (
-              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#087F8C]">
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#17618E]">
                 <ShieldCheck size={13} weight="fill" />
                 Verified
               </span>

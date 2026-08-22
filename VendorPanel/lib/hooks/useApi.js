@@ -16,6 +16,7 @@ import {
   marketingApi,
   uploadApi,
   inventoryApi,
+  returnsApi,
   adminGeneralApi,
   notificationsApi,
 } from "@/lib/api/index";
@@ -246,12 +247,29 @@ export function useVendorServiceAreas(options = {}) {
   });
 }
 
-export function useVendorOrders(options = {}) {
+export function useVendorOrders(params = {}, options = {}) {
   return useQuery({
-    queryKey: ["vendor-orders"],
+    queryKey: ["vendor-orders", params],
     queryFn: async () => {
-      const data = await ordersApi.getVendorOrders();
-      return data.orders || [];
+      const data = await ordersApi.getVendorOrders(params);
+      return {
+        orders: data.orders || [],
+        page: data.page || 1,
+        pageSize: data.pageSize || 20,
+        total: data.total || (data.orders || []).length,
+      };
+    },
+    ...options,
+  });
+}
+
+export function useVendorOrder(id, options = {}) {
+  return useQuery({
+    queryKey: ["vendor-order", id],
+    enabled: Boolean(id),
+    queryFn: async () => {
+      const data = await ordersApi.getById(id);
+      return data.order;
     },
     ...options,
   });
@@ -324,12 +342,29 @@ export function useMarkPrescriptionPacked() {
   });
 }
 
-export function useMyVendorProducts(options = {}) {
+export function useMyVendorProducts(params = {}, options = {}) {
   return useQuery({
-    queryKey: ["vendor-products"],
+    queryKey: ["vendor-products", params],
     queryFn: async () => {
-      const data = await vendorsApi.getMyProducts();
-      return data.products || [];
+      const data = await vendorsApi.getMyProducts(params);
+      return {
+        products: data.products || [],
+        page: data.page || 1,
+        pageSize: data.pageSize || 20,
+        total: data.total || (data.products || []).length,
+      };
+    },
+    ...options,
+  });
+}
+
+export function useMyVendorProduct(id, options = {}) {
+  return useQuery({
+    queryKey: ["vendor-product", id],
+    enabled: Boolean(id),
+    queryFn: async () => {
+      const data = await vendorsApi.getMyProduct(id);
+      return data.product;
     },
     ...options,
   });
@@ -473,11 +508,77 @@ export function useMarkVendorNotificationRead() {
 export function useBulkImportProducts() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (file) => inventoryApi.bulkImport(file).then(res => res.data || res),
+    mutationFn: (fileOrPayload) => {
+      const file = fileOrPayload?.file || fileOrPayload;
+      const importValidOnly = fileOrPayload?.importValidOnly !== false;
+      return inventoryApi.bulkImport(file, { import_valid_only: importValidOnly ? "true" : "false" }).then((res) => res.data || res);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["vendor-products"] });
       queryClient.invalidateQueries({ queryKey: ["vendor-dashboard-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["vendor-inventory"] });
     },
+  });
+}
+
+export function useValidateBulkImport() {
+  return useMutation({
+    mutationFn: (file) => inventoryApi.validateImport(file).then((res) => res.data || res),
+  });
+}
+
+export function useSearchVendorProducts(q, options = {}) {
+  return useQuery({
+    queryKey: ["vendor-product-search", q],
+    enabled: Boolean(String(q || "").trim()),
+    queryFn: async () => {
+      const data = await vendorsApi.searchMyProducts(q);
+      return data.products || [];
+    },
+    ...options,
+  });
+}
+
+export function useAdjustInventory() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...data }) => inventoryApi.adjust(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["vendor-inventory"] });
+      queryClient.invalidateQueries({ queryKey: ["vendor-products"] });
+      queryClient.invalidateQueries({ queryKey: ["vendor-dashboard-stats"] });
+    },
+  });
+}
+
+export function useExpiringBatches(options = {}) {
+  return useQuery({
+    queryKey: ["vendor-expiring"],
+    queryFn: async () => {
+      const data = await inventoryApi.expiring();
+      return data.batches || [];
+    },
+    ...options,
+  });
+}
+
+export function useMarkAllVendorNotifications() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => notificationsApi.markAllVendorRead(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["vendor-notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["inbox-notifications"] });
+    },
+  });
+}
+
+export function usePrescriptionDocument(id, options = {}) {
+  return useQuery({
+    queryKey: ["vendor-prescription-document", id],
+    enabled: Boolean(id),
+    queryFn: async () => prescriptionOrdersApi.getDocument(id),
+    ...options,
   });
 }
 
@@ -517,9 +618,10 @@ export function useDeleteVendorProduct() {
 export function useUpdateVendorOrderStatus() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, status }) => ordersApi.updateStatus(id, status),
+    mutationFn: ({ id, status, ...extra }) => ordersApi.updateStatus(id, status, extra),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["vendor-orders"] });
+      queryClient.invalidateQueries({ queryKey: ["vendor-order"] });
       queryClient.invalidateQueries({ queryKey: ["vendor-dashboard-stats"] });
     },
   });
@@ -1123,5 +1225,194 @@ export function useAuditLogs(options = {}) {
 export function useImpersonate() {
   return useMutation({
     mutationFn: ({ entity_id, role }) => adminGeneralApi.impersonate(entity_id, role),
+  });
+}
+
+export function useVendorInventory(params = {}, options = {}) {
+  return useQuery({
+    queryKey: ["vendor-inventory", params],
+    queryFn: async () => {
+      const data = await inventoryApi.list(params);
+      return {
+        items: data.items || [],
+        page: data.page || 1,
+        pageSize: data.pageSize || 20,
+        total: data.total || 0,
+      };
+    },
+    ...options,
+  });
+}
+
+export function useVendorBatches(params = {}, options = {}) {
+  return useQuery({
+    queryKey: ["vendor-batches", params],
+    queryFn: async () => {
+      const data = await inventoryApi.batches(params);
+      return data.batches || [];
+    },
+    ...options,
+  });
+}
+
+export function useAddBatch() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data) => inventoryApi.addBatch(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["vendor-batches"] });
+      queryClient.invalidateQueries({ queryKey: ["vendor-inventory"] });
+      queryClient.invalidateQueries({ queryKey: ["vendor-products"] });
+    },
+  });
+}
+
+export function useUpdateStock() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, stock, reason }) => inventoryApi.updateStock(id, stock, reason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["vendor-inventory"] });
+      queryClient.invalidateQueries({ queryKey: ["vendor-products"] });
+      queryClient.invalidateQueries({ queryKey: ["vendor-dashboard-stats"] });
+    },
+  });
+}
+
+export function useVendorReturns(options = {}) {
+  return useQuery({
+    queryKey: ["vendor-returns"],
+    queryFn: async () => {
+      const data = await returnsApi.getVendorReturns();
+      return data.returns || [];
+    },
+    ...options,
+  });
+}
+
+export function useUpdateVendorReturn() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...data }) => returnsApi.updateVendorReturn(id, data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["vendor-returns"] }),
+  });
+}
+
+export function useVendorSalesReport(params = {}, options = {}) {
+  return useQuery({
+    queryKey: ["vendor-sales-report", params],
+    queryFn: async () => {
+      const data = await vendorsApi.getSalesReport(params);
+      return data.report;
+    },
+    ...options,
+  });
+}
+
+export function useVendorPayouts(options = {}) {
+  return useQuery({
+    queryKey: ["vendor-payouts"],
+    queryFn: async () => {
+      const data = await vendorsApi.getPayoutOverview();
+      return data.overview || data;
+    },
+    ...options,
+  });
+}
+
+export function useVendorStaff(options = {}) {
+  return useQuery({
+    queryKey: ["vendor-staff"],
+    queryFn: async () => {
+      const data = await vendorsApi.getStaff();
+      return data.staff || [];
+    },
+    ...options,
+  });
+}
+
+export function useInviteStaff() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data) => vendorsApi.inviteStaff(data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["vendor-staff"] }),
+  });
+}
+
+export function useUpdateStaff() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...data }) => vendorsApi.updateStaff(id, data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["vendor-staff"] }),
+  });
+}
+
+export function useVendorLoginActivity(options = {}) {
+  return useQuery({
+    queryKey: ["vendor-login-activity"],
+    queryFn: async () => {
+      const data = await vendorsApi.getLoginActivity();
+      return data.activities || [];
+    },
+    ...options,
+  });
+}
+
+export function useChangeVendorPassword() {
+  return useMutation({
+    mutationFn: (data) => vendorsApi.changePassword(data),
+  });
+}
+
+export function useSignOutOtherSessions() {
+  return useMutation({
+    mutationFn: () => vendorsApi.signOutOthers(),
+  });
+}
+
+export function useVendorCatalog(options = {}) {
+  return useQuery({
+    queryKey: ["vendor-catalog"],
+    queryFn: async () => vendorsApi.getCatalog(),
+    ...options,
+  });
+}
+
+export function useReviewPrescription() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...data }) => prescriptionOrdersApi.review(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["vendor-prescription-orders"] });
+      queryClient.invalidateQueries({ queryKey: ["vendor-prescription-history"] });
+    },
+  });
+}
+
+export function usePrescriptionOrder(id, options = {}) {
+  return useQuery({
+    queryKey: ["vendor-prescription-order", id],
+    enabled: Boolean(id),
+    queryFn: async () => {
+      const data = await prescriptionOrdersApi.getById(id);
+      return data.order;
+    },
+    ...options,
+  });
+}
+
+export function useDuplicateProduct() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => productsApi.duplicate(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["vendor-products"] }),
+  });
+}
+
+export function useSetProductListing() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, listing_status }) => productsApi.setListing(id, listing_status),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["vendor-products"] }),
   });
 }

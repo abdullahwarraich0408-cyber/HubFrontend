@@ -10,6 +10,9 @@ import { AuthProvider } from "@/lib/auth/AuthProvider";
 import { AuthModalProvider } from "@/features/auth/context/AuthModalContext";
 
 import { PrescriptionModalProvider } from "@/features/prescription/context/PrescriptionModalContext";
+import { NotificationBannerHost } from "@/shared/notifications/NotificationBannerHost";
+import { EnableNotificationsPrompt } from "@/shared/notifications/EnableNotificationsPrompt";
+import { useAuth } from "@/lib/auth/AuthProvider";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -50,6 +53,16 @@ function AuthHydrator({ children }) {
   return children;
 }
 
+function NotificationChrome() {
+  const { isAuthenticated } = useAuth();
+  return (
+    <>
+      <NotificationBannerHost />
+      <EnableNotificationsPrompt enabled={Boolean(isAuthenticated)} />
+    </>
+  );
+}
+
 export function Providers({ children }) {
   return (
     <Provider store={store}>
@@ -58,6 +71,7 @@ export function Providers({ children }) {
           <AuthModalProvider>
             <PrescriptionModalProvider>
               <AuthHydrator>{children}</AuthHydrator>
+              <NotificationChrome />
               <div
                 id="recaptcha-container"
                 className="pointer-events-none absolute h-px w-px overflow-hidden opacity-0"

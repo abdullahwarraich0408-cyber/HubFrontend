@@ -50,7 +50,7 @@ export function ProviderSection() {
             return (
               <FadeIn key={item.title} delay={0.06 * index}>
                 <article className="h-full rounded-[22px] border border-[#102A43]/08 bg-white p-5 shadow-[0_6px_24px_rgba(16,42,67,0.04)] md:p-6">
-                  <span className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[#EAF8F7] text-[#087F8C]">
+                  <span className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[#EAF8F7] text-[#17618E]">
                     <Icon size={22} weight="duotone" />
                   </span>
                   <h3 className="text-[1.05rem] font-semibold text-[#102A43]">
@@ -66,8 +66,8 @@ export function ProviderSection() {
         </div>
 
         <FadeIn delay={0.2}>
-          <div className="mt-4 flex items-start gap-3 rounded-[20px] border border-dashed border-[#087F8C]/25 bg-white/70 px-5 py-4 sm:items-center sm:px-6">
-            <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#EAF8F7] text-[#087F8C] sm:mt-0">
+          <div className="mt-4 flex items-start gap-3 rounded-[20px] border border-dashed border-[#17618E]/25 bg-white/70 px-5 py-4 sm:items-center sm:px-6">
+            <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#EAF8F7] text-[#17618E] sm:mt-0">
               <Hospital size={20} weight="duotone" />
             </span>
             <div>

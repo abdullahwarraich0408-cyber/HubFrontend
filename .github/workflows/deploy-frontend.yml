@@ -31,6 +31,7 @@ jobs:
       NEXT_PUBLIC_API_URL: https://backend.medzoos.com/api
       BACKEND_URL: https://backend.medzoos.com
       NEXT_PUBLIC_ENABLE_TEST_AUTH: "true"
+      NEXT_PUBLIC_GOOGLE_CLIENT_ID: 1083815277954-9spbmn6ppfe4nnb3eong8dbihn44211a.apps.googleusercontent.com
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

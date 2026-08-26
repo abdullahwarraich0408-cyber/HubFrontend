@@ -27,7 +27,7 @@ export function ProviderCTA() {
               </p>
               <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
                 <Link
-                  href="/provider/register"
+                  href="/partner-with-us"
                   className="group inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-white px-5 text-[14px] font-semibold text-[#102A43] transition-all hover:bg-[#EAF8F7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
                 >
                   Join as a Provider

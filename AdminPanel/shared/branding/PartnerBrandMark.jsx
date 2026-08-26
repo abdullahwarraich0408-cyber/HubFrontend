@@ -4,8 +4,8 @@ import Link from "next/link";
 import { cn } from "@/utils/cn";
 
 /** Dark sidebars use the footer on-dark (white + mint) wordmark */
-const WORDMARK = "h-9 sm:h-10 w-auto max-w-[200px] object-contain object-left";
-const MARK = "h-10 w-10 sm:h-11 sm:w-11 object-contain";
+const WORDMARK = "h-7 sm:h-8 w-auto max-w-[180px] object-contain object-left";
+const MARK = "h-8 w-8 sm:h-9 sm:w-9 object-contain";
 
 export function PartnerBrandMark({
   href = "/",

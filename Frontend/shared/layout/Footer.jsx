@@ -116,17 +116,14 @@ export function Footer() {
             <Link href="/about" className="text-slate-300 hover:text-white transition-colors">
               About Us
             </Link>
+            <Link href="/help" className="text-slate-300 hover:text-white transition-colors">
+              Help Center
+            </Link>
+            <Link href="/contact" className="text-slate-300 hover:text-white transition-colors">
+              Contact Us
+            </Link>
             <Link href="/partner-with-us" className="text-slate-300 hover:text-white transition-colors">
-              Become a Vendor
-            </Link>
-            <Link href="#" className="text-slate-300 hover:text-white transition-colors">
-              Careers
-            </Link>
-            <Link href="#" className="text-slate-300 hover:text-white transition-colors">
-              Blog
-            </Link>
-            <Link href="#" className="text-slate-300 hover:text-white transition-colors">
-              Press
+              Become a Partner
             </Link>
           </div>
 
@@ -154,16 +151,19 @@ export function Footer() {
             © {new Date().getFullYear()} Medzoos. All rights reserved.
           </p>
 
-          <div className="flex items-center gap-6 text-xs text-slate-300">
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs text-slate-300">
             <Link href="/privacy-policy" className="hover:text-white transition-colors">
               Privacy Policy
             </Link>
             <Link href="/terms-of-service" className="hover:text-white transition-colors">
               Terms of Service
             </Link>
-            {/* <Link href="/cookie-policy" className="hover:text-white transition-colors">
-              Cookie Policy
-            </Link> */}
+            <Link href="/refund-policy" className="hover:text-white transition-colors">
+              Return & Refund Policy
+            </Link>
+            <Link href="/shipping-policy" className="hover:text-white transition-colors">
+              Shipping & Service Policy
+            </Link>
           </div>
 
           {/* Scroll to top button */}

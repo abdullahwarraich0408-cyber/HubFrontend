@@ -35,7 +35,7 @@ const ECOSYSTEM = [
 
 export function ProviderSection() {
   return (
-    <section className="bg-[#F7FAFC] py-16 md:py-20 lg:py-24">
+    <section id="doctors" className="scroll-mt-24 bg-[#F7FAFC] py-16 md:py-20 lg:py-24">
       <div className="landing-container">
         <FadeIn>
           <SectionHeading

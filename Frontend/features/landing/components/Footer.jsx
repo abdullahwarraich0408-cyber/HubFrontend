@@ -23,13 +23,13 @@ const COLUMNS = [
       { label: "Pharmacies", href: "/partner-with-us" },
       { label: "Laboratories", href: "/partner-with-us" },
       { label: "Hospitals & Clinics", href: "/hospitals" },
-      { label: "Join Medzoos", href: "/provider/register" },
+      { label: "Join Medzoos", href: "/partner-with-us" },
     ],
   },
   {
     title: "Company",
     links: [
-      { label: "About", href: "/contact" },
+      { label: "About", href: "/about" },
       { label: "Contact", href: "/contact" },
       { label: "Help Center", href: "/help" },
     ],
@@ -39,7 +39,8 @@ const COLUMNS = [
     links: [
       { label: "Privacy Policy", href: "/privacy-policy" },
       { label: "Terms & Conditions", href: "/terms-and-conditions" },
-      { label: "Medical Disclaimer", href: "#medical-disclaimer" },
+      { label: "Return & Refund Policy", href: "/refund-policy" },
+      { label: "Shipping & Service Policy", href: "/shipping-policy" },
     ],
   },
 ];
@@ -78,17 +79,6 @@ export function Footer() {
               </ul>
             </div>
           ))}
-        </div>
-
-        <div
-          id="medical-disclaimer"
-          className="mt-12 rounded-2xl border border-white/10 bg-white/5 px-5 py-4"
-        >
-          <p className="text-[12px] leading-relaxed text-white/55 md:text-[13px]">
-            Medzoos is a healthcare connection platform and does not itself provide
-            medical diagnosis or treatment. Healthcare services are provided by
-            independent healthcare providers available through the platform.
-          </p>
         </div>
 
         <div className="mt-8 flex flex-col gap-2 border-t border-white/10 pt-6 text-[13px] text-white/45 sm:flex-row sm:items-center sm:justify-between">

@@ -1,12 +1,66 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Heart, Pulse } from "@phosphor-icons/react";
+import Image from "next/image";
+import { 
+  ArrowRight, 
+  Package, 
+  Stethoscope, 
+  CurrencyDollar,
+  PaperPlaneTilt,
+  Snowflake,
+  Lightning,
+  ShieldCheck,
+  Flask
+} from "@phosphor-icons/react";
 import { motion, useReducedMotion } from "framer-motion";
-import { LandingImage } from "./LandingImage";
 import { FadeIn } from "./FadeIn";
 import { useQuery } from "@tanstack/react-query";
 import { publicContentApi } from "@/lib/api/index";
+
+const HERO_CARDS = [
+  {
+    id: "diabetes-care",
+    title: "Diabetes Care",
+    href: "#diabetes-care",
+    image: "/images/card-diabetes-care.png",
+    bg: "bg-[#E7F8F2]",
+    alt: "Diabetes Care, Glucose Monitoring, HbA1c & Insulin",
+  },
+  {
+    id: "mental-health",
+    title: "Mental Health Support",
+    href: "#mental-health",
+    image: "/images/card-psychologists.png",
+    bg: "bg-[#EEF5F8]",
+    alt: "Mental Health, Therapy & Psychologist Support",
+  },
+  {
+    id: "doctors",
+    title: "Doctor Consultations",
+    href: "#doctors",
+    image: "/images/hero-consult-doctor.png",
+    bg: "bg-[#F8EFE6]",
+    alt: "PMDC Verified Doctor Video & Clinic Consultations",
+  },
+  {
+    id: "medicines-labs",
+    title: "Medicines & Diagnostic Labs",
+    href: "#medicines-labs",
+    image: "/images/card-pharmacies.png",
+    bg: "bg-[#FAE9EB]",
+    alt: "Prescription Medicines Delivery & Home Blood Sampling",
+  },
+];
+
+const TRUST_TICKER = [
+  { icon: Lightning, label: "EXPRESS MEDICINE DELIVERY" },
+  { icon: Stethoscope, label: "PMDC VERIFIED SPECIALISTS" },
+  { icon: Flask, label: "ACCREDITED LABS & HOME SAMPLING" },
+  { icon: Snowflake, label: "COLD-CHAIN SAFETY GUARANTEED" },
+  { icon: ShieldCheck, label: "100% AUTHENTIC DRUGS & OTC" },
+  { icon: CurrencyDollar, label: "TRANSPARENT & CLEAR PRICING" },
+];
 
 export function Hero() {
   const reduceMotion = useReducedMotion();
@@ -18,145 +72,130 @@ export function Hero() {
   const settings = data?.settings || {};
 
   return (
-    <section className="relative flex min-h-0 items-center overflow-x-clip py-5 md:py-6 lg:min-h-[calc(100dvh-76px)] lg:py-4">
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute -left-24 top-10 h-72 w-72 rounded-full bg-[#17618E]/10 blur-3xl" />
-        <div className="absolute right-0 top-0 h-80 w-80 rounded-full bg-[#3B82F6]/10 blur-3xl" />
-        <div className="absolute bottom-10 left-1/3 h-56 w-56 rounded-full bg-[#16A085]/10 blur-3xl" />
-      </div>
+    <div className="relative w-full">
+      
+      {/* 1. Upper Medzoos Deep Ocean-Navy Canvas */}
+      <section 
+        className="relative overflow-hidden pt-6 sm:pt-8 md:pt-10 pb-28 sm:pb-34 md:pb-40 lg:pb-44"
+        style={{
+          background: "radial-gradient(circle at 50% 20%, #1A5E8A 0%, #0E3E5D 50%, #082B3F 100%)",
+        }}
+      >
+        
+        {/* Giant Watermark MEDZOOS: Bottom of letters touches behind the arching card */}
+        <div 
+          aria-hidden="true"
+          className="pointer-events-none absolute bottom-0 left-1/2 -translate-x-1/2 select-none text-[18vw] font-black uppercase tracking-tight text-white/[0.04] leading-none whitespace-nowrap z-0"
+        >
+          MEDZOOS
+        </div>
 
-      <div className="landing-container grid w-full items-center gap-8 lg:grid-cols-2 lg:gap-10 xl:gap-12">
-        <div className="order-1">
+        {/* Central Text Content */}
+        <div className="landing-container relative z-10 text-center px-4 mb-6 sm:mb-8 md:mb-10">
+          
+          {/* Eyebrow */}
           <FadeIn>
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#17618E]/20 bg-white/80 px-3.5 py-1.5 shadow-sm backdrop-blur-sm">
-              <span className="h-2 w-2 rounded-full bg-[#16A085]" aria-hidden />
-              <span className="text-[13px] font-semibold text-[#17618E]">
-                {settings.landing_eyebrow || "Healthcare, made simpler"}
-              </span>
-            </div>
+            <p className="font-sans text-[13px] sm:text-[14px] font-normal text-[#BAE6FD] tracking-wide mb-1.5 leading-none">
+              {settings.landing_eyebrow || (
+                <>
+                  Join <span className="font-bold text-white">500,000+</span> Medzoos patients across Pakistan
+                </>
+              )}
+            </p>
           </FadeIn>
 
+          {/* Main Headline */}
           <FadeIn delay={0.05}>
-            <h1 className="font-sans text-[clamp(2rem,4.2vw,3.5rem)] font-semibold leading-[1.08] tracking-tight text-[#102A43]">
-              {settings.landing_headline || "Your Healthcare. One Trusted Platform."}
+            <h1 className="font-sans text-[clamp(2.3rem,4.6vw,3.8rem)] font-extrabold text-white leading-[1.02] tracking-tight mt-1.5 sm:mt-2">
+              Healthcare, <br className="hidden sm:inline" />
+              <span className="text-[#38BDF8] font-extrabold">redefined</span> for real life.
             </h1>
           </FadeIn>
 
+          {/* Subtitle Paragraph Tailored to Medzoos */}
           <FadeIn delay={0.1}>
-            <p className="mt-2 text-[15px] font-medium text-[#17618E] md:text-[16px]">
-              Medicines, Doctors & Lab Tests in One Place
+            <p className="font-sans mx-auto mt-2.5 sm:mt-3 max-w-[640px] text-[13.5px] sm:text-[15px] leading-snug text-[#E0F2FE]/90 font-normal">
+              {settings.landing_subhead || (
+                <>
+                  Order authentic medicines from licensed pharmacies, consult PMDC-verified doctors online, 
+                  and book diagnostic lab tests with at-home sampling across Pakistan.
+                </>
+              )}
             </p>
           </FadeIn>
 
-          <FadeIn delay={0.15}>
-            <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-[#52606D] md:text-[16px] lg:line-clamp-3">
-              {settings.landing_subhead ||
-                "Medzoos connects you with healthcare providers across Pakistan, helping you discover medicines, doctors, consultations, appointments and diagnostic services from one convenient platform."}
-            </p>
-          </FadeIn>
-
-          <FadeIn delay={0.2}>
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <Link
-                href="#services"
-                className="group inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#17618E] px-6 text-[15px] font-semibold text-white shadow-[0_8px_24px_rgba(8,127,140,0.25)] transition-all hover:bg-[#124362] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#17618E]/40 focus-visible:ring-offset-2 sm:w-auto"
-              >
-                {settings.landing_cta_secondary || "Explore Healthcare"}
-                <ArrowRight
-                  size={18}
-                  weight="bold"
-                  className="transition-transform group-hover:translate-x-0.5"
-                />
-              </Link>
-              <Link
-                href="/doctors"
-                className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#102A43]/12 bg-white px-6 text-[15px] font-semibold text-[#102A43] transition-all hover:border-[#17618E]/35 hover:bg-[#EAF8F7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#17618E]/40 focus-visible:ring-offset-2 sm:w-auto"
-              >
-                {settings.landing_cta_primary || "Find a Doctor"}
-              </Link>
-            </div>
-          </FadeIn>
-
-          <FadeIn delay={0.25}>
-            <p className="mt-4 max-w-md text-[13px] leading-relaxed text-[#7B8794] lg:mt-5">
-              Built to connect patients with professional healthcare providers
-              across Pakistan.
-            </p>
-          </FadeIn>
         </div>
 
-        <div className="order-2">
-          <FadeIn
-            delay={0.12}
-            className="relative mx-auto w-full max-w-[480px] overflow-visible lg:max-w-none"
-          >
-            {/* Height capped to first viewport so image + cards aren’t clipped */}
-            <div className="relative mx-auto h-[min(420px,calc(100dvh-14rem))] w-full overflow-hidden rounded-[28px] border border-white/70 bg-[#EAF8F7] shadow-[0_24px_60px_rgba(16,42,67,0.12)] sm:h-[min(480px,calc(100dvh-12rem))] sm:rounded-[32px] lg:h-[min(520px,calc(100dvh-10rem))] lg:max-h-[calc(100dvh-9rem)]">
-              <LandingImage
-                src="/images/medzoos-hero.png"
-                alt="Doctor consulting with a patient through Medzoos"
-                fill
-                priority
-                sizes="(max-width: 1024px) 90vw, 480px"
-                className="h-full w-full"
-                imageClassName="object-cover object-[center_22%]"
-              />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#102A43]/25 via-transparent to-transparent" />
+      </section>
+
+      {/* 2. Seamless White Card Deck: Arched Top, Seamless Flat Bottom Matching Page BG */}
+      <div className="relative z-20 max-w-6xl mx-auto px-4 -mt-[90px] sm:-mt-[115px] md:-mt-[135px] lg:-mt-[150px]">
+        <FadeIn delay={0.15}>
+          <div className="bg-white rounded-t-[26px] sm:rounded-t-[32px] md:rounded-t-[40px] rounded-b-none p-3 sm:p-4 md:p-5 pb-0 shadow-[0_-12px_45px_rgba(0,0,0,0.12)]">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
+              {HERO_CARDS.map((card) => (
+                <Link
+                  key={card.id}
+                  href={card.href}
+                  className="group flex flex-col h-full rounded-[20px] sm:rounded-[24px] cursor-pointer transition-transform duration-300 hover:-translate-y-1"
+                >
+                  {/* Inner Photo Frame with Soft Pastel Background */}
+                  <div className={`relative h-[130px] sm:h-[155px] md:h-[180px] lg:h-[205px] w-full rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-hidden ${card.bg}`}>
+                    <Image
+                      src={card.image}
+                      alt={card.alt}
+                      fill
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
+                      className="object-cover object-center w-full h-full transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+
+                  {/* Title & Arrow Footer on Seamless White Background */}
+                  <div className="bg-white pt-3.5 pb-2 px-1 flex items-center justify-between text-left">
+                    <span className="font-sans text-[12.5px] sm:text-[14px] md:text-[15.5px] font-bold text-[#082B3F] group-hover:text-[#17618E] transition-colors truncate">
+                      {card.title}
+                    </span>
+                    <ArrowRight 
+                      size={16} 
+                      weight="bold" 
+                      className="text-[#082B3F] group-hover:translate-x-1 group-hover:text-[#17618E] transition-all shrink-0 ml-1.5" 
+                    />
+                  </div>
+                </Link>
+              ))}
             </div>
+          </div>
+        </FadeIn>
+      </div>
 
-            <FloatingCard
-              className="absolute left-2 top-[10%] max-w-[180px] sm:left-3 sm:max-w-[200px]"
-              reduceMotion={reduceMotion}
-              delay={0}
-            >
-              <p className="text-[13px] font-semibold text-[#102A43]">Doctor Consultations</p>
-              <p className="mt-0.5 text-[12px] text-[#52606D]">Online & In-Person</p>
-            </FloatingCard>
-
-            <FloatingCard
-              className="absolute right-2 top-[36%] max-w-[160px] sm:right-3 sm:max-w-[180px]"
-              reduceMotion={reduceMotion}
-              delay={0.4}
-            >
-              <p className="text-[13px] font-semibold text-[#102A43]">Lab Tests</p>
-              <p className="mt-0.5 text-[12px] text-[#52606D]">Home Sampling Available</p>
-            </FloatingCard>
-
-            <FloatingCard
-              className="absolute bottom-[10%] left-[8%] max-w-[180px] sm:left-[10%] sm:max-w-[200px]"
-              reduceMotion={reduceMotion}
-              delay={0.8}
-            >
-              <p className="text-[13px] font-semibold text-[#102A43]">Medicines</p>
-              <p className="mt-0.5 text-[12px] text-[#52606D]">From Registered Pharmacies</p>
-            </FloatingCard>
-
-            <motion.div
-              className="absolute bottom-[16%] right-[8%] flex h-12 w-12 items-center justify-center rounded-2xl border border-white/80 bg-white/95 text-[#17618E] shadow-[0_10px_30px_rgba(16,42,67,0.12)] sm:h-14 sm:w-14"
-              animate={reduceMotion ? undefined : { y: [0, -6, 0] }}
-              transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 0.6 }}
-              aria-hidden
-            >
-              <div className="relative">
-                <Heart size={22} weight="fill" className="text-[#17618E]" />
-                <Pulse size={12} weight="bold" className="absolute -bottom-1 -right-2 text-[#16A085]" />
-              </div>
-            </motion.div>
-          </FadeIn>
+      {/* 3. Pure White Section: Seamless Continuation with Auto-Scroller */}
+      <div className="w-full bg-white pt-10 sm:pt-14 md:pt-16 pb-6 sm:pb-8 overflow-hidden">
+        <div className="relative w-full overflow-hidden mask-fade">
+          <motion.div
+            className="flex items-center gap-10 sm:gap-14 md:gap-16 whitespace-nowrap w-max"
+            animate={reduceMotion ? undefined : { x: ["0%", "-50%"] }}
+            transition={{
+              duration: 28,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+          >
+            {[...TRUST_TICKER, ...TRUST_TICKER].map((item, idx) => {
+              const Icon = item.icon;
+              return (
+                <div 
+                  key={idx}
+                  className="font-sans flex items-center gap-2.5 text-[11.5px] sm:text-[12.5px] font-bold text-[#082B3F] tracking-wider uppercase whitespace-nowrap shrink-0 hover:text-[#17618E] transition-colors"
+                >
+                  <Icon size={18} weight="bold" className="text-[#17618E] shrink-0" />
+                  <span>{item.label}</span>
+                </div>
+              );
+            })}
+          </motion.div>
         </div>
       </div>
-    </section>
-  );
-}
 
-function FloatingCard({ children, className, reduceMotion, delay = 0 }) {
-  return (
-    <motion.div
-      className={`rounded-2xl border border-white/80 bg-white/95 px-3.5 py-3 shadow-[0_12px_32px_rgba(16,42,67,0.12)] backdrop-blur-sm ${className}`}
-      animate={reduceMotion ? undefined : { y: [0, -5, 0] }}
-      transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay }}
-    >
-      {children}
-    </motion.div>
+    </div>
   );
 }

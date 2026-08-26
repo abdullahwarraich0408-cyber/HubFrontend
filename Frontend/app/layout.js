@@ -54,7 +54,7 @@ export default function RootLayout({ children }) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${dmSerifDisplay.variable} ${plusJakartaSans.variable} ${jetbrainsMono.variable} h-full`}
+      className={`${dmSerifDisplay.variable} ${plusJakartaSans.variable} ${jetbrainsMono.variable} h-full scroll-smooth`}
     >
       <body suppressHydrationWarning className="min-h-full flex flex-col bg-[var(--color-surface-base)]">
         <Providers>{children}</Providers>

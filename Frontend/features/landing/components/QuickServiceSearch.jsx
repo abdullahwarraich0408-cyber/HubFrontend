@@ -27,7 +27,7 @@ const OPTIONS = [
 
 export function QuickServiceSearch() {
   return (
-    <section className="relative z-10 -mt-2 pb-6 md:-mt-4 md:pb-10" aria-labelledby="quick-search-heading">
+    <section className="relative z-10 pt-10 sm:pt-14 md:pt-16 pb-8 md:pb-12" aria-labelledby="quick-search-heading">
       <div className="landing-container">
         <FadeIn>
           <div className="rounded-[28px] border border-[#102A43]/08 bg-white p-5 shadow-[0_16px_48px_rgba(16,42,67,0.08)] sm:p-7 md:p-8">

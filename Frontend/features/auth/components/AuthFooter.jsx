@@ -12,6 +12,12 @@ export function AuthFooter() {
         <Link href="/terms" className="transition-colors hover:text-[#17618E]">
           Terms & Conditions
         </Link>
+        <Link href="/refund-policy" className="transition-colors hover:text-[#17618E]">
+          Return & Refund
+        </Link>
+        <Link href="/shipping-policy" className="transition-colors hover:text-[#17618E]">
+          Shipping Policy
+        </Link>
         <Link href="/help" className="transition-colors hover:text-[#17618E]">
           Help
         </Link>

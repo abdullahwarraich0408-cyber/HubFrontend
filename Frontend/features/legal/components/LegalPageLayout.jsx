@@ -15,14 +15,16 @@ import {
   ArrowUp,
   CheckCircle,
   Clock,
-  Sparkle
+  Sparkle,
+  ArrowsCounterClockwise,
+  Truck
 } from "@phosphor-icons/react";
 
 export function LegalPageLayout({
   title,
   subtitle,
   lastUpdated,
-  type = "privacy", // 'privacy' | 'terms' | 'cookies'
+  type = "privacy", // 'privacy' | 'terms' | 'cookies' | 'refund' | 'shipping'
   sections = [],
   children
 }) {
@@ -75,6 +77,10 @@ export function LegalPageLayout({
         return <FileText size={32} className="text-brand-primary" weight="duotone" />;
       case "cookies":
         return <Cookie size={32} className="text-brand-primary" weight="duotone" />;
+      case "refund":
+        return <ArrowsCounterClockwise size={32} className="text-brand-primary" weight="duotone" />;
+      case "shipping":
+        return <Truck size={32} className="text-brand-primary" weight="duotone" />;
       default:
         return <ShieldCheck size={32} className="text-brand-primary" weight="duotone" />;
     }
@@ -89,6 +95,22 @@ export function LegalPageLayout({
           docRef: "DOC-MEDZOOS-TOS-2026",
           heroImage: "/images/auth-medzoos-healthcare.png",
           IconComponent: FileText,
+        };
+      case "refund":
+        return {
+          badgeText: "Returns, Refunds & Cancellations",
+          complianceLabel: "DRAP & Consumer Protection Standard",
+          docRef: "DOC-MEDZOOS-REFUND-2026",
+          heroImage: "/images/auth-medzoos-healthcare.png",
+          IconComponent: ArrowsCounterClockwise,
+        };
+      case "shipping":
+        return {
+          badgeText: "Cold-Chain & Delivery SLA",
+          complianceLabel: "Temperature Regulated Healthcare Logistics",
+          docRef: "DOC-MEDZOOS-SHIPPING-2026",
+          heroImage: "/images/hero-upload-prescription.png",
+          IconComponent: Truck,
         };
       case "cookies":
         return {
@@ -114,7 +136,8 @@ export function LegalPageLayout({
   const legalNavTabs = [
     { key: "privacy", label: "Privacy Policy", href: "/privacy-policy", icon: ShieldCheck },
     { key: "terms", label: "Terms of Service", href: "/terms-of-service", icon: FileText },
-    // { key: "cookies", label: "Cookie Policy", href: "/cookie-policy", icon: Cookie },
+    { key: "refund", label: "Return & Refund", href: "/refund-policy", icon: ArrowsCounterClockwise },
+    { key: "shipping", label: "Shipping & Service Delivery", href: "/shipping-policy", icon: Truck },
   ];
 
   return (
@@ -284,7 +307,7 @@ export function LegalPageLayout({
                   </p>
                   {type !== "privacy" && (
                     <Link
-                      href="/privacy"
+                      href="/privacy-policy"
                       className="flex items-center justify-between p-2 rounded-lg text-xs font-medium text-neutral-600 hover:text-brand-primary hover:bg-brand-mist transition-colors"
                     >
                       <span className="flex items-center gap-2">
@@ -296,7 +319,7 @@ export function LegalPageLayout({
                   )}
                   {type !== "terms" && (
                     <Link
-                      href="/terms"
+                      href="/terms-of-service"
                       className="flex items-center justify-between p-2 rounded-lg text-xs font-medium text-neutral-600 hover:text-brand-primary hover:bg-brand-mist transition-colors"
                     >
                       <span className="flex items-center gap-2">
@@ -306,14 +329,26 @@ export function LegalPageLayout({
                       <CaretRight size={12} />
                     </Link>
                   )}
-                  {type !== "cookies" && (
+                  {type !== "refund" && (
                     <Link
-                      href="/cookie-policy"
+                      href="/refund-policy"
                       className="flex items-center justify-between p-2 rounded-lg text-xs font-medium text-neutral-600 hover:text-brand-primary hover:bg-brand-mist transition-colors"
                     >
                       <span className="flex items-center gap-2">
-                        <Cookie size={14} className="text-brand-primary" />
-                        Cookie Policy
+                        <ArrowsCounterClockwise size={14} className="text-brand-primary" />
+                        Return & Refund Policy
+                      </span>
+                      <CaretRight size={12} />
+                    </Link>
+                  )}
+                  {type !== "shipping" && (
+                    <Link
+                      href="/shipping-policy"
+                      className="flex items-center justify-between p-2 rounded-lg text-xs font-medium text-neutral-600 hover:text-brand-primary hover:bg-brand-mist transition-colors"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Truck size={14} className="text-brand-primary" />
+                        Shipping & Service Policy
                       </span>
                       <CaretRight size={12} />
                     </Link>

@@ -20,7 +20,7 @@ const FEATURES = [
 
 export function LabSection() {
   return (
-    <section className="py-16 md:py-20 lg:py-24">
+    <section id="medicines-labs" className="scroll-mt-24 py-16 md:py-20 lg:py-24">
       <div className="landing-container">
         <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
           <FadeIn>

@@ -4,8 +4,8 @@ import Link from "next/link";
 import { cn } from "@/utils/cn";
 
 /** Exact navbar logo sizing */
-const WORDMARK = "h-9 sm:h-10 md:h-11 w-auto";
-const MARK = "h-10 w-10 sm:h-11 sm:w-11";
+const WORDMARK = "h-7 sm:h-7.5 md:h-8 w-auto";
+const MARK = "h-8 w-8 sm:h-9 sm:w-9";
 
 /**
  * Medzoos brand logo

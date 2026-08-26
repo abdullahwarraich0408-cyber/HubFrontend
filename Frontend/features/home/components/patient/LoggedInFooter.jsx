@@ -70,7 +70,7 @@ export function LoggedInFooter() {
           </div>
 
           <div>
-            <h3 className="mb-3 text-[13px] font-semibold text-white">Support</h3>
+            <h3 className="mb-3 text-[13px] font-semibold text-white">Support & Legal</h3>
             <ul className="space-y-2 text-[13px] text-white/55">
               <li>
                 <Link href="/help" className="hover:text-white">
@@ -84,12 +84,22 @@ export function LoggedInFooter() {
               </li>
               <li>
                 <Link href="/privacy-policy" className="hover:text-white">
-                  Privacy
+                  Privacy Policy
                 </Link>
               </li>
               <li>
                 <Link href="/terms-and-conditions" className="hover:text-white">
-                  Terms
+                  Terms & Conditions
+                </Link>
+              </li>
+              <li>
+                <Link href="/refund-policy" className="hover:text-white">
+                  Refund & Return Policy
+                </Link>
+              </li>
+              <li>
+                <Link href="/shipping-policy" className="hover:text-white">
+                  Shipping & Delivery
                 </Link>
               </li>
             </ul>

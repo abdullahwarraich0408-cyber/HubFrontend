@@ -17,10 +17,12 @@ import { Footer } from "../components/Footer";
 
 export function LandingPage() {
   return (
-    <div id="top" className="landing-page min-h-screen overflow-x-clip bg-[#F7FAFC]">
-      <Navbar />
+    <div id="top" className="landing-page min-h-screen overflow-x-clip bg-white">
+      <div className="relative bg-[#082B3F]">
+        <Navbar />
+      </div>
+      <Hero />
       <main>
-        <Hero />
         <QuickServiceSearch />
         <Services />
         <FocusAreas />

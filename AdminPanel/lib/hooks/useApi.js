@@ -925,6 +925,14 @@ export function useCreateDoctor() {
   });
 }
 
+export function useUpdateDoctor() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...data }) => adminGeneralApi.updateDoctor(id, data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-doctors"] }),
+  });
+}
+
 export function useUpdateDoctorStatus() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -1017,6 +1025,14 @@ export function useCreateLab() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data) => adminGeneralApi.createLab(data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-labs"] }),
+  });
+}
+
+export function useUpdateLab() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...data }) => adminGeneralApi.updateLab(id, data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-labs"] }),
   });
 }

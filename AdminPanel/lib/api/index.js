@@ -271,6 +271,7 @@ export const labTestsApi = {
 export const adminGeneralApi = {
   getDoctors: () => api.get("/admin/doctors"),
   createDoctor: (data) => api.post("/admin/doctors", data),
+  updateDoctor: (id, data) => api.patch(`/admin/doctors/${id}`, data),
   updateDoctorStatus: (id, is_active, note) => api.patch(`/admin/doctors/${id}/status`, { is_active, note }),
   deleteDoctor: (id) => api.delete(`/admin/doctors/${id}`),
   getDoctorAppointments: (id) => api.get(`/admin/doctors/${id}/appointments`),
@@ -283,6 +284,7 @@ export const adminGeneralApi = {
   
   getLabs: () => api.get("/admin/labs"),
   createLab: (data) => api.post("/admin/labs", data),
+  updateLab: (id, data) => api.patch(`/admin/labs/${id}`, data),
   updateLabStatus: (id, status, note) => api.patch(`/admin/labs/${id}/status`, { status, note }),
   deleteLab: (id) => api.delete(`/admin/labs/${id}`),
   getLabBookings: () => api.get("/lab-tests/admin/bookings"),

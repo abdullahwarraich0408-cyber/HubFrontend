@@ -4,11 +4,64 @@ import { useState, useMemo, useCallback } from "react";
 import { 
   Plus, MagnifyingGlass, Funnel, DotsThree, Storefront, ShieldCheck, X, 
   Copy, Eye, CheckCircle, XCircle, PencilSimple, DownloadSimple, 
-  CaretLeft, CaretRight, ArrowsDownUp, CaretDown, FileText, Trash, SignIn, MapPin, Spinner
+  CaretLeft, CaretRight, ArrowsDownUp, CaretDown, FileText, Trash, SignIn, MapPin, Spinner, Clock
 } from "@phosphor-icons/react";
 import { useAdminVendors, useAdminCreateVendor, useUpdateVendorStatus, useUpdateVendorCredentials, useDeleteVendor, useImpersonate, useReviewVendorDocument } from "@/lib/hooks/useApi";
 import { detectDeliveryAddress, SUPPORTED_CITIES } from "@/lib/location";
 import { toast } from "sonner";
+
+const SAMPLE_PHARMACY_LOGOS = [
+  "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&q=80&w=250",
+  "https://images.unsplash.com/photo-1576602976047-174e57a47881?auto=format&fit=crop&q=80&w=250",
+  "https://images.unsplash.com/photo-1631549916768-4119b2e5f926?auto=format&fit=crop&q=80&w=250",
+  "https://images.unsplash.com/photo-1586015555751-63c252277d3f?auto=format&fit=crop&q=80&w=250",
+];
+
+function PharmacyAvatar({ vendor, size = "md", className = "" }) {
+  const [hasError, setHasError] = useState(false);
+  const initials = (vendor?.business_name || vendor?.name || "P").slice(0, 2).toUpperCase();
+  const logo = vendor?.logo || vendor?.store_image || vendor?.cover_image;
+
+  const resolvedUrl = useMemo(() => {
+    if (!logo) {
+      const charSum = (vendor?.business_name || vendor?.name || "pharmacy")
+        .split("")
+        .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      return SAMPLE_PHARMACY_LOGOS[Math.abs(charSum) % SAMPLE_PHARMACY_LOGOS.length];
+    }
+    if (logo.startsWith("http://") || logo.startsWith("https://") || logo.startsWith("data:")) {
+      return logo;
+    }
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+    const base = apiBase.replace(/\/api\/?$/, "");
+    return logo.startsWith("/") ? `${base}${logo}` : `${base}/${logo}`;
+  }, [logo, vendor?.business_name, vendor?.name]);
+
+  const sizeClasses = {
+    sm: "w-8 h-8 rounded-lg text-xs",
+    md: "w-10 h-10 rounded-xl text-xs",
+    lg: "w-16 h-16 rounded-2xl text-lg",
+  }[size] || "w-10 h-10 rounded-xl text-xs";
+
+  if (!hasError && resolvedUrl) {
+    return (
+      <img
+        src={resolvedUrl}
+        alt={vendor?.business_name || "Pharmacy"}
+        onError={() => setHasError(true)}
+        className={`${sizeClasses} object-cover border border-slate-200/80 shadow-sm shrink-0 bg-slate-100 ${className}`}
+      />
+    );
+  }
+
+  return (
+    <div
+      className={`${sizeClasses} bg-gradient-to-br from-[#0FA7E3] to-[#082B3F] text-white flex items-center justify-center font-bold shrink-0 shadow-sm ${className}`}
+    >
+      {initials}
+    </div>
+  );
+}
 
 export default function AdminVendorsPage() {
   const { data: vendors = [], isLoading } = useAdminVendors();
@@ -31,6 +84,7 @@ export default function AdminVendorsPage() {
   const [selectedVendors, setSelectedVendors] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [viewVendor, setViewVendor] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [internalNote, setInternalNote] = useState("");
   
   // Edit Credentials State
@@ -169,6 +223,20 @@ export default function AdminVendorsPage() {
     });
   };
 
+  const handleOpenEdit = (vendor) => {
+    setViewVendor(vendor);
+    setIsEditing(true);
+    setEditFormData({
+      business_name: vendor.business_name || vendor.name || "",
+      email: vendor.email || "",
+      license_number: vendor.license_number || "",
+      password: "",
+      commission_rate: vendor.commission_rate || "10.0",
+      trade_license_url: vendor.trade_license_url || "",
+      pharmacist_certificate_url: vendor.pharmacist_certificate_url || ""
+    });
+  };
+
   const handleUpdateCredentials = async (e) => {
     e.preventDefault();
     try {
@@ -185,26 +253,41 @@ export default function AdminVendorsPage() {
     }
   };
 
-  const handleDeleteVendor = async (id) => {
-    if (!confirm("Are you sure you want to permanently delete this vendor? This action cannot be undone.")) return;
+  const confirmDeleteVendor = async () => {
+    if (!deleteTarget) return;
     try {
-      await deleteVendorMutation.mutateAsync(id);
-      toast.success("Vendor deleted successfully!");
-      if (viewVendor?.id === id) setViewVendor(null);
-      setSelectedVendors(prev => prev.filter(vId => vId !== id));
+      await deleteVendorMutation.mutateAsync(deleteTarget.id);
+      toast.success(`"${deleteTarget.business_name || deleteTarget.name}" deleted successfully!`);
+      if (viewVendor?.id === deleteTarget.id) setViewVendor(null);
+      setSelectedVendors(prev => prev.filter(vId => vId !== deleteTarget.id));
+      setDeleteTarget(null);
     } catch (err) {
       toast.error(err.message || "Failed to delete vendor");
     }
   };
 
+  const handleDeleteVendor = (vendor) => {
+    setDeleteTarget(vendor);
+  };
+
   const handleImpersonate = async (vendor) => {
     try {
       const res = await impersonateMutation.mutateAsync({ entity_id: vendor.id, role: 'vendor' });
-      localStorage.setItem('partner_session', JSON.stringify({
-        tokens: res.data.tokens,
-        role: res.data.role,
-        partner: res.data.profile,
-      }));
+      const tokens = res?.tokens || res?.data?.tokens;
+      const role = res?.role || res?.data?.role || 'vendor';
+      const profile = res?.profile || res?.data?.profile || vendor;
+
+      if (!tokens) {
+        throw new Error("Impersonation tokens missing from server response");
+      }
+
+      const { setPartnerSession } = await import("@/lib/partnerAuth");
+      setPartnerSession({
+        tokens,
+        role,
+        partner: profile,
+      });
+
       toast.success(`Logged in as ${vendor.business_name || vendor.name}`);
       const { partnerRoutes } = await import("@/lib/constants/partnerRoutes");
       window.open(partnerRoutes.vendor.dashboard, '_blank');
@@ -258,15 +341,35 @@ export default function AdminVendorsPage() {
     switch (s) {
       case "approved":
       case "active":
-        return <span className="px-2.5 py-1 text-xs font-bold rounded-md bg-[#0F9D58]/10 text-[#0F9D58] capitalize border border-[#0F9D58]/20">Approved</span>;
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            Approved
+          </span>
+        );
       case "suspended":
       case "rejected":
-        return <span className="px-2.5 py-1 text-xs font-bold rounded-md bg-[#DC2626]/10 text-[#DC2626] capitalize border border-[#DC2626]/20">Rejected</span>;
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold rounded-lg bg-rose-50 text-rose-700 border border-rose-200/80">
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+            Rejected
+          </span>
+        );
       case "pending_review":
       case "under review":
-        return <span className="px-2.5 py-1 text-xs font-bold rounded-md bg-[#2563EB]/10 text-[#2563EB] capitalize border border-[#2563EB]/20">Under Review</span>;
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold rounded-lg bg-blue-50 text-blue-700 border border-blue-200/80">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+            Under Review
+          </span>
+        );
       default:
-        return <span className="px-2.5 py-1 text-xs font-bold rounded-md bg-[#D97706]/10 text-[#D97706] capitalize border border-[#D97706]/20">Pending</span>;
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold rounded-lg bg-amber-50 text-amber-700 border border-amber-200/80">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+            Pending
+          </span>
+        );
     }
   };
 
@@ -287,217 +390,248 @@ export default function AdminVendorsPage() {
     }
   };
 
+  const totalVendorsCount = vendors.length;
+
   return (
-    <div className="flex flex-col gap-6 max-w-[1600px] mx-auto w-full font-[var(--font-plus-jakarta-sans)] animate-in fade-in zoom-in-95 duration-500">
-      
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+    <div className="flex flex-col gap-6 max-w-[1600px] mx-auto w-full font-[var(--font-plus-jakarta-sans)] animate-in fade-in zoom-in-95 duration-300">
+      {/* Top Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-[var(--font-dm-serif-display)] text-3xl md:text-4xl text-[#0C1A2E] tracking-tight mb-2">
-            Vendor Management
+          <h1 className="font-[var(--font-dm-serif-display)] text-3xl md:text-4xl text-[#082B3F] tracking-tight">
+            Pharmacy & Vendor Management
           </h1>
-          <p className="text-[#0C1A2E]/60 text-sm font-medium">
-            Approve, monitor, and manage marketplace pharmacies.
+          <p className="text-slate-500 text-xs sm:text-sm font-medium mt-1">
+            Review onboarding applications, licenses, commission rates, and partner store portals.
           </p>
         </div>
+
         <div className="flex items-center gap-3">
-          <button 
+          <button
             onClick={handleExportCSV}
-            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-[#0C1A2E]/10 hover:bg-[#F6F8FA] text-[#0C1A2E] rounded-lg text-sm font-semibold transition-colors shadow-sm"
+            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold transition-all shadow-sm"
           >
-            <DownloadSimple size={18} />
+            <DownloadSimple size={16} weight="bold" />
             <span>Export CSV</span>
           </button>
-          <button 
+          <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-[#17618E] hover:bg-[#082B3F] text-white rounded-lg text-sm font-semibold transition-colors shadow-sm"
+            className="flex items-center gap-2 px-5 py-2.5 bg-[#082B3F] hover:bg-[#0FA7E3] text-white rounded-xl text-xs font-bold transition-all shadow-sm"
           >
-            <Plus size={18} weight="bold" /> 
-            <span>Onboard Vendor</span>
+            <Plus size={16} weight="bold" />
+            <span>Add Pharmacy</span>
           </button>
         </div>
       </div>
 
-      {/* Main Table Card */}
-      <div className="bg-white rounded-xl border border-[#0C1A2E]/10 shadow-sm flex flex-col overflow-hidden">
-        {/* Filters */}
-        <div className="p-4 border-b border-[#0C1A2E]/10 flex flex-col lg:flex-row gap-4 justify-between bg-[#F6F8FA]/50">
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="relative w-full sm:w-[320px]">
-              <MagnifyingGlass size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#0C1A2E]/40" />
-              <input 
-                type="text"
-                placeholder="Search by name or email..." 
-                value={search}
-                onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-                className="w-full h-[40px] pl-10 pr-4 rounded-lg border border-[#0C1A2E]/10 bg-white text-sm outline-none focus:border-[#17618E] focus:ring-1 focus:ring-[#17618E]"
-              />
-            </div>
-            
-            <div className="relative">
-              <select 
-                value={statusFilter}
-                onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-                className="appearance-none h-[40px] pl-4 pr-10 rounded-lg border border-[#0C1A2E]/10 bg-white text-sm font-medium text-[#0C1A2E] outline-none focus:border-[#17618E] focus:ring-1 focus:ring-[#17618E] cursor-pointer"
-              >
-                <option value="all">All Statuses</option>
-                <option value="pending">Pending / Review</option>
-                <option value="approved">Approved</option>
-                <option value="rejected">Rejected</option>
-              </select>
-              <CaretDown size={14} weight="bold" className="absolute right-3 top-1/2 -translate-y-1/2 text-[#0C1A2E]/40 pointer-events-none" />
-            </div>
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-blue-50 text-[#082B3F] flex items-center justify-center shrink-0">
+            <Storefront size={20} weight="bold" />
           </div>
-
-          <div className="flex items-center gap-3">
-            {selectedVendors.length > 0 && (
-              <div className="relative">
-                <button 
-                  onClick={() => setShowBulkActions(!showBulkActions)}
-                  className="flex items-center gap-2 h-[40px] px-4 rounded-lg bg-[#0C1A2E] text-white text-sm font-semibold hover:bg-[#0C1A2E]/90 transition-colors shadow-sm"
-                >
-                  <span>Bulk Action ({selectedVendors.length})</span>
-                  <CaretDown size={14} weight="bold" className={`transition-transform ${showBulkActions ? 'rotate-180' : ''}`} />
-                </button>
-                {showBulkActions && (
-                  <div className="absolute top-full mt-2 right-0 w-48 bg-white border border-neutral-200 shadow-xl rounded-xl overflow-hidden z-20 animate-in fade-in zoom-in-95 duration-150">
-                    <button 
-                      onClick={() => handleBulkAction('approved')}
-                      disabled={updateStatusMutation.isPending}
-                      className="w-full text-left px-4 py-2.5 text-sm font-medium text-[#0F9D58] hover:bg-neutral-50 flex items-center gap-2"
-                    >
-                      <CheckCircle size={16} weight="bold" /> Approve Selected
-                    </button>
-                    <button 
-                      onClick={() => handleBulkAction('rejected')}
-                      disabled={updateStatusMutation.isPending}
-                      className="w-full text-left px-4 py-2.5 text-sm font-medium text-[#DC2626] hover:bg-neutral-50 flex items-center gap-2 border-t border-neutral-100"
-                    >
-                      <XCircle size={16} weight="bold" /> Reject Selected
-                    </button>
-                    <button 
-                      onClick={() => handleBulkAction('suspended')}
-                      disabled={updateStatusMutation.isPending}
-                      className="w-full text-left px-4 py-2.5 text-sm font-medium text-[#D97706] hover:bg-neutral-50 flex items-center gap-2 border-t border-neutral-100"
-                    >
-                      <XCircle size={16} weight="bold" /> Suspend Selected
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-            <button 
-              onClick={() => {
-                setSortField('date');
-                setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-              }}
-              className="flex items-center gap-2 h-[40px] px-4 rounded-lg bg-white border border-[#0C1A2E]/10 text-sm font-semibold text-[#0C1A2E] hover:bg-[#F6F8FA] transition-colors"
-            >
-              <ArrowsDownUp size={16} /> 
-              <span>Sort: {sortOrder === 'asc' ? 'Oldest' : 'Newest'}</span>
-            </button>
+          <div>
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Pharmacies</p>
+            <p className="text-xl font-extrabold text-[#082B3F]">{totalVendorsCount}</p>
           </div>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto min-h-[400px]">
+        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+            <CheckCircle size={20} weight="bold" />
+          </div>
+          <div>
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Approved & Active</p>
+            <p className="text-xl font-extrabold text-emerald-600">
+              {vendors.filter(v => v.status === "approved" || v.status === "active").length}
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+            <Clock size={20} weight="bold" />
+          </div>
+          <div>
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Pending Review</p>
+            <p className="text-xl font-extrabold text-amber-600">
+              {vendors.filter(v => ["pending", "pending_review", "under review"].includes((v.status || "").toLowerCase())).length}
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+            <XCircle size={20} weight="bold" />
+          </div>
+          <div>
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Rejected</p>
+            <p className="text-xl font-extrabold text-rose-600">
+              {vendors.filter(v => ["rejected", "suspended"].includes((v.status || "").toLowerCase())).length}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Table Card */}
+      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm flex flex-col overflow-hidden">
+        
+        {/* Controls Toolbar */}
+        <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-3 flex-1">
+            <div className="relative w-full sm:w-[320px]">
+              <MagnifyingGlass size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search by pharmacy name, email, license..."
+                value={search}
+                onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
+                className="w-full h-10 pl-10 pr-8 rounded-xl border border-slate-200 bg-white text-xs font-medium text-[#082B3F] placeholder-slate-400 outline-none focus:border-[#082B3F] focus:ring-1 focus:ring-[#082B3F]/20 transition-all"
+              />
+              {search && (
+                <button
+                  onClick={() => setSearch("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
+            {/* Status Filter Tabs */}
+            <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200">
+              {["all", "approved", "pending", "rejected"].map((st) => (
+                <button
+                  key={st}
+                  onClick={() => { setStatusFilter(st); setCurrentPage(1); }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-all ${
+                    statusFilter === st
+                      ? "bg-[#082B3F] text-white shadow-sm"
+                      : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  {st === "all" ? "All" : st}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="text-xs font-semibold text-slate-400 self-center">
+            Showing <span className="font-bold text-[#082B3F]">{processedVendors.length}</span> pharmacies
+          </div>
+        </div>
+
+        {/* Clean Basic Table */}
+        <div className="overflow-x-auto min-h-[380px]">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-[#F6F8FA] border-b border-[#0C1A2E]/10 text-xs font-bold text-[#0C1A2E]/60 uppercase tracking-wider">
-                <th className="p-4 pl-6 w-12">
-                  <input 
-                    type="checkbox" 
+              <tr className="bg-slate-50/80 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                <th className="py-3.5 pl-5 pr-2 w-10">
+                  <input
+                    type="checkbox"
                     checked={selectedVendors.length === currentVendors.length && currentVendors.length > 0}
                     onChange={toggleAll}
-                    className="w-4 h-4 rounded border-[#0C1A2E]/20 text-[#17618E] focus:ring-[#17618E] cursor-pointer"
+                    className="w-4 h-4 rounded border-slate-300 text-[#082B3F] focus:ring-[#082B3F] cursor-pointer"
                   />
                 </th>
-                <th className="p-4 cursor-pointer hover:text-[#0C1A2E] transition-colors" onClick={() => { setSortField('name'); setSortOrder(sortOrder==='asc'?'desc':'asc')}}>
-                  Pharmacy Details
-                </th>
-                <th className="p-4">License / Reg</th>
-                <th className="p-4 cursor-pointer hover:text-[#0C1A2E] transition-colors" onClick={() => { setSortField('date'); setSortOrder(sortOrder==='asc'?'desc':'asc')}}>
+                <th className="py-3.5 px-4">Pharmacy Facility</th>
+                <th className="py-3.5 px-4">License / Reg</th>
+                <th className="py-3.5 px-4 cursor-pointer hover:text-[#082B3F]" onClick={() => { setSortField('date'); setSortOrder(sortOrder==='asc'?'desc':'asc')}}>
                   Date Applied
                 </th>
-                <th className="p-4">Status</th>
-                <th className="p-4 pr-6 text-right">Action</th>
+                <th className="py-3.5 px-4">Status</th>
+                <th className="py-3.5 px-5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#0C1A2E]/5">
+            <tbody className="divide-y divide-slate-100">
               {isLoading ? (
                 <tr>
-                  <td colSpan="6" className="p-8 text-center text-[#0C1A2E]/40 font-medium">Loading vendors...</td>
+                  <td colSpan="6" className="py-16 text-center text-slate-400 font-medium">Loading pharmacies...</td>
                 </tr>
               ) : currentVendors.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="p-8 text-center text-[#0C1A2E]/40 font-medium">No vendors found.</td>
+                  <td colSpan="6" className="py-16 text-center text-slate-400 font-medium">No pharmacies found matching the criteria.</td>
                 </tr>
               ) : (
                 currentVendors.map((vendor, idx) => (
-                  <tr key={vendor.id || idx} onClick={() => handleOpenReview(vendor)} className={`cursor-pointer hover:bg-[#DEEEF9]/30 transition-colors group ${selectedVendors.includes(vendor.id) ? 'bg-[#DEEEF9]/20' : ''}`}>
-                    <td className="p-4 pl-6" onClick={(e) => e.stopPropagation()}>
+                  <tr
+                    key={vendor.id || idx}
+                    onClick={() => handleOpenReview(vendor)}
+                    className={`cursor-pointer hover:bg-slate-50/70 transition-colors group ${selectedVendors.includes(vendor.id) ? 'bg-blue-50/30' : ''}`}
+                  >
+                    <td className="py-3.5 pl-5 pr-2" onClick={(e) => e.stopPropagation()}>
                       <input 
                         type="checkbox" 
                         checked={selectedVendors.includes(vendor.id)}
                         onChange={() => toggleSelection(vendor.id)}
-                        className="w-4 h-4 rounded border-[#0C1A2E]/20 text-[#17618E] focus:ring-[#17618E] cursor-pointer"
+                        className="w-4 h-4 rounded border-slate-300 text-[#082B3F] focus:ring-[#082B3F] cursor-pointer"
                       />
                     </td>
-                    <td className="p-4">
+                    <td className="py-3.5 px-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-[#DEEEF9] text-[#17618E] flex items-center justify-center font-bold">
-                          {vendor.business_name?.charAt(0) || vendor.name?.charAt(0) || "V"}
-                        </div>
+                        <PharmacyAvatar vendor={vendor} size="md" />
                         <div>
-                          <div className="text-sm font-bold text-[#0C1A2E] flex items-center gap-1.5">
+                          <div className="text-sm font-bold text-[#082B3F] flex items-center gap-1.5 group-hover:text-[#0FA7E3] transition-colors">
                             {vendor.business_name || vendor.name || "Unknown Pharmacy"}
-                            {(vendor.status === 'approved' || vendor.status === 'active') && <ShieldCheck size={14} className="text-[#0F9D58]" weight="fill" title="Verified" />}
+                            {(vendor.status === 'approved' || vendor.status === 'active') && <ShieldCheck size={14} className="text-emerald-500" weight="fill" title="Verified" />}
                           </div>
-                          <div className="text-xs text-[#0C1A2E]/50 font-[var(--font-jetbrains-mono)] mt-0.5 flex items-center gap-1">
+                          <div className="text-[11px] text-slate-400 font-mono mt-0.5 flex items-center gap-1">
                             ID: ...{vendor.id?.substring(vendor.id?.length - 8) || "N/A"}
-                            <button onClick={() => copyToClipboard(vendor.id)} className="hover:text-[#17618E] transition-colors" title="Copy full ID">
+                            <button onClick={(e) => { e.stopPropagation(); copyToClipboard(vendor.id); }} className="hover:text-slate-700" title="Copy full ID">
                               <Copy size={12} />
                             </button>
                           </div>
-                          <div className="text-xs text-[#0C1A2E]/50 mt-0.5">
+                          <div className="text-[11px] text-slate-400 mt-0.5">
                             {vendor.email}
                           </div>
                         </div>
                       </div>
                     </td>
-                    <td className="p-4 text-sm font-[var(--font-jetbrains-mono)] text-[#0C1A2E]/80 font-medium">
+                    <td className="py-3.5 px-4 text-xs font-mono text-slate-600 font-medium">
                       {vendor.license_number || "—"}
                     </td>
-                    <td className="p-4 text-sm text-[#0C1A2E]/70 font-medium">
+                    <td className="py-3.5 px-4 text-xs text-slate-500 font-medium">
                       {vendor.created_at ? new Date(vendor.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : "—"}
                     </td>
-                    <td className="p-4">
+                    <td className="py-3.5 px-4">
                       {renderStatusBadge(vendor.status)}
                     </td>
-                    <td className="p-4 pr-6 text-right">
-                      <div className="flex items-center justify-end gap-2 transition-opacity">
+                    <td className="py-3.5 px-5 text-right">
+                      <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
+                        {/* Eye Review Button (Icon only) */}
                         <button 
-                          onClick={(e) => { e.stopPropagation(); handleImpersonate(vendor); }}
+                          onClick={() => handleOpenReview(vendor)}
+                          className="p-2 rounded-xl bg-slate-100 hover:bg-[#082B3F] text-[#082B3F] hover:text-white transition-all shadow-sm border border-slate-200"
+                          title="Review & Verify Pharmacy"
+                        >
+                          <Eye size={16} weight="bold" />
+                        </button>
+
+                        {/* Edit Button (Icon only) */}
+                        <button 
+                          onClick={() => handleOpenEdit(vendor)}
+                          className="p-2 rounded-xl bg-slate-100 hover:bg-[#082B3F] text-[#082B3F] hover:text-white transition-all shadow-sm border border-slate-200"
+                          title="Edit Pharmacy Credentials"
+                        >
+                          <PencilSimple size={16} weight="bold" />
+                        </button>
+
+                        {/* Portal Login Button */}
+                        <button 
+                          onClick={() => handleImpersonate(vendor)}
                           disabled={impersonateMutation.isPending}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#17618E] text-white text-sm font-semibold hover:bg-[#082B3F] transition-colors shadow-sm"
-                          title="Log In As Vendor"
+                          className="p-2 rounded-xl bg-[#0FA7E3]/15 hover:bg-[#0FA7E3] text-[#0FA7E3] hover:text-white transition-all shadow-sm border border-[#0FA7E3]/30"
+                          title="Log In As Pharmacy"
                         >
-                          <SignIn size={16} />
+                          <SignIn size={16} weight="bold" />
                         </button>
+
+                        {/* Delete Button */}
                         <button 
-                          onClick={(e) => { e.stopPropagation(); handleOpenReview(vendor); }}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white border border-[#0C1A2E]/10 hover:bg-[#F6F8FA] text-sm font-semibold text-[#0C1A2E] transition-colors shadow-sm"
+                          onClick={() => handleDeleteVendor(vendor)}
+                          className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-all"
+                          title="Delete Pharmacy"
                         >
-                          <Eye size={16} />
-                          <span>Review</span>
-                        </button>
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); handleDeleteVendor(vendor.id); }}
-                          disabled={deleteVendorMutation.isPending}
-                          className="p-1.5 rounded-md hover:bg-[#DC2626]/10 text-[#DC2626]/60 hover:text-[#DC2626] transition-colors disabled:opacity-50"
-                          title="Delete Vendor"
-                        >
-                          <Trash size={20} weight="bold" />
+                          <Trash size={16} weight="bold" />
                         </button>
                       </div>
                     </td>
@@ -968,6 +1102,43 @@ export default function AdminVendorsPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Vendor Confirmation Modal */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#082B3F]/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden p-6 border border-slate-200 animate-in zoom-in-95 duration-200 flex flex-col items-center text-center">
+            <div className="w-14 h-14 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mb-4 border border-rose-100 shadow-sm">
+              <Trash size={28} weight="bold" />
+            </div>
+
+            <h3 className="text-lg font-bold text-[#082B3F]">
+              Delete Pharmacy Account?
+            </h3>
+
+            <p className="text-xs text-slate-500 mt-2 max-w-sm leading-relaxed">
+              Are you sure you want to permanently delete <strong className="text-[#082B3F]">{deleteTarget.business_name || deleteTarget.name}</strong>? This action cannot be undone and will remove all their catalog and inventory records.
+            </p>
+
+            <div className="flex items-center gap-3 w-full mt-6 pt-4 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                className="flex-1 h-11 rounded-xl text-xs font-bold border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeleteVendor}
+                disabled={deleteVendorMutation.isPending}
+                className="flex-1 h-11 rounded-xl text-xs font-bold bg-rose-600 text-white hover:bg-rose-700 disabled:opacity-50 transition-all shadow-sm"
+              >
+                {deleteVendorMutation.isPending ? "Deleting..." : "Yes, Delete"}
+              </button>
+            </div>
           </div>
         </div>
       )}

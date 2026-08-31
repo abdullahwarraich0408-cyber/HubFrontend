@@ -46,6 +46,10 @@ const nextConfig = {
         source: "/api/:path*",
         destination: `${backendUrl}/api/:path*`,
       },
+      {
+        source: "/uploads/:path*",
+        destination: `${backendUrl}/uploads/:path*`,
+      },
       // Private partner portals (not linked on public site)
       { source: "/hub/pharma-x7k2", destination: "/vendor" },
       { source: "/hub/pharma-x7k2/:path*", destination: "/vendor/:path*" },

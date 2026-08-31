@@ -82,7 +82,7 @@ export function VendorOrdersPage() {
           <Input placeholder="Search order number, customer, phone, product" value={search} onChange={(e) => { setSearch(e.target.value); setQuery({ search: e.target.value, page: 1 }); }} />
           <select className="h-[46px] rounded-lg border px-3 text-sm" value={status} onChange={(e) => setQuery({ status: e.target.value, page: 1 })} aria-label="Filter by status">
             <option value="">All statuses</option>
-            {["NEW", "ACCEPTED", "PREPARING", "READY_FOR_PICKUP", "OUT_FOR_DELIVERY", "DELIVERED", "COMPLETED", "CANCELLED", "REJECTED"].map((value) => (
+            {["NEW", "AWAITING_PAYMENT", "ACCEPTED", "PREPARING", "READY_FOR_PICKUP", "OUT_FOR_DELIVERY", "DELIVERED", "COMPLETED", "CANCELLED", "REJECTED"].map((value) => (
               <option key={value} value={value}>{value.replace(/_/g, " ")}</option>
             ))}
           </select>

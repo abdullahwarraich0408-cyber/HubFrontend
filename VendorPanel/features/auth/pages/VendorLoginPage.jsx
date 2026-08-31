@@ -19,12 +19,20 @@ export function VendorLoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (typeof window !== "undefined" && window.location.search.includes("expired=true")) {
-      // Small timeout to allow sonner to mount and register properly
-      const timer = setTimeout(() => {
-        toast.error("Your session has expired. Please log in again.");
-      }, 300);
-      return () => clearTimeout(timer);
+    if (typeof window !== "undefined") {
+      const savedEmail = localStorage.getItem("vendor_remembered_email");
+      if (savedEmail) {
+        setEmail(savedEmail);
+        setRememberMe(true);
+      }
+
+      if (window.location.search.includes("expired=true")) {
+        // Small timeout to allow sonner to mount and register properly
+        const timer = setTimeout(() => {
+          toast.error("Your session has expired. Please log in again.");
+        }, 300);
+        return () => clearTimeout(timer);
+      }
     }
   }, []);
 
@@ -32,7 +40,14 @@ export function VendorLoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await partnerAuthApi.login("vendor", email, password);
+      if (typeof window !== "undefined") {
+        if (rememberMe) {
+          localStorage.setItem("vendor_remembered_email", email.trim());
+        } else {
+          localStorage.removeItem("vendor_remembered_email");
+        }
+      }
+      await partnerAuthApi.login("vendor", email.trim(), password);
       toast.success("Welcome back!");
       router.push(partnerRoutes.vendor.dashboard);
     } catch (err) {

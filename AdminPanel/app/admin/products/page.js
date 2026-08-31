@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useAdminProducts, useReviewAdminProduct } from "@/lib/hooks/useApi";
-import { CheckCircle, MagnifyingGlass, Pill, XCircle } from "@phosphor-icons/react";
+import { CheckCircle, MagnifyingGlass, Pill, ShieldWarning, XCircle } from "@phosphor-icons/react";
 import { toast } from "sonner";
 
 export default function AdminProductsPage() {
@@ -15,10 +15,17 @@ export default function AdminProductsPage() {
     return products.filter((product) => {
       const matchesSearch =
         (product.name || "").toLowerCase().includes(search.toLowerCase()) ||
+        (product.generic_name || "").toLowerCase().includes(search.toLowerCase()) ||
         (product.vendor?.business_name || "").toLowerCase().includes(search.toLowerCase());
       const normalizedStatus = (product.approval_status || "pending_review").toLowerCase();
-      const matchesStatus = statusFilter === "all" || normalizedStatus === statusFilter;
-      return matchesSearch && matchesStatus;
+      
+      let matchesFilter = true;
+      if (statusFilter === "controlled") {
+        matchesFilter = Boolean(product.controlled_medicine);
+      } else if (statusFilter !== "all") {
+        matchesFilter = normalizedStatus === statusFilter;
+      }
+      return matchesSearch && matchesFilter;
     });
   }, [products, search, statusFilter]);
 
@@ -40,7 +47,9 @@ export default function AdminProductsPage() {
       });
       toast.success(
         approvalStatus === "approved"
-          ? "Product approved and now eligible for listing."
+          ? (product.controlled_medicine
+              ? "Controlled medicine approved and catalog listing activated."
+              : "Product approved and now eligible for listing.")
           : approvalStatus === "rejected"
             ? "Product rejected with feedback."
             : "Product moved back to review."
@@ -78,7 +87,7 @@ export default function AdminProductsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-[28px] font-heading font-extrabold text-ink-headline tracking-tight">All Products</h1>
-          <p className="text-[14px] text-neutral-500 mt-1">Global catalog moderation and overview.</p>
+          <p className="text-[14px] text-neutral-500 mt-1">Global catalog moderation, controlled medicine validation, and overview.</p>
         </div>
       </div>
 
@@ -88,7 +97,7 @@ export default function AdminProductsPage() {
             <MagnifyingGlass size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
             <input
               type="text"
-              placeholder="Search by product or vendor..."
+              placeholder="Search by product, generic name, or vendor..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full h-[40px] pl-10 pr-4 rounded-lg border border-neutral-200 bg-white text-sm outline-none focus:border-[#17618E] focus:ring-1 focus:ring-[#17618E]"
@@ -101,6 +110,7 @@ export default function AdminProductsPage() {
           >
             <option value="all">All statuses</option>
             <option value="pending_review">Pending review</option>
+            <option value="controlled">Controlled medicines only</option>
             <option value="approved">Approved</option>
             <option value="rejected">Rejected</option>
           </select>
@@ -110,7 +120,7 @@ export default function AdminProductsPage() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-neutral-50 border-b border-neutral-200 text-xs font-bold text-neutral-500 uppercase tracking-wider">
-                <th className="p-4 pl-6">Product Name</th>
+                <th className="p-4 pl-6">Product Details</th>
                 <th className="p-4">Vendor</th>
                 <th className="p-4">Price</th>
                 <th className="p-4">Stock</th>
@@ -133,8 +143,33 @@ export default function AdminProductsPage() {
                 filteredProducts.map((product) => (
                   <tr key={product.id} className="hover:bg-neutral-50 transition-colors">
                     <td className="p-4 pl-6">
-                      <div className="text-sm font-bold text-ink-headline">{product.name}</div>
-                      <div className="text-xs text-neutral-500 font-mono mt-0.5">ID: ...{product.id.substring(product.id.length - 8)}</div>
+                      <div className="flex items-start gap-2">
+                        <div>
+                          <div className="text-sm font-bold text-ink-headline">{product.name}</div>
+                          {product.generic_name || product.formula ? (
+                            <div className="text-xs text-neutral-500">{product.generic_name || product.formula}</div>
+                          ) : null}
+                          <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                            {product.controlled_medicine ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                                <ShieldWarning size={12} weight="bold" />
+                                Controlled Medicine
+                              </span>
+                            ) : null}
+                            {product.prescription_required ? (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-sky-100 text-sky-800 border border-sky-200">
+                                Rx Required
+                              </span>
+                            ) : null}
+                            {product.strength ? (
+                              <span className="text-[11px] text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded">
+                                {product.strength}
+                              </span>
+                            ) : null}
+                          </div>
+                          <div className="text-[11px] text-neutral-400 font-mono mt-1">ID: ...{product.id.substring(product.id.length - 8)}</div>
+                        </div>
+                      </div>
                     </td>
                     <td className="p-4 text-sm font-medium text-neutral-700">
                       {product.vendor?.business_name || "Unknown"}
@@ -159,7 +194,7 @@ export default function AdminProductsPage() {
                         <button
                           onClick={() => reviewProduct(product, "approved")}
                           disabled={reviewProductMutation.isPending}
-                          className="inline-flex items-center gap-1 rounded-md border border-[#0F9D58]/20 bg-[#0F9D58]/10 px-3 py-1.5 text-xs font-bold text-[#0F9D58] disabled:opacity-60"
+                          className="inline-flex items-center gap-1 rounded-md border border-[#0F9D58]/20 bg-[#0F9D58]/10 px-3 py-1.5 text-xs font-bold text-[#0F9D58] hover:bg-[#0F9D58]/20 disabled:opacity-60 transition-colors"
                         >
                           <CheckCircle size={14} weight="bold" />
                           Approve
@@ -167,7 +202,7 @@ export default function AdminProductsPage() {
                         <button
                           onClick={() => reviewProduct(product, "rejected")}
                           disabled={reviewProductMutation.isPending}
-                          className="inline-flex items-center gap-1 rounded-md border border-[#DC2626]/20 bg-[#DC2626]/10 px-3 py-1.5 text-xs font-bold text-[#DC2626] disabled:opacity-60"
+                          className="inline-flex items-center gap-1 rounded-md border border-[#DC2626]/20 bg-[#DC2626]/10 px-3 py-1.5 text-xs font-bold text-[#DC2626] hover:bg-[#DC2626]/20 disabled:opacity-60 transition-colors"
                         >
                           <XCircle size={14} weight="bold" />
                           Reject

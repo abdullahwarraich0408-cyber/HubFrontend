@@ -19,11 +19,19 @@ export function DoctorLoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (typeof window !== "undefined" && window.location.search.includes("expired=true")) {
-      const timer = setTimeout(() => {
-        toast.error("Your session has expired. Please log in again.");
-      }, 300);
-      return () => clearTimeout(timer);
+    if (typeof window !== "undefined") {
+      const savedEmail = localStorage.getItem("doctor_remembered_email");
+      if (savedEmail) {
+        setEmail(savedEmail);
+        setRememberMe(true);
+      }
+
+      if (window.location.search.includes("expired=true")) {
+        const timer = setTimeout(() => {
+          toast.error("Your session has expired. Please log in again.");
+        }, 300);
+        return () => clearTimeout(timer);
+      }
     }
   }, []);
 
@@ -31,7 +39,14 @@ export function DoctorLoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await partnerAuthApi.login("doctor", email, password);
+      if (typeof window !== "undefined") {
+        if (rememberMe) {
+          localStorage.setItem("doctor_remembered_email", email.trim());
+        } else {
+          localStorage.removeItem("doctor_remembered_email");
+        }
+      }
+      await partnerAuthApi.login("doctor", email.trim(), password);
       toast.success("Welcome back, Doctor!");
       router.push(partnerRoutes.doctor.dashboard);
     } catch (err) {

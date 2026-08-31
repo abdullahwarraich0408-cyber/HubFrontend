@@ -16,6 +16,10 @@ const EXTRA = {
   OUT_FOR_DELIVERY: { bg: "bg-[var(--color-status-shipped-bg)]", text: "text-[var(--color-status-shipped-text)]" },
   LOW_STOCK: { bg: "bg-[var(--color-status-warning-bg)]", text: "text-[var(--color-status-warning-text)]" },
   IN_STOCK: { bg: "bg-[var(--color-status-success-bg)]", text: "text-[var(--color-status-success-text)]" },
+  OUT_OF_STOCK: { bg: "bg-red-50 border border-red-200", text: "text-red-700" },
+  ACTIVE: { bg: "bg-emerald-50 border border-emerald-200", text: "text-emerald-700" },
+  INACTIVE: { bg: "bg-amber-50 border border-amber-200", text: "text-amber-700" },
+  ARCHIVED: { bg: "bg-neutral-100 border border-neutral-200", text: "text-neutral-600" },
 };
 
 export function StatusBadge({ status, kind = "generic" }) {

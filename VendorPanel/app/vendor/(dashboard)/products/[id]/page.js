@@ -64,8 +64,8 @@ export default function ProductDetailPage() {
           <Field label="Retail price" value={formatPkr(product.retail_price ?? product.price)} />
           <Field label="Sale price" value={product.sale_price != null ? formatPkr(product.sale_price) : "—"} />
           <Field label="Available stock" value={product.inventory?.available_quantity ?? product.stock} />
-          <Field label="Low stock threshold" value={product.low_stock_threshold ?? 10} />
           <Field label="Prescription required" value={product.prescription_required ? "Yes" : "No"} />
+          <Field label="Controlled medicine" value={product.controlled_medicine ? "Yes (DRAP Monitored)" : "No"} />
           <div><p className="text-xs uppercase text-neutral-500 font-bold mb-1">Approval</p><StatusBadge status={product.approval_status} kind="approval" /></div>
           <div><p className="text-xs uppercase text-neutral-500 font-bold mb-1">Listing</p><StatusBadge status={product.listing_status} kind="listing" /></div>
         </dl>

@@ -202,14 +202,44 @@ export function ProductForm({ product, mode = "create" }) {
           </label>
           <Input label="Strength" value={form.strength} onChange={(e) => setField("strength", e.target.value)} placeholder="e.g. 500mg" />
           <Input label="Pack Size" value={form.pack_size} onChange={(e) => setField("pack_size", e.target.value)} placeholder="e.g. 10 tablets" />
-          <label className="flex items-center gap-2 text-sm font-medium mt-6">
-            <input type="checkbox" checked={form.prescription_required} onChange={(e) => setField("prescription_required", e.target.checked)} />
-            Prescription Required
-          </label>
-          <label className="flex items-center gap-2 text-sm font-medium mt-6">
-            <input type="checkbox" checked={form.controlled_medicine} onChange={(e) => setField("controlled_medicine", e.target.checked)} />
-            Controlled Medicine
-          </label>
+          <div className="flex flex-col gap-2 mt-4 md:col-span-2">
+            <div className="flex flex-wrap items-center gap-6">
+              <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="rounded border-neutral-300 text-brand-primary focus:ring-brand-primary"
+                  checked={form.prescription_required}
+                  onChange={(e) => setField("prescription_required", e.target.checked)}
+                />
+                Prescription Required
+              </label>
+              <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="rounded border-neutral-300 text-amber-600 focus:ring-amber-500"
+                  checked={form.controlled_medicine}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setField("controlled_medicine", checked);
+                    if (checked) {
+                      setField("prescription_required", true);
+                    }
+                  }}
+                />
+                <span className="inline-flex items-center gap-1.5 font-semibold text-amber-900">
+                  Controlled Medicine (Schedule / DRAP Monitored)
+                </span>
+              </label>
+            </div>
+            {form.controlled_medicine ? (
+              <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 text-xs text-amber-800 flex items-start gap-2 mt-1">
+                <span className="font-bold shrink-0">ℹ️ Note:</span>
+                <span>
+                  Controlled medicines require administrative review before becoming live in the customer store. Submitting this product will notify platform administrators to review and approve the catalog entry.
+                </span>
+              </div>
+            ) : null}
+          </div>
         </div>
       </section>
 

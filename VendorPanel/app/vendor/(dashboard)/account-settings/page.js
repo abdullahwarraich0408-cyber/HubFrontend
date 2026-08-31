@@ -221,7 +221,16 @@ export default function AccountSettingsPage() {
                 <p className="font-semibold">{label}</p>
                 <span className="text-xs uppercase">{(profile?.documents || []).find((doc) => doc.type === type)?.status || "NOT_SUBMITTED"}</span>
               </div>
-              {effectiveDocuments[key] ? <a className="text-sm text-brand-primary" href={effectiveDocuments[key]} target="_blank" rel="noreferrer">View file</a> : null}
+              {effectiveDocuments[key] ? (
+                <a
+                  className="text-sm font-semibold text-brand-primary hover:underline inline-flex items-center gap-1"
+                  href={effectiveDocuments[key].startsWith("http") ? effectiveDocuments[key] : effectiveDocuments[key].startsWith("/") ? effectiveDocuments[key] : `/${effectiveDocuments[key]}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  View file ↗
+                </a>
+              ) : null}
               <label className="mt-3 block text-sm font-semibold text-brand-primary cursor-pointer">
                 {uploadingKey === key ? "Uploading..." : "Upload"}
                 <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" onChange={(e) => handleUpload(key, e.target.files?.[0])} />

@@ -156,7 +156,9 @@ function MyProductsPage() {
                 {products.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="p-8 text-center text-sm text-neutral-500">
-                      No products listed yet. Add your first product to start selling.
+                      {search || approval || listing
+                        ? "No products found matching the selected filter."
+                        : "No products listed yet. Add your first product to start selling."}
                     </td>
                   </tr>
                 ) : (
@@ -182,7 +184,16 @@ function MyProductsPage() {
                       <td className="p-4">
                         <div className="flex flex-col gap-1">
                           <StatusBadge status={product.approval_status} kind="approval" />
-                          <StatusBadge status={product.listing_status || (product.stock > 0 ? "ACTIVE" : "OUT_OF_STOCK")} kind="listing" />
+                          <StatusBadge
+                            status={
+                              product.listing_status === "ARCHIVED" || product.listing_status === "INACTIVE"
+                                ? product.listing_status
+                                : (product.inventory?.available_quantity ?? product.stock) <= 0
+                                  ? "OUT_OF_STOCK"
+                                  : product.listing_status || "ACTIVE"
+                            }
+                            kind="listing"
+                          />
                         </div>
                       </td>
                       <td className="p-4 pr-6 text-right relative">

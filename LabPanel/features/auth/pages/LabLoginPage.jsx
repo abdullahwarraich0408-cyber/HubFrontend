@@ -31,12 +31,20 @@ export function LabLoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (typeof window !== "undefined" && window.location.search.includes("expired=true")) {
-      const timer = setTimeout(
-        () => toast.error("Your session has expired. Please log in again."),
-        300
-      );
-      return () => clearTimeout(timer);
+    if (typeof window !== "undefined") {
+      const savedEmail = localStorage.getItem("lab_remembered_email");
+      if (savedEmail) {
+        setEmail(savedEmail);
+        setRememberMe(true);
+      }
+
+      if (window.location.search.includes("expired=true")) {
+        const timer = setTimeout(
+          () => toast.error("Your session has expired. Please log in again."),
+          300
+        );
+        return () => clearTimeout(timer);
+      }
     }
   }, []);
 
@@ -49,6 +57,14 @@ export function LabLoginPage() {
 
     setLoading(true);
     try {
+      if (typeof window !== "undefined") {
+        if (rememberMe) {
+          localStorage.setItem("lab_remembered_email", email.trim());
+        } else {
+          localStorage.removeItem("lab_remembered_email");
+        }
+      }
+
       // Attempt login via partner auth API
       try {
         await partnerAuthApi.login("lab", email.trim(), password);

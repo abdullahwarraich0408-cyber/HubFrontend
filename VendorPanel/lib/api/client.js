@@ -153,19 +153,25 @@ export async function apiClient(path, options = {}) {
           if (refreshRes.ok) {
             const data = await refreshRes.json();
             const newAuth = data.data || data;
+            const accessToken =
+              newAuth.tokens?.accessToken || newAuth.accessToken || newAuth.token;
+            const refreshTokenValue =
+              newAuth.tokens?.refreshToken || newAuth.refreshToken;
             if (isPartner) {
-              localStorage.setItem('partnerToken', newAuth.token);
-              if (newAuth.refreshToken) localStorage.setItem('partnerRefreshToken', newAuth.refreshToken);
+              if (accessToken) localStorage.setItem('partnerToken', accessToken);
+              if (refreshTokenValue) localStorage.setItem('partnerRefreshToken', refreshTokenValue);
             } else {
-              localStorage.setItem('token', newAuth.token);
-              if (newAuth.refreshToken) localStorage.setItem('refreshToken', newAuth.refreshToken);
+              if (accessToken) localStorage.setItem('token', accessToken);
+              if (refreshTokenValue) localStorage.setItem('refreshToken', refreshTokenValue);
             }
-            config.headers.Authorization = `Bearer ${newAuth.token}`;
-            const retryResponse = await fetch(`${API_BASE}${path}`, config);
-            const retryPayload = await parseResponse(retryResponse).catch(() => null);
-            if (retryResponse.ok) {
-              if (retryResponse.status === 204) return null;
-              return retryPayload?.data ?? retryPayload;
+            if (accessToken) {
+              config.headers.Authorization = `Bearer ${accessToken}`;
+              const retryResponse = await fetch(`${API_BASE}${path}`, config);
+              const retryPayload = await parseResponse(retryResponse).catch(() => null);
+              if (retryResponse.ok) {
+                if (retryResponse.status === 204) return null;
+                return retryPayload?.data ?? retryPayload;
+              }
             }
           }
         } catch (e) {

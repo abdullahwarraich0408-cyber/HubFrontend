@@ -20,6 +20,7 @@ const nextConfig = {
   async rewrites() {
     return [
       { source: "/api/:path*", destination: `${backendUrl}/api/:path*` },
+      { source: "/uploads/:path*", destination: `${backendUrl}/uploads/:path*` },
       { source: "/hub/lab-q3n8", destination: "/lab" },
       { source: "/hub/lab-q3n8/:path*", destination: "/lab/:path*" },
     ];

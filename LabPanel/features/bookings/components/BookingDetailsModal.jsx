@@ -49,9 +49,14 @@ export function BookingDetailsModal({ booking, isOpen, onClose, onMarkPayment, m
   const paymentStatus = String(booking.payment_status || "").toUpperCase();
   const paymentMethod = String(booking.payment_method || "").toLowerCase();
   const isCash =
+    !paymentMethod ||
     paymentMethod.includes("cod") ||
     paymentMethod.includes("cash") ||
-    paymentMethod.includes("pay at lab");
+    paymentMethod.includes("collection") ||
+    paymentMethod.includes("pay at lab") ||
+    paymentMethod.includes("delivery") ||
+    paymentMethod.includes("offline") ||
+    paymentMethod.includes("counter");
   const needsCashConfirm = isCash && paymentStatus !== "PAID" && !isCancelled && !isRejected;
 
   const currentStep = TIMELINE_STEPS.findIndex((s) => s.key === norm);

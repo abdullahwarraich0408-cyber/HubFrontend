@@ -17,17 +17,18 @@ import { Button } from "@/shared/components/Button";
 import { Input } from "@/shared/components/Input";
 import { toast } from "sonner";
 import { partnerRoutes } from "@/lib/constants/partnerRoutes";
-import { partnerAuthApi } from "@/lib/api/index";
+import { partnerAuthApi, authApi } from "@/lib/api/index";
 import { setPartnerSession } from "@/lib/partnerAuth";
 
 export function LabLoginPage() {
-  const [email, setEmail] = useState("lab@medzoos.com");
-  const [password, setPassword] = useState("password123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
+  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [forgotModalOpen, setForgotModalOpen] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotLoading, setForgotLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -100,15 +101,25 @@ export function LabLoginPage() {
     setPassword(demoPassword);
   };
 
-  const handleForgotPassword = (e) => {
+  const handleForgotPassword = async (e) => {
     e.preventDefault();
-    if (!forgotEmail) {
+    const trimmed = forgotEmail.trim();
+    if (!trimmed) {
       toast.error("Please enter your registered email");
       return;
     }
-    toast.success("Password reset instructions sent to " + forgotEmail);
-    setForgotModalOpen(false);
-    setForgotEmail("");
+
+    setForgotLoading(true);
+    try {
+      await authApi.forgotPassword(trimmed);
+      toast.success("Password reset instructions sent to " + trimmed);
+      setForgotModalOpen(false);
+      setForgotEmail("");
+    } catch (err) {
+      toast.error(err.message || "Failed to process password reset request");
+    } finally {
+      setForgotLoading(false);
+    }
   };
 
   return (
@@ -315,9 +326,10 @@ export function LabLoginPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 text-[13px] font-semibold text-white bg-[#17618E] hover:bg-[#124362] rounded-lg"
+                  disabled={forgotLoading}
+                  className="px-5 py-2 text-[13px] font-semibold text-white bg-[#17618E] hover:bg-[#124362] rounded-lg disabled:opacity-60 transition-opacity"
                 >
-                  Send Reset Link
+                  {forgotLoading ? "Sending..." : "Send Reset Link"}
                 </button>
               </div>
             </form>

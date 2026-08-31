@@ -413,16 +413,30 @@ export function useLabPortalTests(options = {}) {
   return useQuery({
     queryKey: ["lab-portal-tests"],
     queryFn: async () => {
+      const localTests = labLocalStoreApi.getTests() || [];
       try {
         const data = await labPortalApi.getTests();
-        if (Array.isArray(data?.tests) && data.tests.length > 0) {
-          return data.tests.map(mapLabTestFromApi);
+        if (Array.isArray(data?.tests)) {
+          const apiTests = data.tests.map(mapLabTestFromApi);
+          const merged = [...apiTests];
+          const apiNames = new Set(
+            apiTests.map((t) => String(t.name || "").toLowerCase().trim())
+          );
+          const apiIds = new Set(apiTests.map((t) => String(t.id)));
+
+          for (const lt of localTests) {
+            const mapped = mapLabTestFromApi(lt);
+            const nameKey = String(mapped.name || "").toLowerCase().trim();
+            if (!apiIds.has(String(mapped.id)) && !apiNames.has(nameKey)) {
+              merged.push(mapped);
+            }
+          }
+          return merged;
         }
       } catch {
         // Fallback to local store
       }
-      const localTests = labLocalStoreApi.getTests();
-      return (localTests || []).map(mapLabTestFromApi);
+      return localTests.map(mapLabTestFromApi);
     },
     ...options,
   });

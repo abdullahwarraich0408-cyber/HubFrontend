@@ -21,6 +21,7 @@ import {
   useLabPortalBookings,
   useLabPortalReports,
   useSimulateIncomingOrder,
+  useMarkLabPaymentReceived,
 } from "@/lib/hooks/usePartnerPortal";
 import { partnerRoutes } from "@/lib/constants/partnerRoutes";
 import { BOOKING_STATUSES, normalizeStatus } from "@/lib/constants/lab";
@@ -30,9 +31,21 @@ export default function LabDashboardPage() {
   const { data: bookings = [], isLoading: loadingBookings, refetch } = useLabPortalBookings();
   const { data: summary, isLoading: loadingSummary } = useLabPortalReports();
   const simulateMutation = useSimulateIncomingOrder();
+  const markPaymentMutation = useMarkLabPaymentReceived();
 
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleMarkPayment = async (booking) => {
+    try {
+      await markPaymentMutation.mutateAsync({ id: booking.id });
+      toast.success("Cash payment marked as received");
+      setSelectedBooking(null);
+      refetch();
+    } catch (err) {
+      toast.error(err.message || "Failed to mark payment");
+    }
+  };
 
   // Real database-calculated stats
   const newOrdersCount = bookings.filter(
@@ -210,8 +223,7 @@ export default function LabDashboardPage() {
                 {recentBookings.map((b) => (
                   <tr
                     key={b.id}
-                    className="hover:bg-neutral-50/70 transition-colors group cursor-pointer"
-                    onClick={() => setSelectedBooking(b)}
+                    className="hover:bg-neutral-50/70 transition-colors group cursor-default"
                   >
                     <td className="py-4 px-6">
                       <div className="font-semibold text-[#082B3F]">
@@ -266,6 +278,8 @@ export default function LabDashboardPage() {
           booking={selectedBooking}
           isOpen={Boolean(selectedBooking)}
           onClose={() => setSelectedBooking(null)}
+          onMarkPayment={handleMarkPayment}
+          markingPayment={markPaymentMutation.isPending}
         />
       )}
     </div>

@@ -336,7 +336,7 @@ export function PrivacyPolicyPage() {
               <div className="flex items-start gap-3">
                 <span className="w-2 h-2 rounded-full bg-brand-primary mt-2 shrink-0"></span>
                 <div>
-                  <strong className="text-ink-headline font-semibold">Right to Deletion:</strong> Request permanent deletion of your Medzoos profile and stored non-mandatory medical records by contacting <a href="mailto:privacy@medzoos.pk" className="text-brand-primary font-semibold hover:underline">privacy@medzoos.pk</a>.
+                  <strong className="text-ink-headline font-semibold">Right to Deletion:</strong> Request permanent deletion of your Medzoos profile and stored non-mandatory medical records by contacting <a href="mailto:security@medzoos.pk" className="text-brand-primary font-semibold hover:underline">security@medzoos.pk</a>.
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -407,7 +407,7 @@ export function PrivacyPolicyPage() {
               <strong className="text-ink-headline font-bold block mb-1">Data Protection Officer (DPO) Contact:</strong>
               <div>Medzoos Digital Health Technologies</div>
               <div>DHA Phase 6, Karachi, Pakistan</div>
-              <div>Email: <a href="mailto:privacy@medzoos.pk" className="text-brand-primary hover:underline font-semibold">privacy@medzoos.pk</a></div>
+              <div>Email: <a href="mailto:security@medzoos.pk" className="text-brand-primary hover:underline font-semibold">security@medzoos.pk</a></div>
               <div>Support Line: +92 300 123 4567</div>
             </div>
           </div>

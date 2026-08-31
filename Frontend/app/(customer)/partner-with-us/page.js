@@ -847,8 +847,8 @@ ${Object.entries(documents).map(([k, v]) => `- ${k}: ${v}`).join("\n") || "No di
                   <PhoneCall size={14} className="text-[#2DD4BF]" />
                   <span>+92 300 123 4567</span>
                 </div>
-                <a href="mailto:partners@medzoos.pk" className="text-[#2DD4BF] font-bold hover:underline">
-                  partners@medzoos.pk
+                <a href="mailto:sales@medzoos.pk" className="text-[#2DD4BF] font-bold hover:underline">
+                  sales@medzoos.pk
                 </a>
               </div>
             </div>

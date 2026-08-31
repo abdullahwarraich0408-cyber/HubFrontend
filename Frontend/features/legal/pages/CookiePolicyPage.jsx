@@ -419,8 +419,8 @@ export function CookiePolicyPage() {
           <div className="space-y-4 text-sm text-neutral-600 leading-relaxed">
             <p>
               For questions regarding our cookie practices or data privacy, please reach out to our team at{" "}
-              <a href="mailto:privacy@medzoos.pk" className="text-brand-primary font-bold hover:underline">
-                privacy@medzoos.pk
+              <a href="mailto:security@medzoos.pk" className="text-brand-primary font-bold hover:underline">
+                security@medzoos.pk
               </a>.
             </p>
           </div>

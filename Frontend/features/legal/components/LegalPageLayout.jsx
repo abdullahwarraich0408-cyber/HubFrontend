@@ -379,11 +379,11 @@ export function LegalPageLayout({
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto shrink-0">
                   <a
-                    href="mailto:privacy@medzoos.pk"
+                    href="mailto:security@medzoos.pk"
                     className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white text-ink-900 hover:bg-neutral-100 text-xs font-bold transition-all shadow-md"
                   >
                     <Envelope size={16} className="text-brand-primary" />
-                    <span>privacy@medzoos.pk</span>
+                    <span>security@medzoos.pk</span>
                   </a>
                   <a
                     href="tel:+923001234567"

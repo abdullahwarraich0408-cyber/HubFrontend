@@ -314,8 +314,8 @@ export function RefundPolicyPage() {
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
               <div className="p-4 rounded-xl bg-neutral-50 border border-neutral-200 space-y-1">
-                <strong className="text-ink-headline font-bold block">Refund & Return Support Desk:</strong>
-                <div>Email: <a href="mailto:refunds@medzoos.pk" className="text-brand-primary font-semibold hover:underline">refunds@medzoos.pk</a></div>
+                <strong className="text-ink-headline font-bold block">Refund & Billing Support Desk:</strong>
+                <div>Email: <a href="mailto:accounts@medzoos.pk" className="text-brand-primary font-semibold hover:underline">accounts@medzoos.pk</a></div>
                 <div>Helpline: <a href="tel:+923001234567" className="text-brand-primary font-semibold hover:underline">+92 300 123 4567</a></div>
               </div>
               <div className="p-4 rounded-xl bg-neutral-50 border border-neutral-200 space-y-1">

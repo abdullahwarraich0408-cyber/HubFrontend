@@ -326,7 +326,7 @@ export function TermsOfServicePage() {
             <div className="p-4 rounded-xl bg-surface-subtle border border-neutral-200 text-xs">
               <strong className="text-ink-headline font-bold block mb-1">Legal Notice Department:</strong>
               <div>Medzoos Digital Health Technologies</div>
-              <div>Email: <a href="mailto:legal@medzoos.pk" className="text-brand-primary hover:underline font-semibold">legal@medzoos.pk</a></div>
+              <div>Email: <a href="mailto:admin@medzoos.pk" className="text-brand-primary hover:underline font-semibold">admin@medzoos.pk</a></div>
             </div>
           </div>
         </section>

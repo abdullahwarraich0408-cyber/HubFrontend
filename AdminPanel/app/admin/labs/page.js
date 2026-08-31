@@ -7,7 +7,6 @@ import {
   useUpdateLab,
   useUpdateLabStatus,
   useDeleteLab,
-  useImpersonate,
 } from "@/lib/hooks/useApi";
 import { toast } from "sonner";
 import {
@@ -15,7 +14,6 @@ import {
   CheckCircle,
   XCircle,
   Trash,
-  SignIn,
   MagnifyingGlass,
   Plus,
   X,
@@ -23,6 +21,7 @@ import {
   Copy,
   Check,
   Eye,
+
   ShieldCheck,
   Clock,
   CaretLeft,
@@ -92,7 +91,7 @@ export default function AdminLabsPage() {
   const updateLabMutation = useUpdateLab();
   const updateStatusMutation = useUpdateLabStatus();
   const deleteLabMutation = useDeleteLab();
-  const impersonateMutation = useImpersonate();
+
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -164,8 +163,25 @@ export default function AdminLabsPage() {
 
   const handleAddLab = async (e) => {
     e.preventDefault();
+
+    const cleanLicense = (formData.license_number || '').trim();
+    if (cleanLicense && cleanLicense.toUpperCase() !== 'PENDING') {
+      const duplicate = labs.find(
+        (l) => (l.license_number || '').trim().toLowerCase() === cleanLicense.toLowerCase()
+      );
+      if (duplicate) {
+        toast.error(`License / registration number '${cleanLicense}' is already registered to ${duplicate.name || "another lab"}.`);
+        return;
+      }
+    }
+
     try {
-      await createLabMutation.mutateAsync(formData);
+      await createLabMutation.mutateAsync({
+        name: formData.name.trim(),
+        email: formData.email.trim().toLowerCase(),
+        password: formData.password,
+        license_number: cleanLicense,
+      });
       toast.success("Lab partner added successfully!");
       setShowAddModal(false);
       setFormData({ name: "", email: "", password: "", license_number: "" });
@@ -195,17 +211,34 @@ export default function AdminLabsPage() {
     e.preventDefault();
     if (!editingLab && !viewLab) return;
     const target = editingLab || viewLab;
+
+    const cleanLicense = (editFormData.license_number || '').trim();
+    if (cleanLicense && cleanLicense.toUpperCase() !== 'PENDING') {
+      const duplicate = labs.find(
+        (l) => l.id !== target.id && (l.license_number || '').trim().toLowerCase() === cleanLicense.toLowerCase()
+      );
+      if (duplicate) {
+        toast.error(`License / registration number '${cleanLicense}' is already registered to ${duplicate.name || "another lab"}.`);
+        return;
+      }
+    }
+
     try {
-      await updateLabMutation.mutateAsync({ id: target.id, ...editFormData });
+      await updateLabMutation.mutateAsync({
+        id: target.id,
+        name: editFormData.name.trim(),
+        license_number: cleanLicense,
+      });
       toast.success("Lab partner updated successfully!");
       if (viewLab && viewLab.id === target.id) {
-        setViewLab((prev) => ({ ...prev, ...editFormData }));
+        setViewLab((prev) => ({ ...prev, name: editFormData.name.trim(), license_number: cleanLicense }));
       }
       setEditingLab(null);
     } catch (err) {
       toast.error(err.message || "Failed to update lab");
     }
   };
+
 
   const handleUpdateStatus = async (id, status) => {
     try {
@@ -231,29 +264,8 @@ export default function AdminLabsPage() {
     }
   };
 
-  const handleImpersonate = async (lab) => {
-    try {
-      const res = await impersonateMutation.mutateAsync({ entity_id: lab.id, role: "lab" });
-      const tokens = res?.tokens || res?.data?.tokens;
-      const role = res?.role || res?.data?.role || "lab";
-      const profile = res?.profile || res?.data?.profile;
-      if (!tokens) throw new Error("Impersonation tokens missing");
-
-      toast.success(`Logged in as ${lab.name}`);
-      const labPanelUrl = process.env.NEXT_PUBLIC_LAB_PANEL_URL || "http://localhost:3004";
-      const params = new URLSearchParams({
-        accessToken: tokens.accessToken,
-        refreshToken: tokens.refreshToken || "",
-        role,
-        partner: profile ? JSON.stringify(profile) : "",
-      });
-      window.open(`${labPanelUrl}/lab/dashboard?${params.toString()}`, "_blank");
-    } catch (e) {
-      toast.error(e.message || "Failed to impersonate");
-    }
-  };
-
   const renderStatusBadge = (status) => {
+
     const s = (status || "pending").toLowerCase();
     switch (s) {
       case "approved":
@@ -507,16 +519,6 @@ export default function AdminLabsPage() {
                           <PencilSimple size={16} weight="bold" />
                         </button>
 
-                        {/* Portal Login Button */}
-                        <button
-                          onClick={() => handleImpersonate(lab)}
-                          disabled={impersonateMutation.isPending}
-                          className="p-2 rounded-xl bg-[#0FA7E3]/15 hover:bg-[#0FA7E3] text-[#0FA7E3] hover:text-white transition-all shadow-sm border border-[#0FA7E3]/30"
-                          title="Log In As Lab"
-                        >
-                          <SignIn size={16} weight="bold" />
-                        </button>
-
                         {/* Delete Button */}
                         <button
                           onClick={() => setDeleteTarget(lab)}
@@ -525,6 +527,7 @@ export default function AdminLabsPage() {
                         >
                           <Trash size={16} weight="bold" />
                         </button>
+
                       </div>
                     </td>
                   </tr>
@@ -684,23 +687,9 @@ export default function AdminLabsPage() {
                       </p>
                     </div>
                   </div>
-
-                  <div className="bg-white p-5 rounded-2xl border border-slate-200/80 space-y-3">
-                    <h3 className="text-xs font-bold text-[#082B3F] uppercase tracking-wider">Partner Portal Access</h3>
-                    <p className="text-xs text-slate-500 leading-relaxed">
-                      You can directly impersonate this lab partner account to manage test catalogs, diagnostic bookings, and test results.
-                    </p>
-                    <button
-                      onClick={() => handleImpersonate(viewLab)}
-                      disabled={impersonateMutation.isPending}
-                      className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#082B3F] hover:bg-[#0FA7E3] text-white text-xs font-bold transition-all shadow-sm"
-                    >
-                      <SignIn size={16} weight="bold" />
-                      <span>Open Lab Partner Portal</span>
-                    </button>
-                  </div>
                 </div>
               )}
+
 
               {activeDetailTab === "edit" && (
                 <form onSubmit={handleUpdateLab} className="space-y-4 animate-in fade-in duration-200">

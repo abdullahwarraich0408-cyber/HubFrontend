@@ -1,10 +1,23 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Envelope, Lock, ShieldCheck, SquaresFour, ArrowRight } from "@phosphor-icons/react";
+import {
+  Envelope,
+  Lock,
+  ShieldCheck,
+  SquaresFour,
+  ArrowRight,
+  Info,
+  WarningCircle,
+  ClockCountdown,
+} from "@phosphor-icons/react";
 import { Button } from "@/shared/components/Button";
 import { Input } from "@/shared/components/Input";
 import { post } from "@/lib/api/client";
+import {
+  setAdminSession,
+  getRememberedEmail,
+} from "@/lib/auth/adminSession";
 import { toast } from "sonner";
 
 export default function AdminLoginPage() {
@@ -12,13 +25,35 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [sessionExpiryReason, setSessionExpiryReason] = useState(null);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && window.location.search.includes("expired=true")) {
-      const timer = setTimeout(() => {
-        toast.error("Your session has expired. Please log in again.");
-      }, 300);
-      return () => clearTimeout(timer);
+    if (typeof window !== "undefined") {
+      const remembered = getRememberedEmail();
+      if (remembered) {
+        setEmail(remembered);
+        setRememberMe(true);
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      const isExpired = params.get("expired") === "true";
+
+      if (isExpired) {
+        const reason = params.get("reason") || "session_expired";
+        setSessionExpiryReason(reason);
+
+        const messages = {
+          idle: "Your session timed out due to 30 minutes of inactivity.",
+          logged_out: "You were logged out from another window or device.",
+          revoked: "Your session was terminated from the security dashboard.",
+          unauthorized: "Access denied. Administrator privileges required.",
+          no_session: "Please log in with administrator credentials to access the console.",
+          session_expired: "Your session has expired. Please log in again.",
+        };
+
+        const msg = messages[reason] || messages.session_expired;
+        toast.error(msg);
+      }
     }
   }, []);
 
@@ -27,7 +62,7 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     try {
-      const response = await post("/auth/login", { email, password });
+      const response = await post("/auth/login", { email: email.trim().toLowerCase(), password });
 
       const user = response?.user || response?.data?.user;
       const tokens = response?.tokens || response?.data?.tokens;
@@ -39,28 +74,22 @@ export default function AdminLoginPage() {
         throw new Error("Access Denied: You do not have administrator privileges.");
       }
 
-      if (tokens?.accessToken) {
-        localStorage.setItem("token", tokens.accessToken);
-      }
-      if (tokens?.refreshToken) {
-        localStorage.setItem("refreshToken", tokens.refreshToken);
-      }
-      if (user) {
-        localStorage.setItem("medzoos_user", JSON.stringify(user));
-      }
-
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(new Event("auth-updated"));
-      }
+      setAdminSession({
+        token: tokens?.accessToken,
+        refreshToken: tokens?.refreshToken,
+        user,
+        rememberMe,
+        email: email.trim().toLowerCase(),
+      });
 
       toast.success("Admin access granted. Welcome to the portal.");
-      window.location.href = "/admin";
+      window.location.replace("/admin");
     } catch (err) {
       toast.error(err.message || "Authentication failed. Invalid credentials.");
-    } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 bg-[var(--color-surface-subtle)] relative overflow-hidden font-[var(--font-plus-jakarta-sans)]">
@@ -121,6 +150,20 @@ export default function AdminLoginPage() {
               Enter your credentials to access the admin dashboard.
             </p>
           </div>
+
+          {sessionExpiryReason && (
+            <div className="mb-6 p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold flex items-center gap-3 animate-in fade-in">
+              <ClockCountdown size={20} weight="duotone" className="text-amber-600 shrink-0" />
+              <span>
+                {sessionExpiryReason === "idle" && "You were automatically signed out due to 30 minutes of inactivity."}
+                {sessionExpiryReason === "logged_out" && "You were signed out from another tab or window."}
+                {sessionExpiryReason === "revoked" && "Your login session was terminated from the security dashboard."}
+                {sessionExpiryReason === "unauthorized" && "You do not have administrator permissions for this area."}
+                {sessionExpiryReason === "no_session" && "Please enter your administrator credentials to sign in."}
+                {sessionExpiryReason === "session_expired" && "Your previous session has expired. Please sign in again."}
+              </span>
+            </div>
+          )}
 
           <form onSubmit={handleAdminLogin} className="space-y-5">
             <Input

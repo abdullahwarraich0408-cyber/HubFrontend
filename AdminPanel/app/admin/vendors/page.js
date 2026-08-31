@@ -4,11 +4,12 @@ import { useState, useMemo, useCallback } from "react";
 import { 
   Plus, MagnifyingGlass, Funnel, DotsThree, Storefront, ShieldCheck, X, 
   Copy, Eye, CheckCircle, XCircle, PencilSimple, DownloadSimple, 
-  CaretLeft, CaretRight, ArrowsDownUp, CaretDown, FileText, Trash, SignIn, MapPin, Spinner, Clock
+  CaretLeft, CaretRight, ArrowsDownUp, CaretDown, FileText, Trash, MapPin, Spinner, Clock
 } from "@phosphor-icons/react";
-import { useAdminVendors, useAdminCreateVendor, useUpdateVendorStatus, useUpdateVendorCredentials, useDeleteVendor, useImpersonate, useReviewVendorDocument } from "@/lib/hooks/useApi";
+import { useAdminVendors, useAdminCreateVendor, useUpdateVendorStatus, useUpdateVendorCredentials, useDeleteVendor, useReviewVendorDocument } from "@/lib/hooks/useApi";
 import { detectDeliveryAddress, SUPPORTED_CITIES } from "@/lib/location";
 import { toast } from "sonner";
+
 
 const SAMPLE_PHARMACY_LOGOS = [
   "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&q=80&w=250",
@@ -69,7 +70,6 @@ export default function AdminVendorsPage() {
   const updateStatusMutation = useUpdateVendorStatus();
   const updateCredentialsMutation = useUpdateVendorCredentials();
   const deleteVendorMutation = useDeleteVendor();
-  const impersonateMutation = useImpersonate();
   const reviewVendorDocumentMutation = useReviewVendorDocument();
 
   // Filters & Sorting
@@ -179,12 +179,24 @@ export default function AdminVendorsPage() {
       toast.error("Add pharmacy city or use auto-detect location");
       return;
     }
+
+    const cleanLicense = (formData.license_number || '').trim();
+    if (cleanLicense && cleanLicense.toUpperCase() !== 'PENDING') {
+      const duplicate = vendors.find(
+        (v) => (v.license_number || '').trim().toLowerCase() === cleanLicense.toLowerCase()
+      );
+      if (duplicate) {
+        toast.error(`License number '${cleanLicense}' is already registered to ${duplicate.business_name || duplicate.name || "another pharmacy"}.`);
+        return;
+      }
+    }
+
     try {
       await createVendorMutation.mutateAsync({
-        business_name: formData.business_name,
-        email: formData.email,
+        business_name: formData.business_name.trim(),
+        email: formData.email.trim().toLowerCase(),
         password: formData.password,
-        license_number: formData.license_number,
+        license_number: cleanLicense,
         address: formData.address,
         city: formData.city,
         latitude: formData.latitude,
@@ -239,8 +251,20 @@ export default function AdminVendorsPage() {
 
   const handleUpdateCredentials = async (e) => {
     e.preventDefault();
+
+    const cleanLicense = (editFormData.license_number || '').trim();
+    if (cleanLicense && cleanLicense.toUpperCase() !== 'PENDING') {
+      const duplicate = vendors.find(
+        (v) => v.id !== viewVendor?.id && (v.license_number || '').trim().toLowerCase() === cleanLicense.toLowerCase()
+      );
+      if (duplicate) {
+        toast.error(`License number '${cleanLicense}' is already registered to ${duplicate.business_name || duplicate.name || "another pharmacy"}.`);
+        return;
+      }
+    }
+
     try {
-      const submitData = { ...editFormData };
+      const submitData = { ...editFormData, license_number: cleanLicense };
       if (!submitData.password) {
         delete submitData.password;
       }
@@ -270,31 +294,6 @@ export default function AdminVendorsPage() {
     setDeleteTarget(vendor);
   };
 
-  const handleImpersonate = async (vendor) => {
-    try {
-      const res = await impersonateMutation.mutateAsync({ entity_id: vendor.id, role: 'vendor' });
-      const tokens = res?.tokens || res?.data?.tokens;
-      const role = res?.role || res?.data?.role || 'vendor';
-      const profile = res?.profile || res?.data?.profile || vendor;
-
-      if (!tokens) {
-        throw new Error("Impersonation tokens missing from server response");
-      }
-
-      const { setPartnerSession } = await import("@/lib/partnerAuth");
-      setPartnerSession({
-        tokens,
-        role,
-        partner: profile,
-      });
-
-      toast.success(`Logged in as ${vendor.business_name || vendor.name}`);
-      const { partnerRoutes } = await import("@/lib/constants/partnerRoutes");
-      window.open(partnerRoutes.vendor.dashboard, '_blank');
-    } catch (err) {
-      toast.error(err.message || "Failed to impersonate");
-    }
-  };
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
@@ -615,16 +614,6 @@ export default function AdminVendorsPage() {
                           <PencilSimple size={16} weight="bold" />
                         </button>
 
-                        {/* Portal Login Button */}
-                        <button 
-                          onClick={() => handleImpersonate(vendor)}
-                          disabled={impersonateMutation.isPending}
-                          className="p-2 rounded-xl bg-[#0FA7E3]/15 hover:bg-[#0FA7E3] text-[#0FA7E3] hover:text-white transition-all shadow-sm border border-[#0FA7E3]/30"
-                          title="Log In As Pharmacy"
-                        >
-                          <SignIn size={16} weight="bold" />
-                        </button>
-
                         {/* Delete Button */}
                         <button 
                           onClick={() => handleDeleteVendor(vendor)}
@@ -633,6 +622,7 @@ export default function AdminVendorsPage() {
                         >
                           <Trash size={16} weight="bold" />
                         </button>
+
                       </div>
                     </td>
                   </tr>
@@ -962,143 +952,178 @@ export default function AdminVendorsPage() {
 
       {/* Add Vendor Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0C1A2E]/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between p-6 border-b border-[#0C1A2E]/10 bg-[#F6F8FA]">
-              <h2 className="text-xl font-bold text-[#0C1A2E] font-[var(--font-dm-serif-display)]">Onboard New Vendor</h2>
-              <button onClick={() => setShowAddModal(false)} className="text-[#0C1A2E]/40 hover:text-[#0C1A2E] transition-colors">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#082B3F]/60 backdrop-blur-sm p-4 sm:p-6 overflow-y-auto animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-200 max-h-[92vh] flex flex-col my-auto">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-5 md:p-6 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-blue-50/40 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#082B3F] text-white flex items-center justify-center shrink-0 shadow-sm">
+                  <Storefront size={20} weight="bold" className="text-[#0FA7E3]" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-[#082B3F]">Onboard New Pharmacy</h2>
+                  <p className="text-xs text-slate-500 mt-0.5">Register pharmacy facility and access credentials</p>
+                </div>
+              </div>
+              <button 
+                type="button"
+                onClick={() => setShowAddModal(false)} 
+                className="text-slate-400 hover:text-slate-600 p-2 rounded-xl hover:bg-slate-200/50 transition-colors"
+              >
                 <X size={20} weight="bold" />
               </button>
             </div>
             
-            <form onSubmit={handleAddVendor} className="p-6 flex flex-col gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-[#0C1A2E] mb-1.5">Business / Pharmacy Name</label>
-                <input 
-                  required
-                  type="text" 
-                  value={formData.business_name}
-                  onChange={e => setFormData({...formData, business_name: e.target.value})}
-                  className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] focus:ring-1 focus:ring-[#17618E] text-sm"
-                  placeholder="e.g. HealthPlus Pharmacy"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-semibold text-[#0C1A2E] mb-1.5">Admin Email</label>
-                <input 
-                  required
-                  type="email" 
-                  value={formData.email}
-                  onChange={e => setFormData({...formData, email: e.target.value})}
-                  className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] focus:ring-1 focus:ring-[#17618E] text-sm"
-                  placeholder="vendor@example.com"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-semibold text-[#0C1A2E] mb-1.5">License Number</label>
-                <input 
-                  required
-                  type="text" 
-                  value={formData.license_number}
-                  onChange={e => setFormData({...formData, license_number: e.target.value})}
-                  className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] focus:ring-1 focus:ring-[#17618E] text-sm font-[var(--font-jetbrains-mono)]"
-                  placeholder="e.g. PHR-2024-XXXX"
-                />
-              </div>
-
-              <div className="rounded-lg border border-[#0C1A2E]/10 bg-[#F6F8FA] p-4 space-y-3">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-semibold text-[#0C1A2E]">Pharmacy Location</p>
-                    <p className="text-xs text-[#0C1A2E]/60">
-                      Select the city manually. Auto detect is optional if you are at the pharmacy.
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={detectPharmacyLocation}
-                    disabled={isDetectingLocation}
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#17618E] hover:text-[#082B3F] disabled:opacity-50"
-                  >
-                    {isDetectingLocation ? <Spinner size={14} className="animate-spin" /> : <MapPin size={14} />}
-                    Auto detect
-                  </button>
-                </div>
-
+            {/* Modal Scrollable Form */}
+            <form onSubmit={handleAddVendor} className="flex flex-col flex-1 overflow-hidden">
+              <div className="overflow-y-auto p-5 md:p-6 space-y-4 flex-1">
                 <div>
-                  <label className="block text-sm font-semibold text-[#0C1A2E] mb-1.5">Street Address</label>
-                  <input
-                    type="text"
-                    value={formData.address}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] focus:ring-1 focus:ring-[#17618E] text-sm"
-                    placeholder="e.g. DHA Phase 5, Street 12"
+                  <label className="block text-xs font-bold text-[#082B3F] uppercase tracking-wider mb-1.5">
+                    Business / Pharmacy Name <span className="text-rose-500">*</span>
+                  </label>
+                  <input 
+                    required
+                    type="text" 
+                    value={formData.business_name}
+                    onChange={e => setFormData({...formData, business_name: e.target.value})}
+                    className="w-full h-11 px-3.5 rounded-xl border border-slate-200 outline-none focus:border-[#082B3F] focus:ring-1 focus:ring-[#082B3F]/20 text-xs font-semibold text-[#082B3F] transition-all bg-white"
+                    placeholder="e.g. HealthPlus Pharmacy"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-xs font-bold text-[#082B3F] uppercase tracking-wider mb-1.5">
+                    Admin Email Address <span className="text-rose-500">*</span>
+                  </label>
+                  <input 
+                    required
+                    type="email" 
+                    value={formData.email}
+                    onChange={e => setFormData({...formData, email: e.target.value})}
+                    className="w-full h-11 px-3.5 rounded-xl border border-slate-200 outline-none focus:border-[#082B3F] focus:ring-1 focus:ring-[#082B3F]/20 text-xs font-semibold text-[#082B3F] transition-all bg-white"
+                    placeholder="vendor@example.com"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-xs font-bold text-[#082B3F] uppercase tracking-wider mb-1.5">
+                    Pharmacy Drug License # <span className="text-rose-500">*</span>
+                  </label>
+                  <input 
+                    required
+                    type="text" 
+                    value={formData.license_number}
+                    onChange={e => setFormData({...formData, license_number: e.target.value})}
+                    className="w-full h-11 px-3.5 rounded-xl border border-slate-200 outline-none focus:border-[#082B3F] focus:ring-1 focus:ring-[#082B3F]/20 text-xs font-mono font-bold text-[#082B3F] transition-all bg-white"
+                    placeholder="e.g. PHR-2026-XXXX"
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-sm font-semibold text-[#0C1A2E] mb-1.5">City</label>
-                    <select
-                      required
-                      value={formData.city}
-                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                      className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] focus:ring-1 focus:ring-[#17618E] text-sm bg-white"
+                <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 space-y-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-bold text-[#082B3F] uppercase tracking-wider">Pharmacy Location</p>
+                      <p className="text-[11px] text-slate-500 mt-0.5">
+                        Specify facility address and delivery coverage radius.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={detectPharmacyLocation}
+                      disabled={isDetectingLocation}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-bold text-[#17618E] hover:bg-slate-50 disabled:opacity-50 transition-all shadow-xs"
                     >
-                      <option value="">Select city</option>
-                      {SUPPORTED_CITIES.map((city) => (
-                        <option key={city} value={city}>{city}</option>
-                      ))}
-                    </select>
+                      {isDetectingLocation ? <Spinner size={14} className="animate-spin" /> : <MapPin size={14} weight="bold" />}
+                      <span>Auto detect</span>
+                    </button>
                   </div>
+
                   <div>
-                    <label className="block text-sm font-semibold text-[#0C1A2E] mb-1.5">Service Radius (km)</label>
+                    <label className="block text-[11px] font-bold text-slate-600 mb-1">Street Address</label>
                     <input
-                      type="number"
-                      min="1"
-                      max="50"
-                      value={formData.service_radius_km}
-                      onChange={(e) => setFormData({ ...formData, service_radius_km: Number(e.target.value) || 10 })}
-                      className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] focus:ring-1 focus:ring-[#17618E] text-sm"
+                      type="text"
+                      value={formData.address}
+                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                      className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:border-[#082B3F] text-xs font-medium text-[#082B3F]"
+                      placeholder="e.g. DHA Phase 5, Commercial Zone"
                     />
                   </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-600 mb-1">City <span className="text-rose-500">*</span></label>
+                      <select
+                        required
+                        value={formData.city}
+                        onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                        className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:border-[#082B3F] text-xs font-bold text-[#082B3F]"
+                      >
+                        <option value="">Select city</option>
+                        {SUPPORTED_CITIES.map((city) => (
+                          <option key={city} value={city}>{city}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-600 mb-1">Service Radius (km)</label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="50"
+                        value={formData.service_radius_km}
+                        onChange={(e) => setFormData({ ...formData, service_radius_km: Number(e.target.value) || 10 })}
+                        className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white outline-none focus:border-[#082B3F] text-xs font-bold text-[#082B3F]"
+                      />
+                    </div>
+                  </div>
+
+                  {formData.latitude != null && formData.longitude != null && (
+                    <p className="text-[11px] text-slate-500 font-mono">
+                      GPS coordinates: {formData.latitude.toFixed(5)}, {formData.longitude.toFixed(5)}
+                    </p>
+                  )}
                 </div>
-
-                {formData.latitude != null && formData.longitude != null && (
-                  <p className="text-[11px] text-[#0C1A2E]/60 font-[var(--font-jetbrains-mono)]">
-                    GPS: {formData.latitude.toFixed(5)}, {formData.longitude.toFixed(5)}
-                  </p>
-                )}
-              </div>
-              
-              <div>
-                <label className="block text-sm font-semibold text-[#0C1A2E] mb-1.5">Temporary Password</label>
-                <input 
-                  required
-                  type="password" 
-                  value={formData.password}
-                  onChange={e => setFormData({...formData, password: e.target.value})}
-                  className="w-full h-11 px-3 rounded-lg border border-[#0C1A2E]/10 outline-none focus:border-[#17618E] focus:ring-1 focus:ring-[#17618E] text-sm"
-                  placeholder="••••••••"
-                />
+                
+                <div>
+                  <label className="block text-xs font-bold text-[#082B3F] uppercase tracking-wider mb-1.5">
+                    Temporary Password <span className="text-rose-500">*</span>
+                  </label>
+                  <input 
+                    required
+                    type="password" 
+                    value={formData.password}
+                    onChange={e => setFormData({...formData, password: e.target.value})}
+                    className="w-full h-11 px-3.5 rounded-xl border border-slate-200 outline-none focus:border-[#082B3F] focus:ring-1 focus:ring-[#082B3F]/20 text-xs font-semibold text-[#082B3F] transition-all bg-white"
+                    placeholder="Set temporary login password"
+                  />
+                </div>
               </div>
 
-              <div className="pt-4 mt-2 border-t border-[#0C1A2E]/10 flex justify-end gap-3">
+              {/* Modal Sticky Footer */}
+              <div className="p-4 px-6 border-t border-slate-100 bg-slate-50 flex items-center justify-end gap-3 shrink-0">
                 <button 
                   type="button" 
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2.5 rounded-lg text-sm font-semibold text-[#0C1A2E] hover:bg-[#F6F8FA] transition-colors"
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold border border-slate-200 text-slate-600 hover:bg-white transition-colors"
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit"
                   disabled={createVendorMutation.isPending}
-                  className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#17618E] hover:bg-[#082B3F] disabled:opacity-50 transition-colors shadow-sm"
+                  className="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-[#082B3F] hover:bg-[#0FA7E3] disabled:opacity-50 transition-all shadow-sm flex items-center gap-2"
                 >
-                  {createVendorMutation.isPending ? "Creating..." : "Create Vendor"}
+                  {createVendorMutation.isPending ? (
+                    <>
+                      <Spinner size={14} className="animate-spin" />
+                      <span>Creating Pharmacy...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Plus size={14} weight="bold" />
+                      <span>Create Pharmacy</span>
+                    </>
+                  )}
                 </button>
               </div>
             </form>

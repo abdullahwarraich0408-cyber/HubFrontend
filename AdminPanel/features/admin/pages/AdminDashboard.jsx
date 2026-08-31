@@ -24,6 +24,7 @@ import {
   Buildings,
   Flask,
   FileText,
+  Pill,
   TrendUp,
   Activity,
   CheckCircle,
@@ -31,6 +32,7 @@ import {
   CalendarCheck,
   Sparkle,
 } from "@phosphor-icons/react";
+
 import {
   AreaChart,
   Area,
@@ -88,32 +90,60 @@ export function AdminDashboard() {
     }));
   }, [orders]);
 
-  // Dynamic Chart Data
+  // Dynamic Chart Data with real-time zero-baseline aggregation
   const finalChartData = useMemo(() => {
-    if (orders.length > 0) {
-      const monthMap = {};
-      orders.forEach((order) => {
-        const d = new Date(order.created_at || Date.now());
-        const key = d.toLocaleString("default", { month: "short" });
-        if (!monthMap[key]) monthMap[key] = { name: key, revenue: 0, orders: 0 };
-        monthMap[key].revenue += Number(order.total_amount || order.amount) || 0;
-        monthMap[key].orders += 1;
-      });
-      const res = Object.values(monthMap);
-      if (res.length > 0) return res;
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const now = new Date();
+    const currentMonthIndex = now.getMonth(); // 0-11
+    
+    let monthsToDisplay = [];
+    if (chartTimeframe === "6m") {
+      // Last 6 consecutive months
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), currentMonthIndex - i, 1);
+        monthsToDisplay.push({
+          name: d.toLocaleString("default", { month: "short" }),
+          year: d.getFullYear(),
+          monthNum: d.getMonth(),
+          revenue: 0,
+          orders: 0,
+        });
+      }
+    } else {
+      // Full 12 calendar months for current year
+      monthsToDisplay = monthNames.map((name, idx) => ({
+        name,
+        year: now.getFullYear(),
+        monthNum: idx,
+        revenue: 0,
+        orders: 0,
+      }));
     }
 
-    return [
-      { name: "Jan", revenue: 45000, orders: 120 },
-      { name: "Feb", revenue: 58000, orders: 155 },
-      { name: "Mar", revenue: 72000, orders: 190 },
-      { name: "Apr", revenue: 94000, orders: 240 },
-      { name: "May", revenue: 118000, orders: 310 },
-      { name: "Jun", revenue: 145000, orders: 380 },
-      { name: "Jul", revenue: 168000, orders: 420 },
-      { name: "Aug", revenue: 192000, orders: 510 },
-    ];
-  }, [orders]);
+    if (orders && orders.length > 0) {
+      orders.forEach((order) => {
+        const orderDate = new Date(order.created_at || order.createdAt || Date.now());
+        const orderMonth = orderDate.getMonth();
+        const orderYear = orderDate.getFullYear();
+        const amount = Number(order.total_amount || order.amount || 0);
+
+        const target = monthsToDisplay.find((m) => {
+          if (chartTimeframe === "6m") {
+            return m.monthNum === orderMonth && m.year === orderYear;
+          }
+          return m.monthNum === orderMonth && m.year === orderYear;
+        });
+
+        if (target) {
+          target.revenue += amount;
+          target.orders += 1;
+        }
+      });
+    }
+
+    return monthsToDisplay;
+  }, [orders, chartTimeframe]);
+
 
   const handleExportSummary = () => {
     const data = [
@@ -264,56 +294,57 @@ export function AdminDashboard() {
           <span className="text-[11px] font-semibold text-slate-400">Fast Navigation</span>
         </div>
 
-        <div className="p-3 bg-white rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-2.5 overflow-x-auto scrollbar-none">
+        <div className="p-3 bg-white rounded-2xl border border-slate-200/80 shadow-sm grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
           <Link
             href="/admin/doctors"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-50 hover:bg-[#082B3F] hover:text-white border border-slate-200 text-xs font-bold text-[#082B3F] transition-all shrink-0 shadow-sm group"
+            className="flex items-center justify-center sm:justify-start gap-2 px-3.5 py-2.5 rounded-xl bg-slate-50 hover:bg-[#082B3F] hover:text-white border border-slate-200 text-xs font-bold text-[#082B3F] transition-all shadow-sm group"
           >
-            <Stethoscope size={16} weight="bold" className="text-[#0FA7E3] group-hover:text-white transition-colors" />
-            <span>Doctors Directory</span>
+            <Stethoscope size={16} weight="bold" className="text-[#0FA7E3] group-hover:text-white transition-colors shrink-0" />
+            <span className="truncate">Doctors Directory</span>
           </Link>
 
           <Link
             href="/admin/hospitals"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-50 hover:bg-[#082B3F] hover:text-white border border-slate-200 text-xs font-bold text-[#082B3F] transition-all shrink-0 shadow-sm group"
+            className="flex items-center justify-center sm:justify-start gap-2 px-3.5 py-2.5 rounded-xl bg-slate-50 hover:bg-[#082B3F] hover:text-white border border-slate-200 text-xs font-bold text-[#082B3F] transition-all shadow-sm group"
           >
-            <Buildings size={16} weight="bold" className="text-[#0FA7E3] group-hover:text-white transition-colors" />
-            <span>Hospitals Network</span>
+            <Buildings size={16} weight="bold" className="text-[#0FA7E3] group-hover:text-white transition-colors shrink-0" />
+            <span className="truncate">Hospitals Network</span>
           </Link>
 
           <Link
             href="/admin/vendors"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-50 hover:bg-[#082B3F] hover:text-white border border-slate-200 text-xs font-bold text-[#082B3F] transition-all shrink-0 shadow-sm group"
+            className="flex items-center justify-center sm:justify-start gap-2 px-3.5 py-2.5 rounded-xl bg-slate-50 hover:bg-[#082B3F] hover:text-white border border-slate-200 text-xs font-bold text-[#082B3F] transition-all shadow-sm group"
           >
-            <Storefront size={16} weight="bold" className="text-[#0FA7E3] group-hover:text-white transition-colors" />
-            <span>Pharmacies & Vendors</span>
+            <Storefront size={16} weight="bold" className="text-[#0FA7E3] group-hover:text-white transition-colors shrink-0" />
+            <span className="truncate">Pharmacies</span>
           </Link>
 
           <Link
             href="/admin/labs"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-50 hover:bg-[#082B3F] hover:text-white border border-slate-200 text-xs font-bold text-[#082B3F] transition-all shrink-0 shadow-sm group"
+            className="flex items-center justify-center sm:justify-start gap-2 px-3.5 py-2.5 rounded-xl bg-slate-50 hover:bg-[#082B3F] hover:text-white border border-slate-200 text-xs font-bold text-[#082B3F] transition-all shadow-sm group"
           >
-            <Flask size={16} weight="bold" className="text-[#0FA7E3] group-hover:text-white transition-colors" />
-            <span>Diagnostic Labs</span>
+            <Flask size={16} weight="bold" className="text-[#0FA7E3] group-hover:text-white transition-colors shrink-0" />
+            <span className="truncate">Diagnostic Labs</span>
           </Link>
 
           <Link
             href="/admin/orders"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-50 hover:bg-[#082B3F] hover:text-white border border-slate-200 text-xs font-bold text-[#082B3F] transition-all shrink-0 shadow-sm group"
+            className="flex items-center justify-center sm:justify-start gap-2 px-3.5 py-2.5 rounded-xl bg-slate-50 hover:bg-[#082B3F] hover:text-white border border-slate-200 text-xs font-bold text-[#082B3F] transition-all shadow-sm group"
           >
-            <Package size={16} weight="bold" className="text-[#0FA7E3] group-hover:text-white transition-colors" />
-            <span>Order Fulfillment</span>
+            <Package size={16} weight="bold" className="text-[#0FA7E3] group-hover:text-white transition-colors shrink-0" />
+            <span className="truncate">Order Fulfillment</span>
           </Link>
 
           <Link
             href="/admin/prescription-orders"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-50 hover:bg-[#082B3F] hover:text-white border border-slate-200 text-xs font-bold text-[#082B3F] transition-all shrink-0 shadow-sm group"
+            className="flex items-center justify-center sm:justify-start gap-2 px-3.5 py-2.5 rounded-xl bg-slate-50 hover:bg-[#082B3F] hover:text-white border border-slate-200 text-xs font-bold text-[#082B3F] transition-all shadow-sm group"
           >
-            <FileText size={16} weight="bold" className="text-[#0FA7E3] group-hover:text-white transition-colors" />
-            <span>Prescription Orders</span>
+            <Pill size={16} weight="bold" className="text-[#0FA7E3] group-hover:text-white transition-colors shrink-0" />
+            <span className="truncate">Prescriptions</span>
           </Link>
         </div>
       </section>
+
 
       {/* 4. REVENUE CHARTS & RECENT ACTIVITY GRID */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -327,11 +358,19 @@ export function AdminDashboard() {
                   Revenue & Volume Growth
                 </h3>
                 <span className="px-2.5 py-0.5 text-[10px] font-mono font-extrabold bg-blue-50 text-[#082B3F] rounded-md border border-blue-100 uppercase">
-                  ANNUAL 2026
+                  {chartTimeframe === "year" ? `ANNUAL ${new Date().getFullYear()}` : "LAST 6 MONTHS"}
                 </span>
+                {totalOrders === 0 && (
+                  <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold bg-slate-100 text-slate-500 rounded-md border border-slate-200">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    Live Telemetry (Awaiting Orders)
+                  </span>
+                )}
               </div>
               <p className="text-xs text-slate-500 font-medium mt-1">
-                Monthly platform sales volume and patient checkout telemetry
+                {totalOrders === 0 
+                  ? "Real-time revenue baseline across all partner facilities (0 PKR initial telemetry)" 
+                  : "Monthly platform sales volume and patient checkout telemetry"}
               </p>
             </div>
 
@@ -341,7 +380,7 @@ export function AdminDashboard() {
                 onChange={(e) => setChartTimeframe(e.target.value)}
                 className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-[#082B3F] outline-none focus:border-[#082B3F]"
               >
-                <option value="year">Full Year (2026)</option>
+                <option value="year">Full Year ({new Date().getFullYear()})</option>
                 <option value="6m">Last 6 Months</option>
               </select>
             </div>
@@ -373,8 +412,10 @@ export function AdminDashboard() {
                   tickLine={false}
                   tick={{ fontSize: 11, fill: "#64748B", fontWeight: 700 }}
                   dx={-10}
+                  domain={[0, totalRevenue > 0 ? 'auto' : 1000]}
                   tickFormatter={(val) => `PKR ${val >= 1000 ? (val / 1000).toFixed(0) + "k" : val}`}
                 />
+
                 <Tooltip
                   contentStyle={{
                     borderRadius: "16px",

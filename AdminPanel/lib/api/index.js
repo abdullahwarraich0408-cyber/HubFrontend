@@ -54,7 +54,11 @@ export const authApi = {
   register: (data) => api.post("/auth/register", data),
   login: (data) => api.post("/auth/login", data),
   logout: () => api.post("/auth/logout"),
+  logoutAll: () => api.post("/auth/logout-all"),
   refresh: () => api.post("/auth/refresh"),
+  getSessions: () => api.get("/auth/sessions"),
+  revokeSession: (sessionId) => api.delete(`/auth/sessions/${sessionId}`),
+  revokeOtherSessions: () => api.post("/auth/sessions/revoke-others"),
   forgotPassword: (email) => api.post("/auth/forgot-password", { email }),
   resetPassword: (token, password) =>
     api.post(`/auth/reset-password/${token}`, { password }),
@@ -133,6 +137,7 @@ export const usersApi = {
   getProfile: () => api.get("/users/profile"),
   getAdminCustomers: () => api.get("/admin/customers"),
   updateProfile: (data) => api.patch("/users/profile", data),
+  changePassword: (data) => api.post("/users/password", data),
   updateNotificationPreferences: (data) =>
     api.post("/notifications/preferences", data),
 };

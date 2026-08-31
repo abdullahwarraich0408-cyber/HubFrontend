@@ -9,7 +9,9 @@ import {
   useDeleteHospital,
   useAdminDoctors,
 } from "@/lib/hooks/useApi";
+import { isValidPakistaniPhone, formatPakistaniPhoneInput } from "@/lib/validators/pakistanPhone";
 import { toast } from "sonner";
+
 import {
   Buildings,
   MagnifyingGlass,
@@ -198,6 +200,12 @@ export default function AdminHospitalsPage() {
 
   const handleCreateHospital = async (e) => {
     e.preventDefault();
+
+    if (addFormData.phone && !isValidPakistaniPhone(addFormData.phone)) {
+      toast.error("Please enter a valid Pakistani phone number (e.g. +92 300 1234567 or 042 35789012)");
+      return;
+    }
+
     try {
       await createMutation.mutateAsync(addFormData);
       toast.success("Hospital created successfully!");
@@ -211,6 +219,12 @@ export default function AdminHospitalsPage() {
   const handleUpdateHospital = async (e) => {
     e.preventDefault();
     if (!viewHospital) return;
+
+    if (editFormData.phone && !isValidPakistaniPhone(editFormData.phone)) {
+      toast.error("Please enter a valid Pakistani phone number (e.g. +92 300 1234567 or 042 35789012)");
+      return;
+    }
+
     try {
       await updateMutation.mutateAsync({ id: viewHospital.id, ...editFormData });
       toast.success("Hospital profile updated!");
@@ -220,6 +234,7 @@ export default function AdminHospitalsPage() {
       toast.error(err.message || "Failed to update hospital");
     }
   };
+
 
   const handleToggleStatus = async (hospital) => {
     try {
@@ -796,12 +811,15 @@ export default function AdminHospitalsPage() {
                       <label className="block text-xs font-bold text-[#082B3F] mb-1.5 uppercase tracking-wider">Phone</label>
                       <input
                         type="text"
+                        maxLength={16}
+                        placeholder="+92 300 1234567"
                         value={editFormData.phone}
-                        onChange={(e) => setEditFormData({ ...editFormData, phone: e.target.value })}
+                        onChange={(e) => setEditFormData({ ...editFormData, phone: formatPakistaniPhoneInput(e.target.value) })}
                         className="w-full h-10 px-3 rounded-xl border border-slate-200 outline-none focus:border-[#082B3F] text-xs font-medium"
                       />
                     </div>
                   </div>
+
 
                   <div>
                     <label className="block text-xs font-bold text-[#082B3F] mb-1.5 uppercase tracking-wider">Official Email</label>
@@ -945,12 +963,14 @@ export default function AdminHospitalsPage() {
                   </label>
                   <input
                     type="text"
+                    maxLength={16}
                     value={addFormData.phone}
-                    onChange={(e) => setAddFormData({ ...addFormData, phone: e.target.value })}
+                    onChange={(e) => setAddFormData({ ...addFormData, phone: formatPakistaniPhoneInput(e.target.value) })}
                     className="w-full h-10 px-3 rounded-xl border border-slate-200 outline-none focus:border-[#082B3F] text-xs font-medium text-[#082B3F]"
-                    placeholder="+92 51 8463000"
+                    placeholder="+92 51 8463000 / 0300 1234567"
                   />
                 </div>
+
               </div>
 
               <div>

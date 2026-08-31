@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
+  authApi,
   productsApi,
   vendorsApi,
   cartApi,
@@ -508,6 +509,20 @@ export function useUpdateProfile() {
   });
 }
 
+export function useChangePassword() {
+  return useMutation({
+    mutationFn: (data) => usersApi.changePassword(data),
+  });
+}
+
+export function useUpdateNotificationPreferences() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data) => usersApi.updateNotificationPreferences(data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["user-profile"] }),
+  });
+}
+
 export function usePrescriptions(options = {}) {
   return useQuery({
     queryKey: ["prescriptions"],
@@ -537,6 +552,37 @@ export function useUserProfile(options = {}) {
       return data.user;
     },
     ...options,
+  });
+}
+
+export function useAdminSessions(options = {}) {
+  return useQuery({
+    queryKey: ["admin-sessions"],
+    queryFn: async () => {
+      const data = await authApi.getSessions();
+      return data.sessions || [];
+    },
+    ...options,
+  });
+}
+
+export function useRevokeSession() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (sessionId) => authApi.revokeSession(sessionId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-sessions"] });
+    },
+  });
+}
+
+export function useRevokeOtherSessions() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => authApi.revokeOtherSessions(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-sessions"] });
+    },
   });
 }
 
@@ -1178,11 +1224,13 @@ export function useAuditLogs(options = {}) {
     queryKey: ["admin-audit-logs"],
     queryFn: async () => {
       const data = await adminGeneralApi.getAuditLogs();
-      return data.logs || [];
+      if (Array.isArray(data)) return data;
+      return data?.logs || data?.data?.logs || [];
     },
     ...options,
   });
 }
+
 
 export function useImpersonate() {
   return useMutation({

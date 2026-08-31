@@ -7,7 +7,6 @@ import {
   useUpdateDoctor,
   useUpdateDoctorStatus,
   useDeleteDoctor,
-  useImpersonate,
   useAdminDoctorAppointments,
   useAdminHospitals,
   useAdminDoctorPracticeLocations,
@@ -15,13 +14,13 @@ import {
   useUpdateDoctorPracticeLocation,
   useDeleteDoctorPracticeLocation,
 } from "@/lib/hooks/useApi";
+
 import { toast } from "sonner";
 import {
   Users,
   CheckCircle,
   XCircle,
   Trash,
-  SignIn,
   CaretLeft,
   CaretRight,
   MagnifyingGlass,
@@ -38,6 +37,7 @@ import {
   Check,
   Eye,
   CalendarCheck,
+
   ShieldCheck,
   EnvelopeSimple,
   UserCheck,
@@ -125,10 +125,10 @@ export default function AdminDoctorsPage() {
   const updateDoctorMutation = useUpdateDoctor();
   const updateStatusMutation = useUpdateDoctorStatus();
   const deleteDoctorMutation = useDeleteDoctor();
-  const impersonateMutation = useImpersonate();
   const createLocationMutation = useCreateDoctorPracticeLocation();
   const updateLocationMutation = useUpdateDoctorPracticeLocation();
   const deleteLocationMutation = useDeleteDoctorPracticeLocation();
+
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -329,33 +329,8 @@ export default function AdminDoctorsPage() {
     }
   };
 
-  const handleImpersonate = async (doctor) => {
-    try {
-      const res = await impersonateMutation.mutateAsync({ entity_id: doctor.id, role: "doctor" });
-      const tokens = res?.tokens || res?.data?.tokens;
-      const role = res?.role || res?.data?.role || "doctor";
-      const profile = res?.profile || res?.data?.profile || doctor;
-
-      if (!tokens) {
-        throw new Error("Impersonation tokens missing from server response");
-      }
-
-      const { setPartnerSession } = await import("@/lib/partnerAuth");
-      setPartnerSession({
-        tokens,
-        role,
-        partner: profile,
-      });
-
-      toast.success(`Logged in as Dr. ${doctor.name}`);
-      const { partnerRoutes } = await import("@/lib/constants/partnerRoutes");
-      window.open(partnerRoutes.doctor.dashboard, "_blank");
-    } catch (e) {
-      toast.error(e.message || "Failed to impersonate");
-    }
-  };
-
   const toggleDay = (day) => {
+
     setLocationForm((prev) => ({
       ...prev,
       days: prev.days.includes(day) ? prev.days.filter((d) => d !== day) : [...prev.days, day],
@@ -796,17 +771,6 @@ export default function AdminDoctorsPage() {
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
-                  {/* Magic Login as Doctor */}
-                  <button
-                    onClick={() => handleImpersonate(viewDoctor)}
-                    disabled={impersonateMutation.isPending}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#0FA7E3]/15 hover:bg-[#0FA7E3] text-[#0FA7E3] hover:text-white text-xs font-bold transition-all border border-[#0FA7E3]/30"
-                    title="Login to Doctor Portal"
-                  >
-                    <SignIn size={15} weight="bold" />
-                    <span>Portal Login</span>
-                  </button>
-
                   <button
                     onClick={() => setViewDoctor(null)}
                     className="text-slate-400 hover:text-slate-600 p-2 rounded-xl hover:bg-slate-200/50 transition-colors"
@@ -814,6 +778,7 @@ export default function AdminDoctorsPage() {
                     <X size={20} weight="bold" />
                   </button>
                 </div>
+
               </div>
 
               {/* Navigation Tabs inside Detail Modal */}

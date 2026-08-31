@@ -97,6 +97,66 @@ async function parseResponse(response) {
   return null;
 }
 
+let activeRefreshPromise = null;
+
+async function executeTokenRefresh(isPartner) {
+  if (activeRefreshPromise) {
+    return activeRefreshPromise;
+  }
+
+  activeRefreshPromise = (async () => {
+    try {
+      const refreshToken = isPartner
+        ? localStorage.getItem("partnerRefreshToken")
+        : localStorage.getItem("refreshToken");
+
+      if (!refreshToken) {
+        return null;
+      }
+
+      const refreshRes = await fetch(`${API_BASE}/auth/refresh`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refreshToken }),
+      });
+
+      if (!refreshRes.ok) {
+        return null;
+      }
+
+      const data = await refreshRes.json();
+      const newAuth = data.data || data;
+
+      if (isPartner) {
+        if (newAuth.tokens?.accessToken || newAuth.token) {
+          const accToken = newAuth.tokens?.accessToken || newAuth.token;
+          const refToken = newAuth.tokens?.refreshToken || newAuth.refreshToken;
+          localStorage.setItem("partnerToken", accToken);
+          if (refToken) localStorage.setItem("partnerRefreshToken", refToken);
+          return accToken;
+        }
+      } else {
+        if (newAuth.tokens?.accessToken || newAuth.token) {
+          const accToken = newAuth.tokens?.accessToken || newAuth.token;
+          const refToken = newAuth.tokens?.refreshToken || newAuth.refreshToken;
+          localStorage.setItem("token", accToken);
+          if (refToken) localStorage.setItem("refreshToken", refToken);
+          if (newAuth.user) localStorage.setItem("medzoos_user", JSON.stringify(newAuth.user));
+          return accToken;
+        }
+      }
+
+      return null;
+    } catch {
+      return null;
+    } finally {
+      activeRefreshPromise = null;
+    }
+  })();
+
+  return activeRefreshPromise;
+}
+
 export async function apiClient(path, options = {}) {
   const { method = "GET", body, headers = {}, auth, ...rest } = options;
   const token = resolveAuthToken(path, { auth, method });
@@ -120,69 +180,50 @@ export async function apiClient(path, options = {}) {
   const payload = await parseResponse(response);
 
   if (!response.ok) {
-    if (response.status === 401 && typeof window !== 'undefined') {
+    if (response.status === 401 && typeof window !== "undefined") {
       const pathname = window.location.pathname;
       const isPartner = isPartnerPortalPath(pathname);
-      const refreshToken = isPartner ? localStorage.getItem('partnerRefreshToken') : localStorage.getItem('refreshToken');
-      
-      if (refreshToken) {
-        try {
-          const refreshRes = await fetch(`${API_BASE}/auth/refresh`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ refreshToken })
-          });
-          if (refreshRes.ok) {
-            const data = await refreshRes.json();
-            const newAuth = data.data || data;
-            if (isPartner) {
-              localStorage.setItem('partnerToken', newAuth.token);
-              if (newAuth.refreshToken) localStorage.setItem('partnerRefreshToken', newAuth.refreshToken);
-            } else {
-              localStorage.setItem('token', newAuth.token);
-              if (newAuth.refreshToken) localStorage.setItem('refreshToken', newAuth.refreshToken);
-            }
-            config.headers.Authorization = `Bearer ${newAuth.token}`;
-            const retryResponse = await fetch(`${API_BASE}${path}`, config);
-            const retryPayload = await parseResponse(retryResponse).catch(() => null);
-            if (retryResponse.ok) {
-              if (retryResponse.status === 204) return null;
-              return retryPayload?.data ?? retryPayload;
-            }
-          }
-        } catch (e) {
-          // Fall through to clear tokens if refresh fails
+
+      // Attempt unified token refresh
+      const newToken = await executeTokenRefresh(isPartner);
+
+      if (newToken) {
+        config.headers.Authorization = `Bearer ${newToken}`;
+        const retryResponse = await fetch(`${API_BASE}${path}`, config);
+        const retryPayload = await parseResponse(retryResponse).catch(() => null);
+        if (retryResponse.ok) {
+          if (retryResponse.status === 204) return null;
+          return retryPayload?.data ?? retryPayload;
         }
       }
 
-      const hadPartnerSession = Boolean(localStorage.getItem('partnerToken'));
-      const hadCustomerSession = Boolean(localStorage.getItem('token'));
-
-      if (hadCustomerSession) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
-      }
-      if (hadPartnerSession && isPartner) {
-        localStorage.removeItem('partnerToken');
-        localStorage.removeItem('partnerRefreshToken');
-        localStorage.removeItem('partnerRole');
-        localStorage.removeItem('partnerData');
+      // If refresh failed or was not possible, clear session and redirect
+      if (!isPartner) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("medzoos_user");
+      } else {
+        localStorage.removeItem("partnerToken");
+        localStorage.removeItem("partnerRefreshToken");
+        localStorage.removeItem("partnerRole");
+        localStorage.removeItem("partnerData");
       }
 
       const currentPath = window.location.pathname;
-      if (!currentPath.includes("/login") && !currentPath.includes("/sign-in")) {
+      if (!currentPath.includes("/login") && !currentPath.includes("/portal-access") && !currentPath.includes("/sign-in")) {
         window.location.href = getExpiredRedirectPath(currentPath);
       }
     }
+
     let message =
       payload?.message ||
       payload?.error?.message ||
       `Request failed with status ${response.status}`;
-    
+
     if (message.toLowerCase().includes("jwt expired")) {
       message = "Your session has expired. Please log in again.";
     }
-    
+
     throw new ApiError(message, response.status, payload);
   }
 

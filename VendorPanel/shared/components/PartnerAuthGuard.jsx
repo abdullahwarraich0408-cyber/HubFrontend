@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { isPartnerAuthenticated } from "@/lib/partnerAuth";
+import { isPartnerAuthenticated, setPartnerSession } from "@/lib/partnerAuth";
 import { partnerRoutes } from "@/lib/constants/partnerRoutes";
 
 const LOGIN_PATHS = {
@@ -13,15 +13,33 @@ const LOGIN_PATHS = {
 
 export function PartnerAuthGuard({ role, children }) {
   const router = useRouter();
-  const isAuth = typeof window !== "undefined" && isPartnerAuthenticated(role);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (!isAuth) {
-      router.replace(LOGIN_PATHS[role] || "/");
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const accessToken = params.get("accessToken");
+      if (accessToken) {
+        setPartnerSession({
+          tokens: {
+            accessToken,
+            refreshToken: params.get("refreshToken") || undefined,
+          },
+          role: params.get("role") || role || "vendor",
+          partner: params.get("partner") ? JSON.parse(params.get("partner")) : undefined,
+        });
+        window.history.replaceState({}, "", window.location.pathname);
+      }
     }
-  }, [isAuth, role, router]);
 
-  if (!isAuth) {
+    if (!isPartnerAuthenticated(role)) {
+      router.replace(LOGIN_PATHS[role] || "/");
+      return;
+    }
+    setReady(true);
+  }, [role, router]);
+
+  if (!ready) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-surface-subtle">
         <div className="text-[14px] text-neutral-500 font-medium">Loading portal...</div>

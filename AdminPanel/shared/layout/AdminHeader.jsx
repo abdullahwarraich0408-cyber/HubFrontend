@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { 
   MagnifyingGlass, 
-  Globe, 
   ShieldCheck,
   Clock,
   CaretDown,
@@ -18,18 +17,19 @@ import {
   Pill,
   CalendarCheck,
   Tag,
-  ArrowSquareOut,
   X,
   Check,
   User,
   Sparkle
 } from "@phosphor-icons/react";
+
 import { NotificationInbox } from "@/shared/notifications/NotificationInbox";
 import { getAdminSocket } from "@/lib/socket";
 import { clearAdminSession } from "@/lib/auth/adminSession";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
+import { useUserProfile } from "@/lib/hooks/useApi";
 
 const QUICK_SEARCH_ITEMS = [
   { name: "Executive Dashboard", path: "/admin", category: "Core Navigation", icon: ChartLineUp },
@@ -48,15 +48,24 @@ const QUICK_SEARCH_ITEMS = [
 export function AdminHeader() {
   const router = useRouter();
   const pathname = usePathname();
+  const { data: userProfile } = useUserProfile();
   const [time, setTime] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [isPortalsOpen, setIsPortalsOpen] = useState(false);
+
+  const adminName = userProfile?.name || "Super Admin";
+  const adminEmail = userProfile?.email || "admin@medzoos.com";
+
+  const adminInitials = useMemo(() => {
+    if (!adminName) return "SA";
+    const parts = adminName.trim().split(/\s+/);
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return adminName.slice(0, 2).toUpperCase();
+  }, [adminName]);
 
   const searchRef = useRef(null);
   const profileRef = useRef(null);
-  const portalsRef = useRef(null);
 
   // Live Realtime Clock
   useEffect(() => {
@@ -83,7 +92,6 @@ export function AdminHeader() {
       if (e.key === "Escape") {
         setIsSearchOpen(false);
         setIsProfileOpen(false);
-        setIsPortalsOpen(false);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -99,13 +107,11 @@ export function AdminHeader() {
       if (profileRef.current && !profileRef.current.contains(e.target)) {
         setIsProfileOpen(false);
       }
-      if (portalsRef.current && !portalsRef.current.contains(e.target)) {
-        setIsPortalsOpen(false);
-      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
 
   // Filter search matches
   const searchResults = useMemo(() => {
@@ -251,64 +257,9 @@ export function AdminHeader() {
           <span>System Operational</span>
         </div>
 
-        {/* Partner Portals Fast Switcher */}
-        <div className="relative hidden md:block" ref={portalsRef}>
-          <button
-            onClick={() => setIsPortalsOpen(!isPortalsOpen)}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-[#082B3F] hover:text-white border border-slate-200/80 text-xs font-bold text-[#082B3F] transition-all shadow-2xs"
-          >
-            <Globe size={15} weight="bold" />
-            <span>Portals</span>
-            <CaretDown size={12} weight="bold" className={`transition-transform ${isPortalsOpen ? "rotate-180" : ""}`} />
-          </button>
-
-          {isPortalsOpen && (
-            <div className="absolute right-0 mt-2 w-52 bg-white rounded-2xl border border-slate-200 shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-              <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                Partner Cloud Portals
-              </div>
-              <a
-                href={process.env.NEXT_PUBLIC_DOCTOR_PANEL_URL || "http://localhost:3002"}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 text-xs font-bold text-[#082B3F] transition-colors group"
-              >
-                <div className="flex items-center gap-2">
-                  <Stethoscope size={16} className="text-[#0FA7E3]" weight="bold" />
-                  <span>Doctor Portal</span>
-                </div>
-                <ArrowSquareOut size={14} className="text-slate-400 group-hover:text-[#082B3F]" />
-              </a>
-              <a
-                href={process.env.NEXT_PUBLIC_VENDOR_PANEL_URL || "http://localhost:3003"}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 text-xs font-bold text-[#082B3F] transition-colors group"
-              >
-                <div className="flex items-center gap-2">
-                  <Storefront size={16} className="text-emerald-500" weight="bold" />
-                  <span>Pharmacy Portal</span>
-                </div>
-                <ArrowSquareOut size={14} className="text-slate-400 group-hover:text-[#082B3F]" />
-              </a>
-              <a
-                href={process.env.NEXT_PUBLIC_LAB_PANEL_URL || "http://localhost:3004"}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 text-xs font-bold text-[#082B3F] transition-colors group"
-              >
-                <div className="flex items-center gap-2">
-                  <Flask size={16} className="text-indigo-500" weight="bold" />
-                  <span>Lab Diagnostics</span>
-                </div>
-                <ArrowSquareOut size={14} className="text-slate-400 group-hover:text-[#082B3F]" />
-              </a>
-            </div>
-          )}
-        </div>
-
         {/* Real-time Socket Notification Inbox */}
         <NotificationInbox getSocket={getAdminSocket} />
+
 
         {/* Executive Admin Profile Menu Dropdown */}
         <div className="relative pl-2" ref={profileRef}>
@@ -318,12 +269,12 @@ export function AdminHeader() {
           >
             {/* Gradient Avatar */}
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#0FA7E3] to-[#082B3F] text-white flex items-center justify-center font-extrabold text-xs shadow-sm">
-              SA
+              {adminInitials}
             </div>
             <div className="hidden md:flex flex-col text-left">
               <div className="flex items-center gap-1">
-                <span className="text-xs font-bold text-[#082B3F] group-hover:text-[#0FA7E3] transition-colors">
-                  Super Admin
+                <span className="text-xs font-bold text-[#082B3F] group-hover:text-[#0FA7E3] transition-colors truncate max-w-[120px]">
+                  {adminName}
                 </span>
                 <ShieldCheck size={14} weight="fill" className="text-emerald-500 shrink-0" />
               </div>
@@ -340,11 +291,11 @@ export function AdminHeader() {
               <div className="p-4 border-b border-slate-100 bg-slate-50/50">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0FA7E3] to-[#082B3F] text-white flex items-center justify-center font-extrabold text-sm shadow-sm">
-                    SA
+                    {adminInitials}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs font-bold text-[#082B3F] truncate">Super Administrator</p>
-                    <p className="text-[11px] text-slate-400 font-mono truncate">admin@medzoos.com</p>
+                    <p className="text-xs font-bold text-[#082B3F] truncate">{adminName}</p>
+                    <p className="text-[11px] text-slate-400 font-mono truncate">{adminEmail}</p>
                   </div>
                 </div>
               </div>

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuditLogs } from "@/lib/hooks/useApi";
 import {
   ShieldCheck,
@@ -24,11 +26,14 @@ import {
   Shield,
   Activity,
   FileCode,
+  ArrowSquareOut,
+  Info,
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
 
 export default function AdminAuditLogsPage() {
-  const { data: logs = [], isLoading: logsLoading, refetch } = useAuditLogs();
+  const queryClient = useQueryClient();
+  const { data: logs = [], isLoading: logsLoading, isFetching, refetch } = useAuditLogs();
 
   const [search, setSearch] = useState("");
   const [entityFilter, setEntityFilter] = useState("all");
@@ -37,6 +42,8 @@ export default function AdminAuditLogsPage() {
 
   const [viewLog, setViewLog] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
 
   // Key Metrics
   const kpis = useMemo(() => {
@@ -91,10 +98,57 @@ export default function AdminAuditLogsPage() {
   );
 
   const copyToClipboard = (text, id) => {
+    if (!text) return;
     navigator.clipboard.writeText(text);
     setCopiedId(id || text);
     toast.success("Copied to clipboard!");
     setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const getEntityLink = (entity, entityId) => {
+    if (!entity) return null;
+    const e = entity.toLowerCase();
+    switch (e) {
+      case "doctor":
+        return entityId ? `/admin/doctors?search=${encodeURIComponent(entityId)}` : "/admin/doctors";
+      case "vendor":
+      case "pharmacy":
+        return entityId ? `/admin/vendors?search=${encodeURIComponent(entityId)}` : "/admin/vendors";
+      case "hospital":
+        return entityId ? `/admin/hospitals?search=${encodeURIComponent(entityId)}` : "/admin/hospitals";
+      case "lab":
+        return entityId ? `/admin/labs?search=${encodeURIComponent(entityId)}` : "/admin/labs";
+      case "offer":
+        return "/admin/marketing";
+      case "customer":
+      case "user":
+      case "patient":
+        return entityId ? `/admin/customers?search=${encodeURIComponent(entityId)}` : "/admin/customers";
+      case "order":
+        return "/admin/orders";
+      case "prescription":
+        return "/admin/prescription-orders";
+      case "product":
+        return "/admin/products";
+      default:
+        return null;
+    }
+  };
+
+  const handleRefresh = async () => {
+    try {
+      setIsRefreshing(true);
+      await Promise.all([
+        refetch(),
+        queryClient.invalidateQueries({ queryKey: ["admin-audit-logs"] }),
+      ]);
+      toast.success("Audit trail refreshed successfully");
+    } catch (err) {
+      console.error("Audit log refresh error:", err);
+      toast.error("Failed to refresh audit trail");
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   const handleExportCSV = () => {
@@ -183,11 +237,18 @@ export default function AdminAuditLogsPage() {
 
         <div className="flex items-center gap-3">
           <button
-            onClick={() => refetch()}
-            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold transition-all shadow-sm"
+            type="button"
+            onClick={handleRefresh}
+            disabled={isRefreshing || isFetching}
+            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 disabled:opacity-60 rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer disabled:cursor-not-allowed"
+            title="Refresh Audit Logs"
           >
-            <ArrowsClockwise size={16} weight="bold" />
-            <span>Refresh</span>
+            <ArrowsClockwise
+              size={16}
+              weight="bold"
+              className={isRefreshing || isFetching ? "animate-spin text-[#0FA7E3]" : ""}
+            />
+            <span>{isRefreshing || isFetching ? "Refreshing..." : "Refresh"}</span>
           </button>
           <button
             onClick={handleExportCSV}
@@ -198,6 +259,7 @@ export default function AdminAuditLogsPage() {
           </button>
         </div>
       </div>
+
 
       {/* KPI Summary Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -328,97 +390,127 @@ export default function AdminAuditLogsPage() {
                   </td>
                 </tr>
               ) : (
-                currentLogs.map((log) => (
-                  <tr
-                    key={log.id}
-                    className="hover:bg-slate-50/70 transition-colors group cursor-pointer"
-                    onClick={() => setViewLog(log)}
-                  >
-                    {/* Timestamp */}
-                    <td className="py-3.5 px-5">
-                      <div className="flex items-center gap-2">
-                        <Clock size={15} className="text-slate-400 shrink-0" />
-                        <div>
-                          <span className="text-xs font-bold text-[#082B3F] block">
-                            {new Date(log.created_at || Date.now()).toLocaleDateString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            })}
-                          </span>
-                          <span className="text-[10px] text-slate-400 font-mono">
-                            {new Date(log.created_at || Date.now()).toLocaleTimeString()}
-                          </span>
+                currentLogs.map((log) => {
+                  const entityLink = getEntityLink(log.entity, log.entity_id);
+                  return (
+                    <tr
+                      key={log.id}
+                      className="hover:bg-slate-50/70 transition-colors group"
+                    >
+                      {/* Timestamp */}
+                      <td className="py-3.5 px-5">
+                        <div className="flex items-center gap-2">
+                          <Clock size={15} className="text-slate-400 shrink-0" />
+                          <div>
+                            <span className="text-xs font-bold text-[#082B3F] block">
+                              {new Date(log.created_at || Date.now()).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              })}
+                            </span>
+                            <span className="text-[10px] text-slate-400 font-mono">
+                              {new Date(log.created_at || Date.now()).toLocaleTimeString()}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    </td>
+                      </td>
 
-                    {/* Action Triggered */}
-                    <td className="py-3.5 px-4">
-                      {getActionBadge(log.action)}
-                    </td>
+                      {/* Action Triggered */}
+                      <td className="py-3.5 px-4">
+                        {getActionBadge(log.action)}
+                      </td>
 
-                    {/* Target Entity */}
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
-                          {getEntityIcon(log.entity)}
-                        </div>
-                        <div className="min-w-0">
-                          <span className="text-xs font-bold text-[#082B3F] capitalize block">
-                            {log.entity || "System"}
-                          </span>
-                          {log.entity_id && (
-                            <span className="text-[10px] text-slate-400 font-mono flex items-center gap-1">
-                              ID: ...{log.entity_id.slice(-8)}
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  copyToClipboard(log.entity_id, `ent_${log.id}`);
-                                }}
-                                className="text-slate-400 hover:text-slate-700"
-                                title="Copy Entity ID"
+                      {/* Target Entity */}
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+                            {getEntityIcon(log.entity)}
+                          </div>
+                          <div className="min-w-0">
+                            {entityLink ? (
+                              <Link
+                                href={entityLink}
+                                className="text-xs font-bold text-[#082B3F] hover:text-[#0FA7E3] capitalize inline-flex items-center gap-1 transition-colors"
+                                title={`Navigate to ${log.entity || "Entity"}`}
                               >
-                                {copiedId === `ent_${log.id}` ? (
+                                <span>{log.entity || "System"}</span>
+                                <ArrowSquareOut size={12} className="text-slate-400 hover:text-[#0FA7E3]" />
+                              </Link>
+                            ) : (
+                              <span className="text-xs font-bold text-[#082B3F] capitalize block">
+                                {log.entity || "System"}
+                              </span>
+                            )}
+
+                            {log.entity_id && (
+                              <div className="text-[10px] text-slate-400 font-mono flex items-center gap-1 mt-0.5">
+                                <span title={log.entity_id}>ID: ...{log.entity_id.slice(-8)}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => copyToClipboard(log.entity_id, `ent_${log.id}`)}
+                                  className="text-slate-400 hover:text-slate-700 p-0.5 rounded hover:bg-slate-200/50 transition-colors"
+                                  title="Copy Entity ID"
+                                >
+                                  {copiedId === `ent_${log.id}` ? (
+                                    <Check size={11} className="text-emerald-500" />
+                                  ) : (
+                                    <Copy size={11} />
+                                  )}
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Actor / Admin */}
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+                          <User size={14} className="text-slate-400 shrink-0" />
+                          {log.user_id ? (
+                            <div className="flex items-center gap-1">
+                              <span className="font-mono text-[11px] text-slate-700" title={log.user_id}>
+                                ...{log.user_id.slice(-12)}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => copyToClipboard(log.user_id, `usr_${log.id}`)}
+                                className="text-slate-400 hover:text-slate-700 p-0.5 rounded hover:bg-slate-200/50 transition-colors"
+                                title="Copy Admin ID"
+                              >
+                                {copiedId === `usr_${log.id}` ? (
                                   <Check size={11} className="text-emerald-500" />
                                 ) : (
                                   <Copy size={11} />
                                 )}
                               </button>
+                            </div>
+                          ) : (
+                            <span className="text-[11px] text-slate-500 italic">
+                              System Administrator
                             </span>
                           )}
                         </div>
-                      </div>
-                    </td>
+                      </td>
 
-                    {/* Actor / Admin */}
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
-                        <User size={14} className="text-slate-400 shrink-0" />
-                        <span className="font-mono text-[11px] truncate max-w-[140px]">
-                          {log.user_id || "System Administrator"}
-                        </span>
-                      </div>
-                    </td>
-
-                    {/* Payload Actions */}
-                    <td className="py-3.5 px-5 text-right">
-                      <div
-                        className="flex items-center justify-end gap-1.5"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <button
-                          onClick={() => setViewLog(log)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-[#082B3F] text-[#082B3F] hover:text-white text-xs font-bold transition-all shadow-sm border border-slate-200"
-                          title="Inspect Event Payload"
-                        >
-                          <Eye size={15} weight="bold" />
-                          <span>Inspect</span>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      {/* Payload Actions */}
+                      <td className="py-3.5 px-5 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => setViewLog(log)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-[#082B3F] text-[#082B3F] hover:text-white text-xs font-bold transition-all shadow-sm border border-slate-200"
+                            title="Inspect Event Payload"
+                          >
+                            <Eye size={15} weight="bold" />
+                            <span>Inspect</span>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -479,13 +571,28 @@ export default function AdminAuditLogsPage() {
                     <h2 className="text-lg font-bold text-[#082B3F]">
                       Audit Event Inspector
                     </h2>
-                    <p className="text-xs text-slate-500 font-mono mt-0.5">
-                      Event ID: {viewLog.id}
-                    </p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <p className="text-xs text-slate-500 font-mono">
+                        Event ID: {viewLog.id}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(viewLog.id, "modal_id")}
+                        className="text-slate-400 hover:text-slate-700"
+                        title="Copy Event ID"
+                      >
+                        {copiedId === "modal_id" ? (
+                          <Check size={12} className="text-emerald-500" />
+                        ) : (
+                          <Copy size={12} />
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
 
                 <button
+                  type="button"
                   onClick={() => setViewLog(null)}
                   className="text-slate-400 hover:text-slate-600 p-2 rounded-xl hover:bg-slate-200/50 transition-colors"
                 >
@@ -504,15 +611,46 @@ export default function AdminAuditLogsPage() {
                 </div>
                 <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100">
                   <span className="text-[10px] uppercase font-bold text-slate-400 block">Target Entity</span>
-                  <span className="text-xs font-bold text-[#082B3F] capitalize mt-0.5 block">{viewLog.entity}</span>
+                  <div className="flex items-center justify-between mt-0.5">
+                    <span className="text-xs font-bold text-[#082B3F] capitalize">{viewLog.entity || "System"}</span>
+                    {getEntityLink(viewLog.entity, viewLog.entity_id) && (
+                      <Link
+                        href={getEntityLink(viewLog.entity, viewLog.entity_id)}
+                        className="text-[11px] font-bold text-[#0FA7E3] hover:underline inline-flex items-center gap-0.5"
+                      >
+                        <span>View</span>
+                        <ArrowSquareOut size={11} />
+                      </Link>
+                    )}
+                  </div>
                 </div>
                 <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100">
                   <span className="text-[10px] uppercase font-bold text-slate-400 block">Timestamp</span>
                   <span className="text-xs font-bold text-[#082B3F] mt-0.5 block">
-                    {new Date(viewLog.created_at).toLocaleString()}
+                    {new Date(viewLog.created_at || Date.now()).toLocaleString()}
                   </span>
                 </div>
               </div>
+
+              {/* Structured Details if available */}
+              {viewLog.details && typeof viewLog.details === "object" && Object.keys(viewLog.details).length > 0 && (
+                <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-4 space-y-2">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-[#082B3F]">
+                    <Info size={15} className="text-[#0FA7E3]" weight="bold" />
+                    <span>Event Metadata Summary</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                    {Object.entries(viewLog.details).map(([k, v]) => (
+                      <div key={k} className="bg-white/80 p-2 rounded-lg border border-blue-100/60">
+                        <span className="font-bold text-slate-500 capitalize">{k.replace(/_/g, " ")}: </span>
+                        <span className="font-mono text-slate-800">
+                          {typeof v === "object" ? JSON.stringify(v) : String(v)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
@@ -520,6 +658,7 @@ export default function AdminAuditLogsPage() {
                     Full JSON Payload
                   </h3>
                   <button
+                    type="button"
                     onClick={() => copyToClipboard(JSON.stringify(viewLog, null, 2), "payload")}
                     className="text-xs font-bold text-[#0FA7E3] hover:underline flex items-center gap-1"
                   >
@@ -550,3 +689,4 @@ export default function AdminAuditLogsPage() {
     </div>
   );
 }
+

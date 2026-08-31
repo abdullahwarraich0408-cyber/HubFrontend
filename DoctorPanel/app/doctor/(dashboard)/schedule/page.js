@@ -24,30 +24,6 @@ const TABS = [
   { id: "online", label: "Online Schedule", icon: Video },
 ];
 
-export default function DoctorSchedulePage() {
-  const { data: apiSchedule = [], isLoading } = useDoctorPortalSchedule();
-  const updateSchedule = useUpdateDoctorSchedule();
-  const [activeTab, setActiveTab] = useState("hospitals");
-  const [schedule, setSchedule] = useState(DEFAULT_SCHEDULE);
-  const [editingDay, setEditingDay] = useState(null);
-  const [newSlot, setNewSlot] = useState("");
-
-  useEffect(() => {
-    if (apiSchedule.length > 0) {
-      setSchedule(apiSchedule);
-    }
-  }, [apiSchedule]);
-
-  const persistSchedule = async (next) => {
-    setSchedule(next);
-    try {
-      await updateSchedule.mutateAsync(next);
-      toast.success("Online schedule saved");
-    } catch (error) {
-      toast.error(error.message || "Could not save schedule");
-    }
-  };
-
 function parseTimePart(part) {
   if (!part) return null;
   const str = String(part).trim();
@@ -86,6 +62,30 @@ export function validateAndFormatTimeSlot(rawSlot) {
   if (start == null || end == null || end <= start) return null;
   return `${formatMinutes(start)} - ${formatMinutes(end)}`;
 }
+
+export default function DoctorSchedulePage() {
+  const { data: apiSchedule = [], isLoading } = useDoctorPortalSchedule();
+  const updateSchedule = useUpdateDoctorSchedule();
+  const [activeTab, setActiveTab] = useState("hospitals");
+  const [schedule, setSchedule] = useState(DEFAULT_SCHEDULE);
+  const [editingDay, setEditingDay] = useState(null);
+  const [newSlot, setNewSlot] = useState("");
+
+  useEffect(() => {
+    if (apiSchedule.length > 0) {
+      setSchedule(apiSchedule);
+    }
+  }, [apiSchedule]);
+
+  const persistSchedule = async (next) => {
+    setSchedule(next);
+    try {
+      await updateSchedule.mutateAsync(next);
+      toast.success("Online schedule saved");
+    } catch (error) {
+      toast.error(error.message || "Could not save schedule");
+    }
+  };
 
   const addSlot = (day, applyToWeekdays = false) => {
     if (!newSlot.trim()) {

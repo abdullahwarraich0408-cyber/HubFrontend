@@ -24,42 +24,6 @@ const emptyForm = {
   slots: DEFAULT_SLOT,
 };
 
-export function HospitalScheduleManager() {
-  const { data: profile } = useDoctorPortalProfile();
-  const { data: hospitals = [], isLoading: hospitalsLoading } = useDoctorPortalHospitals();
-  const { data: locations = [], isLoading: locationsLoading } = useDoctorPortalPracticeLocations();
-  const createLocation = useCreateDoctorPracticeLocation();
-  const updateLocation = useUpdateDoctorPracticeLocation();
-  const deleteLocation = useDeleteDoctorPracticeLocation();
-
-  const [form, setForm] = useState(emptyForm);
-  const [editingId, setEditingId] = useState(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-
-  const toggleDay = (day) => {
-    setForm((prev) => ({
-      ...prev,
-      days: prev.days.includes(day) ? prev.days.filter((d) => d !== day) : [...prev.days, day],
-    }));
-  };
-
-  const resetForm = () => {
-    setForm({ ...emptyForm, fee: profile?.fee ? String(profile.fee) : "" });
-    setEditingId(null);
-    setDrawerOpen(false);
-  };
-
-  const startEdit = (location) => {
-    setEditingId(location.id);
-    setForm({
-      hospital_id: location.hospital_id || "",
-      fee: location.fee ? String(location.fee) : "",
-      days: location.days || [],
-      slots: location.schedule?.find((entry) => entry.slots?.length)?.slots?.[0] || DEFAULT_SLOT,
-    });
-    setDrawerOpen(true);
-  };
-
 function parseTimePart(part) {
   if (!part) return null;
   const str = String(part).trim();
@@ -98,6 +62,42 @@ export function validateAndFormatTimeSlot(rawSlot) {
   if (start == null || end == null || end <= start) return null;
   return `${formatMinutes(start)} - ${formatMinutes(end)}`;
 }
+
+export function HospitalScheduleManager() {
+  const { data: profile } = useDoctorPortalProfile();
+  const { data: hospitals = [], isLoading: hospitalsLoading } = useDoctorPortalHospitals();
+  const { data: locations = [], isLoading: locationsLoading } = useDoctorPortalPracticeLocations();
+  const createLocation = useCreateDoctorPracticeLocation();
+  const updateLocation = useUpdateDoctorPracticeLocation();
+  const deleteLocation = useDeleteDoctorPracticeLocation();
+
+  const [form, setForm] = useState(emptyForm);
+  const [editingId, setEditingId] = useState(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const toggleDay = (day) => {
+    setForm((prev) => ({
+      ...prev,
+      days: prev.days.includes(day) ? prev.days.filter((d) => d !== day) : [...prev.days, day],
+    }));
+  };
+
+  const resetForm = () => {
+    setForm({ ...emptyForm, fee: profile?.fee ? String(profile.fee) : "" });
+    setEditingId(null);
+    setDrawerOpen(false);
+  };
+
+  const startEdit = (location) => {
+    setEditingId(location.id);
+    setForm({
+      hospital_id: location.hospital_id || "",
+      fee: location.fee ? String(location.fee) : "",
+      days: location.days || [],
+      slots: location.schedule?.find((entry) => entry.slots?.length)?.slots?.[0] || DEFAULT_SLOT,
+    });
+    setDrawerOpen(true);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();

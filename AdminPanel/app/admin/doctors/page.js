@@ -118,6 +118,45 @@ const emptyLocationForm = {
   slots: DEFAULT_SLOT,
 };
 
+function parseTimePart(part) {
+  if (!part) return null;
+  const str = String(part).trim();
+  const match12 = str.match(/^(0?[1-9]|1[0-2])(?::([0-5][0-9]))?\s*(AM|PM|am|pm)$/i);
+  if (match12) {
+    let hours = parseInt(match12[1], 10);
+    const minutes = match12[2] ? parseInt(match12[2], 10) : 0;
+    const meridiem = match12[3].toUpperCase();
+    if (meridiem === "PM" && hours < 12) hours += 12;
+    if (meridiem === "AM" && hours === 12) hours = 0;
+    return hours * 60 + minutes;
+  }
+  const match24 = str.match(/^([01]?[0-9]|2[0-3]):([0-5][0-9])$/);
+  if (match24) {
+    const hours = parseInt(match24[1], 10);
+    const minutes = parseInt(match24[2], 10);
+    return hours * 60 + minutes;
+  }
+  return null;
+}
+
+function formatMinutes(minutes) {
+  const hrs24 = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  const meridiem = hrs24 >= 12 ? "PM" : "AM";
+  const hrs12 = hrs24 % 12 || 12;
+  return `${String(hrs12).padStart(2, "0")}:${String(mins).padStart(2, "0")} ${meridiem}`;
+}
+
+export function validateAndFormatTimeSlot(rawSlot) {
+  if (!rawSlot || typeof rawSlot !== "string") return null;
+  const parts = rawSlot.replace(/[–—]/g, "-").split("-").map((p) => p.trim()).filter(Boolean);
+  if (parts.length !== 2) return null;
+  const start = parseTimePart(parts[0]);
+  const end = parseTimePart(parts[1]);
+  if (start == null || end == null || end <= start) return null;
+  return `${formatMinutes(start)} - ${formatMinutes(end)}`;
+}
+
 export default function AdminDoctorsPage() {
   const { data: doctors = [], isLoading } = useAdminDoctors();
   const { data: hospitals = [] } = useAdminHospitals();
@@ -371,45 +410,6 @@ export default function AdminDoctorsPage() {
       fee: viewDoctor?.fee ? String(viewDoctor.fee) : "",
     });
   };
-
-function parseTimePart(part) {
-  if (!part) return null;
-  const str = String(part).trim();
-  const match12 = str.match(/^(0?[1-9]|1[0-2])(?::([0-5][0-9]))?\s*(AM|PM|am|pm)$/i);
-  if (match12) {
-    let hours = parseInt(match12[1], 10);
-    const minutes = match12[2] ? parseInt(match12[2], 10) : 0;
-    const meridiem = match12[3].toUpperCase();
-    if (meridiem === "PM" && hours < 12) hours += 12;
-    if (meridiem === "AM" && hours === 12) hours = 0;
-    return hours * 60 + minutes;
-  }
-  const match24 = str.match(/^([01]?[0-9]|2[0-3]):([0-5][0-9])$/);
-  if (match24) {
-    const hours = parseInt(match24[1], 10);
-    const minutes = parseInt(match24[2], 10);
-    return hours * 60 + minutes;
-  }
-  return null;
-}
-
-function formatMinutes(minutes) {
-  const hrs24 = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  const meridiem = hrs24 >= 12 ? "PM" : "AM";
-  const hrs12 = hrs24 % 12 || 12;
-  return `${String(hrs12).padStart(2, "0")}:${String(mins).padStart(2, "0")} ${meridiem}`;
-}
-
-export function validateAndFormatTimeSlot(rawSlot) {
-  if (!rawSlot || typeof rawSlot !== "string") return null;
-  const parts = rawSlot.replace(/[–—]/g, "-").split("-").map((p) => p.trim()).filter(Boolean);
-  if (parts.length !== 2) return null;
-  const start = parseTimePart(parts[0]);
-  const end = parseTimePart(parts[1]);
-  if (start == null || end == null || end <= start) return null;
-  return `${formatMinutes(start)} - ${formatMinutes(end)}`;
-}
 
   const handleSaveLocation = async (e) => {
     e.preventDefault();

@@ -12,12 +12,14 @@ export default function DoctorPatientsPage() {
 
   const filteredPatients = useMemo(() => {
     if (!search.trim()) return patients;
-    const q = search.toLowerCase();
+    const q = search.toLowerCase().trim();
     return patients.filter(
       (p) =>
-        p.name.toLowerCase().includes(q) ||
-        (p.phone && p.phone.toLowerCase().includes(q)) ||
-        (p.condition && p.condition.toLowerCase().includes(q))
+        String(p.name || "").toLowerCase().includes(q) ||
+        String(p.phone || "").toLowerCase().includes(q) ||
+        String(p.email || "").toLowerCase().includes(q) ||
+        String(p.id || "").toLowerCase().includes(q) ||
+        String(p.condition || "").toLowerCase().includes(q)
     );
   }, [patients, search]);
 

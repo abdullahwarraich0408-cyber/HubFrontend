@@ -48,17 +48,64 @@ export default function DoctorSchedulePage() {
     }
   };
 
+function parseTimePart(part) {
+  if (!part) return null;
+  const str = String(part).trim();
+  const match12 = str.match(/^(0?[1-9]|1[0-2])(?::([0-5][0-9]))?\s*(AM|PM|am|pm)$/i);
+  if (match12) {
+    let hours = parseInt(match12[1], 10);
+    const minutes = match12[2] ? parseInt(match12[2], 10) : 0;
+    const meridiem = match12[3].toUpperCase();
+    if (meridiem === "PM" && hours < 12) hours += 12;
+    if (meridiem === "AM" && hours === 12) hours = 0;
+    return hours * 60 + minutes;
+  }
+  const match24 = str.match(/^([01]?[0-9]|2[0-3]):([0-5][0-9])$/);
+  if (match24) {
+    const hours = parseInt(match24[1], 10);
+    const minutes = parseInt(match24[2], 10);
+    return hours * 60 + minutes;
+  }
+  return null;
+}
+
+function formatMinutes(minutes) {
+  const hrs24 = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  const meridiem = hrs24 >= 12 ? "PM" : "AM";
+  const hrs12 = hrs24 % 12 || 12;
+  return `${String(hrs12).padStart(2, "0")}:${String(mins).padStart(2, "0")} ${meridiem}`;
+}
+
+export function validateAndFormatTimeSlot(rawSlot) {
+  if (!rawSlot || typeof rawSlot !== "string") return null;
+  const parts = rawSlot.replace(/[–—]/g, "-").split("-").map((p) => p.trim()).filter(Boolean);
+  if (parts.length !== 2) return null;
+  const start = parseTimePart(parts[0]);
+  const end = parseTimePart(parts[1]);
+  if (start == null || end == null || end <= start) return null;
+  return `${formatMinutes(start)} - ${formatMinutes(end)}`;
+}
+
   const addSlot = (day, applyToWeekdays = false) => {
-    if (!newSlot.trim()) return;
-    const normalizedSlot = newSlot.trim();
+    if (!newSlot.trim()) {
+      toast.error("Please enter a time slot (e.g. 09:00 AM - 01:00 PM)");
+      return;
+    }
+    const formattedSlot = validateAndFormatTimeSlot(newSlot);
+    if (!formattedSlot) {
+      toast.error("Invalid time format. Please use a valid format (e.g., 09:00 AM - 01:00 PM)");
+      return;
+    }
     const weekdayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
     const next = schedule.map((item) => {
       if (applyToWeekdays && weekdayNames.includes(item.day)) {
-        if (item.slots.includes(normalizedSlot)) return item;
-        return { ...item, slots: [...item.slots, normalizedSlot] };
+        if (item.slots.includes(formattedSlot)) return item;
+        return { ...item, slots: [...item.slots, formattedSlot] };
       }
       if (item.day === day) {
-        return { ...item, slots: [...item.slots, normalizedSlot] };
+        if (item.slots.includes(formattedSlot)) return item;
+        return { ...item, slots: [...item.slots, formattedSlot] };
       }
       return item;
     });
@@ -69,7 +116,7 @@ export default function DoctorSchedulePage() {
   const copyDayToWeekdays = (sourceDay) => {
     const source = schedule.find((item) => item.day === sourceDay);
     if (!source?.slots?.length) {
-      toast.error(`Add slots to ${sourceDay} first`);
+      toast.error(`Add consultation hours to ${sourceDay} first`);
       return;
     }
 
@@ -78,7 +125,22 @@ export default function DoctorSchedulePage() {
       weekdayNames.includes(item.day) ? { ...item, slots: [...source.slots] } : item
     );
     persistSchedule(next);
-    toast.success(`${sourceDay}'s hours copied to all weekdays`);
+    toast.success(`${sourceDay}'s hours copied to weekdays (Mon–Fri)`);
+  };
+
+  const copyDayToAllDays = (sourceDay) => {
+    const source = schedule.find((item) => item.day === sourceDay);
+    if (!source?.slots?.length) {
+      toast.error(`Add consultation hours to ${sourceDay} first`);
+      return;
+    }
+
+    const next = schedule.map((item) => ({
+      ...item,
+      slots: [...source.slots],
+    }));
+    persistSchedule(next);
+    toast.success(`${sourceDay}'s hours copied to all 7 days (Mon–Sun)`);
   };
 
   const removeSlot = (day, index) => {
@@ -144,9 +206,18 @@ export default function DoctorSchedulePage() {
               <button
                 onClick={() => copyDayToWeekdays("Monday")}
                 className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 border border-slate-200"
+                title="Copy Monday's consultation hours to Tuesday through Friday only"
               >
                 <Copy size={13} className="text-teal-600" />
-                <span>Copy Monday to Mon–Fri</span>
+                <span>Copy to Weekdays (Mon–Fri)</span>
+              </button>
+              <button
+                onClick={() => copyDayToAllDays("Monday")}
+                className="px-3 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-900 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 border border-teal-200/80"
+                title="Copy Monday's consultation hours to all 7 days of the week (Monday through Sunday)"
+              >
+                <Layers size={13} className="text-teal-600" />
+                <span>Copy to All Days (Mon–Sun)</span>
               </button>
             </div>
           </div>
@@ -202,7 +273,7 @@ export default function DoctorSchedulePage() {
                   {/* Inline Slot Controls */}
                   <div className="shrink-0 flex items-center gap-2">
                     {isEditing ? (
-                      <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-lg border border-slate-200">
+                      <div className="flex flex-wrap items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200">
                         <input
                           type="text"
                           placeholder="e.g. 09:00 AM - 01:00 PM"
@@ -216,6 +287,26 @@ export default function DoctorSchedulePage() {
                         >
                           <Plus size={14} /> Add
                         </button>
+                        {item.slots.length > 0 && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => copyDayToWeekdays(item.day)}
+                              className="h-8 px-2.5 bg-white hover:bg-slate-100 text-slate-700 rounded-md text-[11px] font-semibold border border-slate-200 transition-colors"
+                              title={`Copy ${item.day}'s schedule to all weekdays (Mon–Fri)`}
+                            >
+                              Apply to Weekdays
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => copyDayToAllDays(item.day)}
+                              className="h-8 px-2.5 bg-teal-50 hover:bg-teal-100 text-teal-800 rounded-md text-[11px] font-semibold border border-teal-200/80 transition-colors"
+                              title={`Copy ${item.day}'s schedule to all 7 days (Mon–Sun)`}
+                            >
+                              Apply to All 7 Days
+                            </button>
+                          </>
+                        )}
                         <button
                           onClick={() => setEditingDay(null)}
                           className="p-1.5 text-slate-400 hover:text-slate-700"

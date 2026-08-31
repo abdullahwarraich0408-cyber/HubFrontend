@@ -42,15 +42,12 @@ import {
 import { DoctorNotifications } from "@/features/doctor-panel/components/DoctorNotifications";
 import { AppointmentDetailModal } from "@/features/doctor-panel/components/AppointmentDetailModal";
 
-const appointmentData = [
-  { name: "Mon", appointments: 12, completed: 10 },
-  { name: "Tue", appointments: 15, completed: 14 },
-  { name: "Wed", appointments: 18, completed: 16 },
-  { name: "Thu", appointments: 14, completed: 13 },
-  { name: "Fri", appointments: 20, completed: 18 },
-  { name: "Sat", appointments: 8, completed: 7 },
-  { name: "Sun", appointments: 5, completed: 5 },
-];
+function getTimeBasedGreeting() {
+  const hour = new Date().getHours();
+  if (hour >= 5 && hour < 12) return "Good morning";
+  if (hour >= 12 && hour < 17) return "Good afternoon";
+  return "Good evening";
+}
 
 export function DoctorDashboard() {
   const { profile } = useDoctorProfile();
@@ -102,15 +99,58 @@ export function DoctorDashboard() {
   }, [appointments, todayFormatted]);
 
   const filteredTodayAppointments = useMemo(() => {
+    const sourceList = search.trim() ? appointments : todayAppointments;
     if (!search.trim()) return todayAppointments;
-    const q = search.toLowerCase();
-    return todayAppointments.filter(
-      (a) =>
-        a.patient.toLowerCase().includes(q) ||
-        String(a.id).toLowerCase().includes(q) ||
-        (a.reason && a.reason.toLowerCase().includes(q))
-    );
-  }, [todayAppointments, search]);
+    const q = search.toLowerCase().trim();
+    return sourceList.filter((a) => {
+      const patientName = String(a.patient || a.patient_name || a.customer?.name || "").toLowerCase();
+      const id = String(a.id || "").toLowerCase();
+      const reason = String(a.reason || "").toLowerCase();
+      const phone = String(a.phone || a.customer?.phone || "").toLowerCase();
+      const type = String(a.type || "").toLowerCase();
+      const date = String(a.date || "").toLowerCase();
+      return (
+        patientName.includes(q) ||
+        id.includes(q) ||
+        reason.includes(q) ||
+        phone.includes(q) ||
+        type.includes(q) ||
+        date.includes(q)
+      );
+    });
+  }, [todayAppointments, appointments, search]);
+
+  const weeklyChartData = useMemo(() => {
+    const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    const counts = { Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0, Sun: 0 };
+    const completedCounts = { Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0, Sun: 0 };
+
+    if (Array.isArray(appointments) && appointments.length > 0) {
+      appointments.forEach((apt) => {
+        const d = apt.raw?.appointment_date || apt.date;
+        if (d) {
+          const dateObj = new Date(d);
+          if (!Number.isNaN(dateObj.getTime())) {
+            const dayIndex = dateObj.getDay();
+            const dayMap = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+            const dayKey = dayMap[dayIndex];
+            if (counts[dayKey] !== undefined) {
+              counts[dayKey] += 1;
+              if (apt.status === "completed") {
+                completedCounts[dayKey] += 1;
+              }
+            }
+          }
+        }
+      });
+    }
+
+    return days.map((day) => ({
+      name: day,
+      appointments: counts[day],
+      completed: completedCounts[day],
+    }));
+  }, [appointments]);
 
   const handleStatusChange = (id, status) => {
     updateStatus.mutate({ id, status });
@@ -138,7 +178,7 @@ export function DoctorDashboard() {
               </span>
             </div>
             <h1 className="text-xl md:text-2xl font-bold text-white tracking-tight">
-              Good morning, {profile.name}
+              {getTimeBasedGreeting()}, {profile.name}
             </h1>
             {/* Inline Stats Strip */}
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-300 pt-1 font-medium">
@@ -149,10 +189,10 @@ export function DoctorDashboard() {
               <span>{stats?.videoConsultations ?? videoCount} Video Calls</span>
               <span className="text-slate-700">|</span>
               <span className="text-emerald-400 font-semibold">PKR {Number(stats?.revenue || 0).toLocaleString()}</span>
-              {stats?.rating > 0 && (
+              {Number(stats?.rating || 0) > 0 && Number(stats?.reviewsCount || 0) > 0 && (
                 <>
                   <span className="text-slate-700">|</span>
-                  <span className="text-amber-400 font-semibold">★ {stats.rating}</span>
+                  <span className="text-amber-400 font-semibold">★ {Number(stats.rating).toFixed(1)}</span>
                 </>
               )}
             </div>
@@ -214,13 +254,19 @@ export function DoctorDashboard() {
                 <h2 className="text-base font-bold text-slate-900">Weekly Appointments Volume</h2>
                 <p className="text-xs text-slate-500">Scheduled vs completed consultations</p>
               </div>
-              <span className="text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/60">
-                +14% this week
+              <span
+                className={`text-xs font-medium px-2.5 py-1 rounded-full border ${
+                  appointments.length > 0
+                    ? "text-emerald-700 bg-emerald-50 border-emerald-200/60"
+                    : "text-slate-600 bg-slate-100 border-slate-200/80"
+                }`}
+              >
+                {appointments.length > 0 ? `${appointments.length} consultations` : "0 scheduled"}
               </span>
             </div>
             <div className="h-56 w-full pt-2">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={appointmentData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                <AreaChart data={weeklyChartData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorAppts" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#0d9488" stopOpacity={0.25} />
@@ -229,7 +275,13 @@ export function DoctorDashboard() {
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#64748b" }} dy={5} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    allowDecimals={false}
+                    domain={[0, (dataMax) => Math.max(5, dataMax)]}
+                    tick={{ fontSize: 11, fill: "#64748b" }}
+                  />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "#0f172a",

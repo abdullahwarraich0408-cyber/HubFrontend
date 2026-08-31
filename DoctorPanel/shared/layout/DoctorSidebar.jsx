@@ -21,12 +21,22 @@ import { partnerAuthApi } from "@/lib/api/index";
 import { useDoctorProfile } from "@/features/doctor-panel/hooks/useDoctorProfile";
 import { partnerRoutes } from "@/lib/constants/partnerRoutes";
 import { PartnerBrandLockup } from "@/shared/branding/PartnerBrandMark";
+import { resolvePhotoUrl } from "@/features/doctor-panel/pages/DoctorSettingsPage";
 
-export function DoctorSidebar({ mobileOpen, setMobileOpen }) {
+export function DoctorSidebar({
+  mobileOpen,
+  setMobileOpen,
+  isCollapsed: externalCollapsed,
+  setIsCollapsed: externalSetIsCollapsed,
+}) {
   const pathname = usePathname();
   const router = useRouter();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [internalCollapsed, setInternalCollapsed] = useState(false);
+  const isCollapsed =
+    externalCollapsed !== undefined ? externalCollapsed : internalCollapsed;
+  const setIsCollapsed = externalSetIsCollapsed || setInternalCollapsed;
   const { profile, initials } = useDoctorProfile();
+  const photoUrl = resolvePhotoUrl(profile?.photo || profile?.photo_url);
   const routes = partnerRoutes.doctor;
 
   const menuItems = [
@@ -128,8 +138,13 @@ export function DoctorSidebar({ mobileOpen, setMobileOpen }) {
         {/* Doctor profile Footer */}
         <div className="p-3 border-t border-slate-800/80 shrink-0 bg-slate-900/50">
           <div className={cn("flex items-center gap-3", isCollapsed && !mobileOpen && "justify-center")}>
-            <div className="w-[38px] h-[38px] rounded-full bg-[#17618E]/20 border border-[#17618E]/40 flex items-center justify-center shrink-0">
-              <span className="text-xs font-bold text-[#0FA7E3]">{initials || "DR"}</span>
+            <div className="w-[38px] h-[38px] rounded-full overflow-hidden bg-[#17618E]/20 border border-[#17618E]/40 flex items-center justify-center shrink-0">
+              {photoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={photoUrl} alt={profile.name} className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-xs font-bold text-[#0FA7E3]">{initials || "DR"}</span>
+              )}
             </div>
             {(!isCollapsed || mobileOpen) && (
               <div className="flex flex-col min-w-0 flex-1">

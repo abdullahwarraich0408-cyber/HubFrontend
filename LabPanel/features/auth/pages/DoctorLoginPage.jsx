@@ -21,8 +21,15 @@ export function DoctorLoginPage() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedEmail = localStorage.getItem("doctor_remembered_email");
+      const savedPass = localStorage.getItem("doctor_remembered_password");
+      const savedRemember = localStorage.getItem("doctor_remember_me");
       if (savedEmail) {
         setEmail(savedEmail);
+      }
+      if (savedPass) {
+        setPassword(savedPass);
+      }
+      if (savedRemember === "true" || savedEmail) {
         setRememberMe(true);
       }
 
@@ -42,8 +49,12 @@ export function DoctorLoginPage() {
       if (typeof window !== "undefined") {
         if (rememberMe) {
           localStorage.setItem("doctor_remembered_email", email.trim());
+          localStorage.setItem("doctor_remembered_password", password);
+          localStorage.setItem("doctor_remember_me", "true");
         } else {
           localStorage.removeItem("doctor_remembered_email");
+          localStorage.removeItem("doctor_remembered_password");
+          localStorage.removeItem("doctor_remember_me");
         }
       }
       await partnerAuthApi.login("doctor", email.trim(), password);

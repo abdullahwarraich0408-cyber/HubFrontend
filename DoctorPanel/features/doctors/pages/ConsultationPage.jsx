@@ -31,7 +31,13 @@ import { getPartnerData } from "@/lib/partnerAuth";
 import { partnerRoutes } from "@/lib/constants/partnerRoutes";
 import { toast } from "sonner";
 
-const EMPTY_PRESCRIPTION_ITEM = { medicine: "", dosage: "", instructions: "", duration: "" };
+const createEmptyPrescriptionItem = () => ({
+  id: `rx_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+  medicine: "",
+  dosage: "",
+  instructions: "",
+  duration: "",
+});
 
 export function ConsultationPage({ meetingId }) {
   const router = useRouter();
@@ -59,8 +65,8 @@ export function ConsultationPage({ meetingId }) {
   const [treatmentPlan, setTreatmentPlan] = useState("");
   const [followUp, setFollowUp] = useState("");
 
-  // Prescription State
-  const [items, setItems] = useState([EMPTY_PRESCRIPTION_ITEM]);
+  // Prescription State (Each item is an independent object instance)
+  const [items, setItems] = useState([createEmptyPrescriptionItem()]);
   const [prescriptionSaved, setPrescriptionSaved] = useState(false);
 
   // Completion Dialog State
@@ -70,7 +76,19 @@ export function ConsultationPage({ meetingId }) {
     if (appointment?.consultationNotes) {
       setObservations(appointment.consultationNotes);
     }
-  }, [appointment?.consultationNotes]);
+    if (appointment?.prescription?.items && Array.isArray(appointment.prescription.items) && appointment.prescription.items.length > 0) {
+      setItems(
+        appointment.prescription.items.map((it) => ({
+          id: `rx_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+          medicine: it.medicine || "",
+          dosage: it.dosage || "",
+          instructions: it.instructions || "",
+          duration: it.duration || "",
+        }))
+      );
+      setPrescriptionSaved(true);
+    }
+  }, [appointment?.consultationNotes, appointment?.prescription]);
 
   const canComplete = appointment?.status === "in_progress";
   const existingPrescriptionItems = appointment?.prescription?.items || [];
@@ -361,7 +379,7 @@ export function ConsultationPage({ meetingId }) {
 
               <div className="space-y-3">
                 {items.map((item, index) => (
-                  <div key={index} className="p-3 bg-slate-950 rounded-lg border border-slate-800 space-y-2 relative">
+                  <div key={item.id || index} className="p-3 bg-slate-950 rounded-lg border border-slate-800 space-y-2 relative">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-bold text-slate-400 uppercase">Medicine #{index + 1}</span>
                       {items.length > 1 && (
@@ -369,6 +387,7 @@ export function ConsultationPage({ meetingId }) {
                           type="button"
                           onClick={() => setItems((prev) => prev.filter((_, i) => i !== index))}
                           className="text-slate-500 hover:text-rose-400"
+                          title="Remove this medicine"
                         >
                           <Trash2 size={13} />
                         </button>
@@ -379,9 +398,10 @@ export function ConsultationPage({ meetingId }) {
                       placeholder="Medicine Name (e.g. Paracetamol 500mg)"
                       value={item.medicine}
                       onChange={(e) => {
-                        const next = [...items];
-                        next[index].medicine = e.target.value;
-                        setItems(next);
+                        const val = e.target.value;
+                        setItems((prev) =>
+                          prev.map((it, i) => (i === index ? { ...it, medicine: val } : it))
+                        );
                       }}
                       className="w-full h-8 px-2.5 bg-slate-900 border border-slate-800 rounded text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-teal-500"
                     />
@@ -391,9 +411,10 @@ export function ConsultationPage({ meetingId }) {
                         placeholder="Dosage (e.g. 1-0-1)"
                         value={item.dosage}
                         onChange={(e) => {
-                          const next = [...items];
-                          next[index].dosage = e.target.value;
-                          setItems(next);
+                          const val = e.target.value;
+                          setItems((prev) =>
+                            prev.map((it, i) => (i === index ? { ...it, dosage: val } : it))
+                          );
                         }}
                         className="h-8 px-2.5 bg-slate-900 border border-slate-800 rounded text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-teal-500"
                       />
@@ -402,9 +423,10 @@ export function ConsultationPage({ meetingId }) {
                         placeholder="Duration (e.g. 5 days)"
                         value={item.duration}
                         onChange={(e) => {
-                          const next = [...items];
-                          next[index].duration = e.target.value;
-                          setItems(next);
+                          const val = e.target.value;
+                          setItems((prev) =>
+                            prev.map((it, i) => (i === index ? { ...it, duration: val } : it))
+                          );
                         }}
                         className="h-8 px-2.5 bg-slate-900 border border-slate-800 rounded text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-teal-500"
                       />
@@ -416,7 +438,7 @@ export function ConsultationPage({ meetingId }) {
               <div className="flex items-center gap-2 pt-1">
                 <button
                   type="button"
-                  onClick={() => setItems((prev) => [...prev, EMPTY_PRESCRIPTION_ITEM])}
+                  onClick={() => setItems((prev) => [...prev, createEmptyPrescriptionItem()])}
                   className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 transition-colors flex items-center gap-1"
                 >
                   <Plus size={14} /> Add Medicine

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { PartnerAuthGuard } from "@/shared/components/PartnerAuthGuard";
 import { DoctorSidebar } from "@/shared/layout/DoctorSidebar";
@@ -8,18 +8,48 @@ import { DoctorNotifications } from "@/features/doctor-panel/components/DoctorNo
 import { useDoctorProfile } from "@/features/doctor-panel/hooks/useDoctorProfile";
 import { Menu, Clock, Sparkles } from "lucide-react";
 import { partnerRoutes } from "@/lib/constants/partnerRoutes";
+import { cn } from "@/utils/cn";
+import { resolvePhotoUrl } from "@/features/doctor-panel/pages/DoctorSettingsPage";
 
 export function DoctorDashboardLayout({ children }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const { profile, initials } = useDoctorProfile();
+  const photoUrl = resolvePhotoUrl(profile?.photo || profile?.photo_url);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("medzoos_doctor_sidebar_collapsed");
+      if (saved !== null) {
+        setIsCollapsed(JSON.parse(saved));
+      }
+    } catch {}
+  }, []);
+
+  const handleToggleCollapse = (val) => {
+    setIsCollapsed(val);
+    try {
+      localStorage.setItem("medzoos_doctor_sidebar_collapsed", JSON.stringify(val));
+    } catch {}
+  };
 
   return (
     <PartnerAuthGuard role="doctor">
       <div className="min-h-screen bg-[#F5F9FB] text-slate-800 font-sans antialiased selection:bg-teal-500/20 selection:text-teal-700">
-        <DoctorSidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
+        <DoctorSidebar
+          mobileOpen={mobileOpen}
+          setMobileOpen={setMobileOpen}
+          isCollapsed={isCollapsed}
+          setIsCollapsed={handleToggleCollapse}
+        />
 
         {/* Main Layout Container */}
-        <div className="transition-all duration-200 ease-in-out md:pl-[250px] flex flex-col min-h-screen">
+        <div
+          className={cn(
+            "transition-all duration-200 ease-in-out flex flex-col min-h-screen",
+            isCollapsed ? "md:pl-[72px]" : "md:pl-[250px]"
+          )}
+        >
           
           {/* Gen-Z Ultra-Glass Top Header Bar */}
           <header className="sticky top-0 z-30 h-16 bg-[#060B16]/92 backdrop-blur-xl border-b border-white/10 px-4 sm:px-6 flex items-center justify-between text-white shadow-lg shadow-slate-950/20">
@@ -70,14 +100,19 @@ export function DoctorDashboardLayout({ children }) {
                 href={partnerRoutes.doctor.settings}
                 className="flex items-center gap-2.5 p-1.5 sm:px-3 sm:py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/15 transition-all group active:scale-95 shadow-xs"
               >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-teal-400 via-emerald-400 to-cyan-400 text-slate-950 font-black text-xs flex items-center justify-center shadow-md shadow-teal-400/25 ring-2 ring-teal-400/30">
-                  {initials || "DR"}
+                <div className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-tr from-teal-400 via-emerald-400 to-cyan-400 text-slate-950 font-black text-xs flex items-center justify-center shadow-md shadow-teal-400/25 ring-2 ring-teal-400/30 shrink-0">
+                  {photoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={photoUrl} alt={profile?.name || "Doctor"} className="w-full h-full object-cover" />
+                  ) : (
+                    initials || "DR"
+                  )}
                 </div>
-                <div className="hidden md:flex flex-col text-left">
-                  <span className="text-xs font-bold text-slate-100 group-hover:text-teal-300 transition-colors leading-tight">
+                <div className="hidden md:flex flex-col text-left max-w-[150px] lg:max-w-[220px]">
+                  <span className="text-xs font-bold text-slate-100 group-hover:text-teal-300 transition-colors leading-tight truncate">
                     {profile?.name || "Dr. Physician"}
                   </span>
-                  <span className="text-[10px] text-teal-400 font-mono font-medium">
+                  <span className="text-[10px] text-teal-400 font-mono font-medium truncate">
                     {profile?.specialty || "Specialist"}
                   </span>
                 </div>

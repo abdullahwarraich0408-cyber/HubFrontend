@@ -51,11 +51,18 @@ export default function DoctorAppointmentsPage() {
         if (typeFilter === "online" && (!a.isOnline && a.type !== "Video Call")) return false;
         if (typeFilter === "in_person" && (a.isOnline || a.type === "Video Call")) return false;
         if (search.trim()) {
-          const q = search.toLowerCase();
+          const q = search.toLowerCase().trim();
+          const patientName = String(a.patient || a.patient_name || a.customer?.name || "").toLowerCase();
+          const id = String(a.id || "").toLowerCase();
+          const reason = String(a.reason || "").toLowerCase();
+          const phone = String(a.phone || a.customer?.phone || "").toLowerCase();
+          const type = String(a.type || "").toLowerCase();
           return (
-            a.patient.toLowerCase().includes(q) ||
-            String(a.id).toLowerCase().includes(q) ||
-            (a.reason && a.reason.toLowerCase().includes(q))
+            patientName.includes(q) ||
+            id.includes(q) ||
+            reason.includes(q) ||
+            phone.includes(q) ||
+            type.includes(q)
           );
         }
         return true;

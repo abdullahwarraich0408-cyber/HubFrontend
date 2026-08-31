@@ -259,12 +259,17 @@ export default function AdminDoctorsPage() {
 
   const openEditDoctor = (doctor) => {
     setEditingDoctor(doctor);
+    const matchedHospital = hospitals.find(
+      (h) =>
+        h.id === doctor.hospital_id ||
+        (h.name && doctor.hospital && h.name.trim().toLowerCase() === doctor.hospital.trim().toLowerCase())
+    );
     setEditFormData({
       name: doctor.name || "",
       specialty: doctor.specialty || "",
-      experience_years: doctor.experience_years || "",
-      fee: doctor.fee || "",
-      hospital_id: doctor.hospital_id || "",
+      experience_years: doctor.experience_years ?? "",
+      fee: doctor.fee ?? "",
+      hospital_id: doctor.hospital_id || matchedHospital?.id || "",
       photo_url: doctor.photo_url || "",
     });
   };
@@ -273,16 +278,28 @@ export default function AdminDoctorsPage() {
     e.preventDefault();
     if (!editingDoctor) return;
     try {
+      const selectedHospitalObj = hospitals.find((h) => h.id === editFormData.hospital_id);
+      const hospitalName = selectedHospitalObj
+        ? selectedHospitalObj.name
+        : (editFormData.hospital_id ? editFormData.hospital_id : "Independent Practice");
+
       await updateDoctorMutation.mutateAsync({
         id: editingDoctor.id,
-        ...editFormData,
+        name: editFormData.name.trim(),
+        specialty: editFormData.specialty.trim(),
         fee: Number(editFormData.fee) || 0,
         experience_years: Number(editFormData.experience_years) || 0,
         hospital_id: editFormData.hospital_id || null,
+        hospital: hospitalName,
+        photo_url: editFormData.photo_url || null,
       });
       toast.success("Doctor profile updated successfully!");
       if (viewDoctor && viewDoctor.id === editingDoctor.id) {
-        setViewDoctor((prev) => ({ ...prev, ...editFormData }));
+        setViewDoctor((prev) => ({
+          ...prev,
+          ...editFormData,
+          hospital: hospitalName,
+        }));
       }
       setEditingDoctor(null);
     } catch (err) {
@@ -355,6 +372,45 @@ export default function AdminDoctorsPage() {
     });
   };
 
+function parseTimePart(part) {
+  if (!part) return null;
+  const str = String(part).trim();
+  const match12 = str.match(/^(0?[1-9]|1[0-2])(?::([0-5][0-9]))?\s*(AM|PM|am|pm)$/i);
+  if (match12) {
+    let hours = parseInt(match12[1], 10);
+    const minutes = match12[2] ? parseInt(match12[2], 10) : 0;
+    const meridiem = match12[3].toUpperCase();
+    if (meridiem === "PM" && hours < 12) hours += 12;
+    if (meridiem === "AM" && hours === 12) hours = 0;
+    return hours * 60 + minutes;
+  }
+  const match24 = str.match(/^([01]?[0-9]|2[0-3]):([0-5][0-9])$/);
+  if (match24) {
+    const hours = parseInt(match24[1], 10);
+    const minutes = parseInt(match24[2], 10);
+    return hours * 60 + minutes;
+  }
+  return null;
+}
+
+function formatMinutes(minutes) {
+  const hrs24 = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  const meridiem = hrs24 >= 12 ? "PM" : "AM";
+  const hrs12 = hrs24 % 12 || 12;
+  return `${String(hrs12).padStart(2, "0")}:${String(mins).padStart(2, "0")} ${meridiem}`;
+}
+
+export function validateAndFormatTimeSlot(rawSlot) {
+  if (!rawSlot || typeof rawSlot !== "string") return null;
+  const parts = rawSlot.replace(/[–—]/g, "-").split("-").map((p) => p.trim()).filter(Boolean);
+  if (parts.length !== 2) return null;
+  const start = parseTimePart(parts[0]);
+  const end = parseTimePart(parts[1]);
+  if (start == null || end == null || end <= start) return null;
+  return `${formatMinutes(start)} - ${formatMinutes(end)}`;
+}
+
   const handleSaveLocation = async (e) => {
     e.preventDefault();
     if (!viewDoctor) return;
@@ -368,6 +424,13 @@ export default function AdminDoctorsPage() {
       return;
     }
 
+    const slotInput = locationForm.slots || DEFAULT_SLOT;
+    const formattedSlot = validateAndFormatTimeSlot(slotInput);
+    if (!formattedSlot) {
+      toast.error("Invalid consultation hours format. Please use a valid format (e.g., 09:00 AM - 01:00 PM)");
+      return;
+    }
+
     try {
       if (editingLocationId) {
         await updateLocationMutation.mutateAsync({
@@ -375,7 +438,7 @@ export default function AdminDoctorsPage() {
           locationId: editingLocationId,
           data: {
             days: locationForm.days,
-            slots: locationForm.slots || DEFAULT_SLOT,
+            slots: [formattedSlot],
             fee: locationForm.fee ? Number(locationForm.fee) : undefined,
           },
         });
@@ -387,7 +450,7 @@ export default function AdminDoctorsPage() {
           data: {
             hospital_id: locationForm.hospital_id,
             days: locationForm.days,
-            slots: locationForm.slots || DEFAULT_SLOT,
+            slots: [formattedSlot],
             fee: locationForm.fee ? Number(locationForm.fee) : undefined,
           },
         });

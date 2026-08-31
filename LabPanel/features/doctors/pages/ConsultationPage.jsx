@@ -21,7 +21,13 @@ import { getPartnerData } from "@/lib/partnerAuth";
 import { partnerRoutes } from "@/lib/constants/partnerRoutes";
 import { toast } from "sonner";
 
-const EMPTY_PRESCRIPTION_ITEM = { medicine: "", dosage: "", duration: "", instructions: "" };
+const createEmptyPrescriptionItem = () => ({
+  id: `rx_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+  medicine: "",
+  dosage: "",
+  duration: "",
+  instructions: "",
+});
 
 export function ConsultationPage({ meetingId }) {
   const router = useRouter();
@@ -39,7 +45,7 @@ export function ConsultationPage({ meetingId }) {
   const updateStatus = useUpdateDoctorAppointmentStatus();
   const createPrescription = useCreateDoctorPrescription();
   const [notes, setNotes] = useState("");
-  const [items, setItems] = useState([EMPTY_PRESCRIPTION_ITEM]);
+  const [items, setItems] = useState([createEmptyPrescriptionItem()]);
 
   useEffect(() => {
     if (appointment?.consultationNotes) setNotes(appointment.consultationNotes);
@@ -208,7 +214,7 @@ export function ConsultationPage({ meetingId }) {
               ))}
             </div>
             <div className="flex gap-2 mt-4">
-              <Button variant="secondary" onClick={() => setItems((prev) => [...prev, EMPTY_PRESCRIPTION_ITEM])}>
+              <Button variant="secondary" onClick={() => setItems((prev) => [...prev, createEmptyPrescriptionItem()])}>
                 Add Medicine
               </Button>
               <Button onClick={handleSavePrescription}>Save Prescription</Button>

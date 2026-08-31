@@ -3,7 +3,12 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const projectRoot = path.dirname(fileURLToPath(import.meta.url));
-const backendUrl = process.env.BACKEND_URL || "https://backend.medzoos.com";
+const backendUrl =
+  process.env.BACKEND_URL ||
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
+  (process.env.NODE_ENV === "production"
+    ? "https://backend.medzoos.com"
+    : "http://127.0.0.1:5000");
 
 const nextConfig = {
   turbopack: {

@@ -54,6 +54,9 @@ export const labPortalApi = {
 
 export const authApi = {
   register: (data) => api.post("/auth/register", data),
+  initiateRegister: (data) => api.post("/auth/register/initiate", data),
+  verifyRegisterOtp: (data) => api.post("/auth/register/verify-otp", data),
+  resendRegisterOtp: (email) => api.post("/auth/register/resend-otp", { email }),
   login: (data) => api.post("/auth/login", data),
   firebaseLogin: (data) => api.post("/auth/firebase", data),
   googleLogin: (data) => api.post("/auth/google", data),
@@ -68,6 +71,7 @@ export const authApi = {
   forgotPassword: (email) => api.post("/auth/forgot-password", { email }),
   resetPassword: (token, password) =>
     api.post(`/auth/reset-password/${token}`, { password }),
+  resetPasswordOtp: (data) => api.post("/auth/reset-password-otp", data),
 };
 
 export const productsApi = {

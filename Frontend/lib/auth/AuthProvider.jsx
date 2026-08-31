@@ -161,13 +161,26 @@ export function AuthProvider({ children }) {
     [applySession]
   );
 
-  const registerWithEmail = useCallback(
+  const initiateRegistration = useCallback(
     async ({ name, email, password, phone }) => {
-      const data = await authApi.register({
+      const data = await authApi.initiateRegister({
         name,
         email,
         password,
         ...(phone ? { phone } : {}),
+        deviceId: getDeviceId(),
+        platform: "web",
+      });
+      return data;
+    },
+    []
+  );
+
+  const verifyRegistrationOtp = useCallback(
+    async ({ email, otp }) => {
+      const data = await authApi.verifyRegisterOtp({
+        email,
+        otp,
         deviceId: getDeviceId(),
         platform: "web",
       });
@@ -176,6 +189,20 @@ export function AuthProvider({ children }) {
       return sessionUser;
     },
     [applySession]
+  );
+
+  const resendRegistrationOtp = useCallback(async (email) => {
+    return authApi.resendRegisterOtp(email);
+  }, []);
+
+  const registerWithEmail = useCallback(
+    async ({ name, email, password, phone, otp }) => {
+      if (otp) {
+        return verifyRegistrationOtp({ email, otp });
+      }
+      return initiateRegistration({ name, email, password, phone });
+    },
+    [initiateRegistration, verifyRegistrationOtp]
   );
 
   const logout = useCallback(async () => {
@@ -225,6 +252,9 @@ export function AuthProvider({ children }) {
       loginWithApple,
       loginWithEmail,
       registerWithEmail,
+      initiateRegistration,
+      verifyRegistrationOtp,
+      resendRegistrationOtp,
       updateProfile,
       logout,
       logoutAllDevices,
@@ -247,6 +277,9 @@ export function AuthProvider({ children }) {
       loginWithApple,
       loginWithEmail,
       registerWithEmail,
+      initiateRegistration,
+      verifyRegistrationOtp,
+      resendRegistrationOtp,
       updateProfile,
       logout,
       logoutAllDevices,

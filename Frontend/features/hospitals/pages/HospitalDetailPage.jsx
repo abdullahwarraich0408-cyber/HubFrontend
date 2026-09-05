@@ -119,7 +119,7 @@ export function HospitalDetailPage() {
 
   return (
     <div className="w-full bg-[var(--color-surface-subtle)] min-h-screen py-6 md:py-8">
-      <div className="w-full max-w-[1280px] mx-auto px-4 md:px-[80px]">
+      <div className="w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
         <Link
           href="/hospitals"
           className="inline-flex items-center gap-2 text-[13px] font-semibold text-[var(--color-brand-primary)] mb-4"
@@ -183,6 +183,7 @@ export function HospitalDetailPage() {
                 doctor={doctor}
                 consultType={consultType}
                 hospitalContext={hospital.id}
+                variant="horizontal"
               />
             ))}
           </div>

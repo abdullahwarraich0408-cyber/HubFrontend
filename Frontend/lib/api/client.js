@@ -4,6 +4,7 @@ import {
   clearAuthStorage,
   getDeviceId,
   getMemoryAccessToken,
+  isLoggingOut,
   persistUser,
   setMemoryAccessToken,
 } from "../auth/tokenStore";
@@ -29,6 +30,7 @@ function isPartnerPortalPath(pathname = "") {
 
 function openExpiredSignInModal(pathname = "") {
   if (typeof window === "undefined") return;
+  if (isLoggingOut()) return;
   window.dispatchEvent(
     new CustomEvent(AUTH_SIGN_IN_EVENT, {
       detail: { redirect: pathname || "/", expired: true },
@@ -247,7 +249,7 @@ export async function apiClient(path, options = {}) {
         }
       }
 
-      if (!isPartnerRequest) {
+      if (!isPartnerRequest && !isLoggingOut()) {
         const currentPath = window.location.pathname;
         if (!currentPath.includes("/login") && !currentPath.includes("/sign-in")) {
           openExpiredSignInModal(currentPath);

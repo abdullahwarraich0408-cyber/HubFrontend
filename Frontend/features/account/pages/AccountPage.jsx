@@ -49,8 +49,7 @@ export function AccountPage() {
   }, [authLoading, isAuthenticated, openSignIn]);
 
   const handleLogout = async () => {
-    await logout();
-    router.push("/");
+    await logout("/");
   };
 
   if (authLoading) {

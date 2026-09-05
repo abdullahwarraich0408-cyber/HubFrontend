@@ -178,7 +178,7 @@ export function DoctorSlotPicker({
           No slots available for this date. Try another day.
         </p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 sm:gap-3">
           {allSlots.map((slot) => {
             const isBooked = bookedSet.has(slot);
             const isSelected = selectedSlot === slot;
@@ -189,7 +189,7 @@ export function DoctorSlotPicker({
                 type="button"
                 disabled={isBooked}
                 onClick={() => onSlotChange(slot)}
-                className={`flex flex-col items-center justify-center gap-1 py-3 px-4 rounded-[12px] border text-[14px] font-semibold transition-all ${
+                className={`flex flex-col items-center justify-center gap-1 py-2.5 px-3 sm:py-3 sm:px-4 rounded-[12px] border text-[13px] sm:text-[14px] font-semibold transition-all ${
                   isBooked
                     ? "border-[var(--color-neutral-200)] bg-[var(--color-neutral-100)] text-[var(--color-neutral-400)] cursor-not-allowed opacity-70"
                     : isSelected
@@ -197,13 +197,13 @@ export function DoctorSlotPicker({
                       : "border-[var(--color-neutral-200)] text-[var(--color-neutral-700)] hover:border-[var(--color-brand-primary)] hover:bg-[var(--color-brand-mist)]"
                 }`}
               >
-                <span className="flex items-center gap-2">
+                <span className="flex items-center gap-1.5 sm:gap-2 whitespace-nowrap">
                   <Clock
-                    size={16}
+                    size={15}
                     className={isBooked ? "text-[var(--color-neutral-400)]" : "text-[var(--color-brand-primary)]"}
                     weight="fill"
                   />
-                  {slot}
+                  <span>{slot}</span>
                 </span>
                 {isBooked && <span className="text-[10px] font-bold uppercase tracking-wide">Booked</span>}
               </button>

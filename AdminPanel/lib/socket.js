@@ -19,7 +19,7 @@ export function getSocketUrl() {
     return url.origin + (url.pathname === "/" ? "" : url.pathname);
   }
 
-  return process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+  return process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5001";
 }
 
 export function getAdminSocket() {

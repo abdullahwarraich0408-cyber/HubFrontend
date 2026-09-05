@@ -56,7 +56,11 @@ export function AuthFlow({ onAuthenticated }) {
       <SocialLogin onSuccess={finish} />
       <p className="mt-5 text-[14px] text-[#6B7C7B]">
         Don&apos;t have an account?{" "}
-        <Link href="/signup" className="font-semibold text-[#17618E] hover:underline">
+        <Link
+          href="/signup"
+          onClick={() => onAuthenticated?.()}
+          className="font-semibold text-[#17618E] hover:underline"
+        >
           Sign up
         </Link>
       </p>

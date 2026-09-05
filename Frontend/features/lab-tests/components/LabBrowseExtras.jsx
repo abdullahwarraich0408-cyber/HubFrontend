@@ -5,7 +5,6 @@ import Image from "next/image";
 import {
   House,
   Buildings,
-  ShoppingCart,
   FileText,
   ArrowRight,
 } from "@phosphor-icons/react";
@@ -16,12 +15,6 @@ const QUICK_LINKS = [
     href: "/lab-tests",
     icon: Buildings,
     tone: "bg-white text-[#102A43] border border-[#102A43]/08",
-  },
-  {
-    label: "Lab cart",
-    href: "/lab-tests/cart",
-    icon: ShoppingCart,
-    tone: "bg-[#062F3D] text-white",
   },
   {
     label: "My reports",

@@ -64,13 +64,8 @@ export function UserMenu({ profile, className }) {
 
   const handleLogout = async () => {
     try {
-      await logout();
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(new Event("cart-updated"));
-      }
-      toast.success("Signed out successfully");
-      router.push("/");
-      window.location.href = "/";
+      setOpen(false);
+      await logout("/");
     } catch {
       toast.error("Failed to sign out. Please try again.");
     }

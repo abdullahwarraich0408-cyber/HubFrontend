@@ -36,6 +36,7 @@ import {
   Info,
   CalendarCheck,
   UserCheck,
+  DownloadSimple,
 } from "@phosphor-icons/react";
 
 const emptyForm = {
@@ -183,6 +184,32 @@ export default function AdminHospitalsPage() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
+  const handleExportCSV = () => {
+    const headers = ["ID", "Hospital Name", "Email", "City", "Address", "Phone", "Affiliated Doctors", "Status", "Date Registered"];
+    const csvContent = [
+      headers.join(","),
+      ...filtered.map((h) => [
+        h.id,
+        `"${h.name || ""}"`,
+        h.email || "",
+        `"${h.city || ""}"`,
+        `"${h.address || ""}"`,
+        `"${h.phone || ""}"`,
+        h._count?.doctors ?? 0,
+        h.is_active ? "Active" : "Inactive",
+        new Date(h.created_at || Date.now()).toLocaleDateString(),
+      ].join(",")),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `hospitals_export_${new Date().toISOString().split("T")[0]}.csv`;
+    link.click();
+    toast.success("Hospital network directory exported successfully!");
+  };
+
   const handleOpenDetails = (hospital) => {
     setViewHospital(hospital);
     setActiveDetailTab("overview");
@@ -275,6 +302,13 @@ export default function AdminHospitalsPage() {
         </div>
         
         <div className="flex items-center gap-3">
+          <button
+            onClick={handleExportCSV}
+            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold transition-all shadow-sm"
+          >
+            <DownloadSimple size={16} weight="bold" />
+            <span>Export CSV</span>
+          </button>
           <button
             onClick={() => setShowAddModal(true)}
             className="flex items-center gap-2 px-5 py-2.5 bg-[#082B3F] hover:bg-[#0FA7E3] text-white rounded-xl text-xs font-bold transition-all shadow-sm"
@@ -584,10 +618,10 @@ export default function AdminHospitalsPage() {
         )}
       </div>
 
-      {/* Complete Hospital Detail Modal (Triggered by Eye Icon) */}
+      {/* Complete Hospital Detail Slide-Over Sheet (Triggered by Eye Icon) */}
       {viewHospital && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#082B3F]/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col border border-slate-200 animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex justify-end bg-[#0C1A2E]/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-xl h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 border-l border-slate-200">
             
             {/* Modal Header */}
             <div className="p-6 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-blue-50/40 shrink-0">

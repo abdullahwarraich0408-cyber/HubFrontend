@@ -9,6 +9,7 @@ import {
   getDeviceId,
   getPendingAuthAction,
   persistUser,
+  setLoggingOut,
   setMemoryAccessToken,
   setPendingAuthAction,
 } from "@/lib/auth/tokenStore";
@@ -205,27 +206,42 @@ export function AuthProvider({ children }) {
     [initiateRegistration, verifyRegistrationOtp]
   );
 
-  const logout = useCallback(async () => {
+  const logout = useCallback(async (redirectUrl = "/") => {
+    setLoggingOut(true);
     try {
       await authApi.logout();
     } catch {
       // ignore
     }
     clearAuthStorage();
-    setUser(null);
-    setIsAuthenticated(false);
     if (typeof window !== "undefined") {
       window.dispatchEvent(new Event("auth-updated"));
+      window.dispatchEvent(new Event("cart-updated"));
+      if (redirectUrl) {
+        window.location.href = redirectUrl;
+        return;
+      }
     }
+    setUser(null);
+    setIsAuthenticated(false);
   }, []);
 
-  const logoutAllDevices = useCallback(async () => {
+  const logoutAllDevices = useCallback(async (redirectUrl = "/") => {
+    setLoggingOut(true);
     try {
       await authApi.logoutAll();
     } catch {
       // ignore
     }
     clearAuthStorage();
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("auth-updated"));
+      window.dispatchEvent(new Event("cart-updated"));
+      if (redirectUrl) {
+        window.location.href = redirectUrl;
+        return;
+      }
+    }
     setUser(null);
     setIsAuthenticated(false);
   }, []);

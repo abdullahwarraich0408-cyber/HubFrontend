@@ -202,7 +202,7 @@ export function DoctorProfilePage() {
 
   return (
     <div className="w-full bg-[var(--color-surface-subtle)] min-h-screen py-6 md:py-8">
-      <div className="w-full max-w-[1280px] mx-auto px-4 md:px-[80px]">
+      <div className="w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2 text-[12px] text-[var(--color-neutral-500)] mb-6 flex-wrap">
           <Link href="/" className="hover:text-[var(--color-brand-primary)]">Home</Link>
           <CaretRight size={12} weight="bold" />
@@ -227,9 +227,9 @@ export function DoctorProfilePage() {
           <span className="text-[var(--color-ink-headline)]">{doctor.name}</span>
         </div>
 
-        <div className="grid lg:grid-cols-[1fr_320px] gap-6 items-start">
-          <div>
-            <div className="bg-white rounded-[20px] border border-[var(--color-neutral-200)] p-6 md:p-8 mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] xl:grid-cols-[1fr_360px] gap-6 lg:gap-8 items-start">
+          <div className="min-w-0">
+            <div className="bg-white rounded-[20px] border border-[var(--color-neutral-200)] p-5 sm:p-6 md:p-8 mb-6">
               <div className="flex flex-col md:flex-row gap-6">
                 <div className="relative w-32 h-32 md:w-36 md:h-36 rounded-[20px] overflow-hidden shrink-0 border-2 border-[var(--color-neutral-100)] mx-auto md:mx-0">
                   <Image src={doctor.photo} alt={doctor.name} fill className="object-cover" />

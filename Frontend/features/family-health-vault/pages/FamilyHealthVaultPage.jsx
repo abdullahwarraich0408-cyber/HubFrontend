@@ -27,6 +27,7 @@ import {
   useFamilyAiInsights,
   useFamilyWeeklySummary,
   useCreateFamily,
+  useUpdateFamily,
   useAddFamilyMember,
   useFamilyCopilotQuery,
 } from "@/lib/hooks/useApi";
@@ -59,6 +60,14 @@ export function FamilyHealthVaultPage() {
   const [memberForm, setMemberForm] = useState(EMPTY_MEMBER);
   const [copilotQuestion, setCopilotQuestion] = useState("");
   const [copilotAnswer, setCopilotAnswer] = useState(null);
+  const [isEditingSettings, setIsEditingSettings] = useState(false);
+  const [settingsForm, setSettingsForm] = useState({
+    home_address: "",
+    emergency_contact: "",
+    preferred_hospital: "",
+    preferred_pharmacy: "",
+    preferred_lab: "",
+  });
 
   const { data: vault, isLoading, isError, refetch, isFetching } = useFamilyVault({ enabled: isAuthenticated });
   const { data: dashboard } = useFamilyDashboard({ enabled: isAuthenticated && Boolean(vault) });
@@ -67,8 +76,33 @@ export function FamilyHealthVaultPage() {
   const { data: weeklySummary } = useFamilyWeeklySummary({ enabled: isAuthenticated && Boolean(vault) && view === "summary" });
 
   const createFamily = useCreateFamily();
+  const updateFamily = useUpdateFamily();
   const addMember = useAddFamilyMember();
   const copilotQuery = useFamilyCopilotQuery();
+
+  useEffect(() => {
+    if (vault) {
+      setSettingsForm({
+        home_address: vault.home_address || "",
+        emergency_contact: vault.emergency_contact || "",
+        preferred_hospital: vault.preferred_hospital || "",
+        preferred_pharmacy: vault.preferred_pharmacy || "",
+        preferred_lab: vault.preferred_lab || "",
+      });
+    }
+  }, [vault]);
+
+  const handleSaveSettings = async (e) => {
+    e.preventDefault();
+    try {
+      await updateFamily.mutateAsync(settingsForm);
+      toast.success("Family settings updated successfully");
+      setIsEditingSettings(false);
+      refetch();
+    } catch (err) {
+      toast.error(err.message || "Failed to update settings");
+    }
+  };
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) openSignIn({ redirect: "/family-health" });
@@ -267,34 +301,37 @@ export function FamilyHealthVaultPage() {
                     <Button onClick={() => setShowAddMember(true)}>Add Member</Button>
                   </div>
                 ) : (
-                  members.map((member) => (
-                    <Link
-                      key={member.id}
-                      href={`/family-health/members/${member.id}`}
-                      className="block rounded-[16px] border border-[var(--color-neutral-200)] bg-white p-5 hover:border-[var(--color-brand-primary)]/40 transition-colors"
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex items-start gap-4">
-                          <span className="text-3xl">{relationshipEmoji(member.relationship)}</span>
-                          <div>
-                            <h3 className="text-[18px] font-bold">{member.full_name}</h3>
-                            <p className="text-[13px] text-[var(--color-neutral-500)]">{member.relationship}</p>
-                            <div className="mt-2 space-y-1">
-                              {(member.status_lines || []).map((line, i) => (
-                                <p key={i} className="text-[14px] text-[var(--color-neutral-700)]">{line}</p>
-                              ))}
+                  members.map((member) => {
+                    const memberId = member.id || member._id || member.member_id;
+                    return (
+                      <Link
+                        key={memberId}
+                        href={`/family-health/members/${memberId}`}
+                        className="block rounded-[16px] border border-[var(--color-neutral-200)] bg-white p-5 hover:border-[var(--color-brand-primary)]/40 transition-colors"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex items-start gap-4">
+                            <span className="text-3xl">{relationshipEmoji(member.relationship)}</span>
+                            <div>
+                              <h3 className="text-[18px] font-bold">{member.full_name}</h3>
+                              <p className="text-[13px] text-[var(--color-neutral-500)]">{member.relationship}</p>
+                              <div className="mt-2 space-y-1">
+                                {(member.status_lines || []).map((line, i) => (
+                                  <p key={i} className="text-[14px] text-[var(--color-neutral-700)]">{line}</p>
+                                ))}
+                              </div>
                             </div>
                           </div>
+                          <div className="flex items-center gap-3">
+                            <span className={`px-3 py-1 rounded-full text-[13px] font-semibold ${scoreColor(member.health_score)}`}>
+                              Score: {member.health_score ?? "—"}
+                            </span>
+                            <CaretRight size={20} className="text-[var(--color-neutral-400)]" />
+                          </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <span className={`px-3 py-1 rounded-full text-[13px] font-semibold ${scoreColor(member.health_score)}`}>
-                            Score: {member.health_score ?? "—"}
-                          </span>
-                          <CaretRight size={20} className="text-[var(--color-neutral-400)]" />
-                        </div>
-                      </div>
-                    </Link>
-                  ))
+                      </Link>
+                    );
+                  })
                 )}
               </div>
             </div>
@@ -395,14 +432,85 @@ export function FamilyHealthVaultPage() {
 
           {view === "settings" && (
             <div className="rounded-[16px] border border-[var(--color-neutral-200)] bg-white p-6">
-              <h2 className="text-[20px] font-bold mb-4">Family Settings</h2>
-              <dl className="grid gap-3 text-[14px]">
-                <div><dt className="text-[var(--color-neutral-500)]">Home Address</dt><dd className="font-medium">{vault.home_address || "—"}</dd></div>
-                <div><dt className="text-[var(--color-neutral-500)]">Emergency Contact</dt><dd className="font-medium">{vault.emergency_contact || "—"}</dd></div>
-                <div><dt className="text-[var(--color-neutral-500)]">Preferred Hospital</dt><dd className="font-medium">{vault.preferred_hospital || "—"}</dd></div>
-                <div><dt className="text-[var(--color-neutral-500)]">Preferred Pharmacy</dt><dd className="font-medium">{vault.preferred_pharmacy || "—"}</dd></div>
-                <div><dt className="text-[var(--color-neutral-500)]">Preferred Lab</dt><dd className="font-medium">{vault.preferred_lab || "—"}</dd></div>
-              </dl>
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-[20px] font-bold text-[var(--color-ink-headline)]">Family Settings</h2>
+                  <p className="text-[13px] text-[var(--color-neutral-500)] mt-0.5">
+                    Manage your family's address, emergency contacts, and preferred healthcare providers.
+                  </p>
+                </div>
+                {!isEditingSettings && (
+                  <Button variant="secondary" onClick={() => setIsEditingSettings(true)}>
+                    Edit Settings
+                  </Button>
+                )}
+              </div>
+
+              {isEditingSettings ? (
+                <form onSubmit={handleSaveSettings} className="space-y-4 max-w-xl">
+                  <Input
+                    label="Home Address"
+                    placeholder="Enter family home address"
+                    value={settingsForm.home_address}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, home_address: e.target.value })}
+                  />
+                  <Input
+                    label="Emergency Contact"
+                    placeholder="e.g. +92 300 1234567 (Emergency)"
+                    value={settingsForm.emergency_contact}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, emergency_contact: e.target.value })}
+                  />
+                  <Input
+                    label="Preferred Hospital"
+                    placeholder="e.g. Shifa International Hospital"
+                    value={settingsForm.preferred_hospital}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, preferred_hospital: e.target.value })}
+                  />
+                  <Input
+                    label="Preferred Pharmacy"
+                    placeholder="e.g. D.Watson Pharmacy"
+                    value={settingsForm.preferred_pharmacy}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, preferred_pharmacy: e.target.value })}
+                  />
+                  <Input
+                    label="Preferred Lab"
+                    placeholder="e.g. Chughtai Lab"
+                    value={settingsForm.preferred_lab}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, preferred_lab: e.target.value })}
+                  />
+                  <div className="flex gap-3 pt-2">
+                    <Button type="submit" disabled={updateFamily.isPending}>
+                      {updateFamily.isPending ? "Saving..." : "Save Settings"}
+                    </Button>
+                    <Button type="button" variant="secondary" onClick={() => setIsEditingSettings(false)}>
+                      Cancel
+                    </Button>
+                  </div>
+                </form>
+              ) : (
+                <dl className="grid gap-3.5 text-[14px]">
+                  <div className="p-4 bg-[var(--color-surface-subtle)] rounded-[12px]">
+                    <dt className="text-[12px] font-semibold uppercase tracking-wider text-[var(--color-neutral-500)] mb-1">Home Address</dt>
+                    <dd className="font-semibold text-[var(--color-ink-headline)]">{vault?.home_address || "—"}</dd>
+                  </div>
+                  <div className="p-4 bg-[var(--color-surface-subtle)] rounded-[12px]">
+                    <dt className="text-[12px] font-semibold uppercase tracking-wider text-[var(--color-neutral-500)] mb-1">Emergency Contact</dt>
+                    <dd className="font-semibold text-[var(--color-ink-headline)]">{vault?.emergency_contact || "—"}</dd>
+                  </div>
+                  <div className="p-4 bg-[var(--color-surface-subtle)] rounded-[12px]">
+                    <dt className="text-[12px] font-semibold uppercase tracking-wider text-[var(--color-neutral-500)] mb-1">Preferred Hospital</dt>
+                    <dd className="font-semibold text-[var(--color-ink-headline)]">{vault?.preferred_hospital || "—"}</dd>
+                  </div>
+                  <div className="p-4 bg-[var(--color-surface-subtle)] rounded-[12px]">
+                    <dt className="text-[12px] font-semibold uppercase tracking-wider text-[var(--color-neutral-500)] mb-1">Preferred Pharmacy</dt>
+                    <dd className="font-semibold text-[var(--color-ink-headline)]">{vault?.preferred_pharmacy || "—"}</dd>
+                  </div>
+                  <div className="p-4 bg-[var(--color-surface-subtle)] rounded-[12px]">
+                    <dt className="text-[12px] font-semibold uppercase tracking-wider text-[var(--color-neutral-500)] mb-1">Preferred Lab</dt>
+                    <dd className="font-semibold text-[var(--color-ink-headline)]">{vault?.preferred_lab || "—"}</dd>
+                  </div>
+                </dl>
+              )}
             </div>
           )}
         </main>

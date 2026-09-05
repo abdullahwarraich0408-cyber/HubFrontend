@@ -16,6 +16,19 @@ const ACTION_HREF = {
   hospitals: "/hospitals",
 };
 
+function resolveImageUrl(url) {
+  if (!url || typeof url !== "string") return "";
+  const trimmed = url.trim();
+  if (!trimmed) return "";
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://") || trimmed.startsWith("data:")) {
+    return trimmed;
+  }
+  const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
+  const origin = apiBase.replace(/\/api\/?$/, "");
+  const cleanPath = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+  return `${origin}${cleanPath}`;
+}
+
 export function CampaignBanners() {
   const { openPrescriptionModal } = usePrescriptionModal();
   const { data } = useQuery({
@@ -36,14 +49,21 @@ export function CampaignBanners() {
               banner.action === "prescription" ||
               banner.href?.includes("prescription") ||
               banner.title?.toLowerCase().includes("prescription");
-            const href =
-              banner.href || ACTION_HREF[banner.action] || "/doctors";
+            const isDoctor =
+              banner.action === "doctors" ||
+              banner.action === "clinic" ||
+              banner.cta?.toLowerCase().includes("doctor") ||
+              banner.title?.toLowerCase().includes("doctor");
+            const href = isDoctor
+              ? "/doctors"
+              : banner.href || ACTION_HREF[banner.action] || "/doctors";
+            const imageUrl = resolveImageUrl(banner.image_url);
 
             const content = (
               <>
-                {banner.image_url ? (
+                {imageUrl ? (
                   <img
-                    src={banner.image_url}
+                    src={imageUrl}
                     alt=""
                     className="h-40 w-full object-cover"
                   />

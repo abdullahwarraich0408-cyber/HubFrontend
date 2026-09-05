@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { 
   BuildingOffice, 
   Storefront, 
@@ -17,7 +18,12 @@ import {
   GraduationCap,
   IdentificationCard,
   MapPin,
-  Clock
+  Clock,
+  X,
+  Copy,
+  Check,
+  Lock,
+  ArrowSquareOut
 } from "@phosphor-icons/react";
 import { Input } from "@/shared/components/Input";
 import { Button } from "@/shared/components/Button";
@@ -88,8 +94,23 @@ const SPECIALTY_OPTIONS = [
   "Other Specialist",
 ];
 
-export default function PartnerWithUsPage() {
-  const [partnerType, setPartnerType] = useState("pharmacy");
+function PartnerWithUsContent() {
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get("tab") || searchParams.get("type") || searchParams.get("role");
+  const [partnerType, setPartnerType] = useState(() => {
+    if (initialTab === "doctor") return "doctor";
+    if (initialTab === "lab" || initialTab === "laboratory") return "lab";
+    if (initialTab === "pharmacy") return "pharmacy";
+    return "pharmacy";
+  });
+
+  useEffect(() => {
+    const tabParam = searchParams.get("tab") || searchParams.get("type") || searchParams.get("role");
+    if (tabParam === "doctor") setPartnerType("doctor");
+    else if (tabParam === "lab" || tabParam === "laboratory") setPartnerType("lab");
+    else if (tabParam === "pharmacy") setPartnerType("pharmacy");
+  }, [searchParams]);
+
   const createVendor = useCreateVendor();
   const uploadPublicDocument = useUploadPublicDocument();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -97,6 +118,16 @@ export default function PartnerWithUsPage() {
   // Application tracking state
   const [applicationId, setApplicationId] = useState("");
   const [submittedType, setSubmittedType] = useState("");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [copiedRef, setCopiedRef] = useState(false);
+
+  const handleCopyRef = () => {
+    if (!applicationId) return;
+    navigator.clipboard.writeText(applicationId);
+    setCopiedRef(true);
+    toast.success("Application Reference ID copied!");
+    setTimeout(() => setCopiedRef(false), 2000);
+  };
   const { data: onboardingStatus } = useVendorOnboardingStatus(applicationId, {
     refetchInterval: applicationId && submittedType === "pharmacy" ? 15000 : false,
   });
@@ -172,7 +203,8 @@ export default function PartnerWithUsPage() {
     setUploadingKey(key);
     try {
       const res = await uploadPublicDocument.mutateAsync(file);
-      setDocuments((prev) => ({ ...prev, [key]: res.url }));
+      const fileUrl = res?.url || res?.data?.url || (typeof res === "string" ? res : "");
+      setDocuments((prev) => ({ ...prev, [key]: fileUrl }));
       toast.success("Document uploaded successfully");
     } catch (error) {
       toast.error(error.message || "Failed to upload document");
@@ -197,8 +229,9 @@ export default function PartnerWithUsPage() {
       });
 
       const createdVendor = data.vendor || data;
-      setApplicationId(createdVendor.id);
+      setApplicationId(createdVendor.id || `PHARM-${Date.now().toString().slice(-6)}`);
       setSubmittedType("pharmacy");
+      setShowSuccessModal(true);
       toast.success("Pharmacy application submitted successfully!");
     } catch (error) {
       toast.error(error.message || "Unable to submit pharmacy application");
@@ -207,6 +240,12 @@ export default function PartnerWithUsPage() {
 
   const handleDoctorSubmit = async (e) => {
     e.preventDefault();
+    const missing = DOCTOR_DOCS.filter((doc) => !documents[doc.key]);
+    if (missing.length > 0) {
+      toast.error(`Please upload all ${DOCTOR_DOCS.length} required doctor credentials (${missing.length} missing)`);
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const nameParts = doctorForm.full_name.trim().split(" ");
@@ -240,11 +279,25 @@ ${Object.entries(documents).map(([k, v]) => `- ${k}: ${v}`).join("\n") || "No di
         type: "partner",
         subject: subject,
         message: message,
+        metadata: {
+          partner_type: "doctor",
+          full_name: doctorForm.full_name,
+          specialty: doctorForm.specialty,
+          pmdc_number: doctorForm.pmdc_number,
+          experience_years: doctorForm.experience_years,
+          consultation_fee: doctorForm.consultation_fee,
+          hospital_name: doctorForm.hospital_name,
+          city: doctorForm.city,
+          about: doctorForm.about,
+          qualifications: doctorForm.qualifications,
+          documents: documents,
+        },
       });
 
       const generatedId = `DOC-APP-${Date.now().toString().slice(-6)}`;
       setApplicationId(generatedId);
       setSubmittedType("doctor");
+      setShowSuccessModal(true);
       toast.success("Doctor application submitted! Our medical verification team will review your credentials within 24 hours.");
     } catch (error) {
       toast.error(error.message || "Failed to submit doctor application. Please try again.");
@@ -255,6 +308,12 @@ ${Object.entries(documents).map(([k, v]) => `- ${k}: ${v}`).join("\n") || "No di
 
   const handleLabSubmit = async (e) => {
     e.preventDefault();
+    const missing = LAB_DOCS.filter((doc) => !documents[doc.key]);
+    if (missing.length > 0) {
+      toast.error(`Please upload all ${LAB_DOCS.length} required laboratory compliance documents (${missing.length} missing)`);
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const subject = `[Diagnostic Lab Registration] ${labForm.lab_name} - ${labForm.city}`;
@@ -285,11 +344,23 @@ ${Object.entries(documents).map(([k, v]) => `- ${k}: ${v}`).join("\n") || "No di
         type: "partner",
         subject: subject,
         message: message,
+        metadata: {
+          partner_type: "lab",
+          facility_name: labForm.lab_name,
+          contact_person: labForm.contact_person,
+          phone: labForm.phone,
+          license_number: labForm.license_number,
+          city: labForm.city,
+          address: labForm.address,
+          notes: labForm.tests_summary,
+          documents: documents,
+        },
       });
 
       const generatedId = `LAB-APP-${Date.now().toString().slice(-6)}`;
       setApplicationId(generatedId);
       setSubmittedType("lab");
+      setShowSuccessModal(true);
       toast.success("Laboratory application submitted! Our diagnostic team will contact you shortly for onboarding.");
     } catch (error) {
       toast.error(error.message || "Failed to submit laboratory application");
@@ -757,9 +828,11 @@ ${Object.entries(documents).map(([k, v]) => `- ${k}: ${v}`).join("\n") || "No di
             {/* Submitted Application Tracker */}
             {applicationId && (
               <div className="bg-emerald-50 rounded-[24px] border border-emerald-200 p-6 shadow-sm">
-                <div className="flex items-center gap-3 mb-3">
-                  <CheckCircle size={24} className="text-emerald-600" weight="fill" />
-                  <h3 className="text-[17px] font-bold text-emerald-950">Application Received</h3>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle size={24} className="text-emerald-600" weight="fill" />
+                    <h3 className="text-[17px] font-bold text-emerald-950">Application Received</h3>
+                  </div>
                 </div>
                 <p className="text-[13px] text-emerald-800 leading-relaxed">
                   Your registration application has been submitted to the Medzoos Verification Authority.
@@ -769,6 +842,14 @@ ${Object.entries(documents).map(([k, v]) => `- ${k}: ${v}`).join("\n") || "No di
                   <div><strong>Type:</strong> <span className="capitalize">{submittedType || partnerType}</span></div>
                   <div><strong>Review SLA:</strong> 12–24 Hours</div>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setShowSuccessModal(true)}
+                  className="mt-3 w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors flex items-center justify-center gap-2"
+                >
+                  <CheckCircle size={16} weight="bold" />
+                  <span>View Submission Modal</span>
+                </button>
               </div>
             )}
 
@@ -858,6 +939,177 @@ ${Object.entries(documents).map(([k, v]) => `- ${k}: ${v}`).join("\n") || "No di
         </div>
 
       </div>
+
+      {/* Premium Submit Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#082B3F]/75 backdrop-blur-md p-4 sm:p-6 animate-in fade-in duration-200" onClick={() => setShowSuccessModal(false)}>
+          <div className="bg-white w-full max-w-lg rounded-[32px] shadow-2xl overflow-hidden border border-neutral-100 animate-in zoom-in-95 duration-200 relative text-left" onClick={(e) => e.stopPropagation()}>
+            
+            {/* Sleek Gradient Header Banner */}
+            <div className="relative bg-gradient-to-br from-[#082B3F] via-[#0F4C75] to-[#17618E] p-6 sm:p-8 text-white overflow-hidden">
+              {/* Ambient Decorative Glowing Rings */}
+              <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-sky-400/20 blur-2xl pointer-events-none" />
+              <div className="absolute -bottom-10 -left-10 w-36 h-36 rounded-full bg-teal-400/20 blur-xl pointer-events-none" />
+              
+              {/* Top Header Row */}
+              <div className="flex items-center justify-between relative z-10 mb-4">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[11px] font-bold text-sky-200 uppercase tracking-widest">
+                  <ShieldCheck size={14} className="text-emerald-400" weight="fill" />
+                  <span>Medzoos Verification</span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setShowSuccessModal(false)}
+                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white flex items-center justify-center transition-all border border-white/10"
+                >
+                  <X size={18} weight="bold" />
+                </button>
+              </div>
+
+              {/* Success Icon & Title */}
+              <div className="flex items-center gap-4 relative z-10">
+                <div className="w-16 h-16 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 backdrop-blur-md flex items-center justify-center shrink-0 shadow-inner">
+                  <CheckCircle size={36} className="text-emerald-400" weight="fill" />
+                </div>
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                    Application Submitted!
+                  </h2>
+                  <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                    Your registration request is under priority review by our credentialing team.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 sm:p-7 space-y-5 bg-white">
+              
+              {/* Reference ID Card */}
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-3">
+                <div>
+                  <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Application Reference ID</span>
+                  <span className="font-mono text-base font-bold text-[#082B3F] tracking-wide">{applicationId || "DOC-APP-314141"}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleCopyRef}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200 hover:border-sky-500 text-xs font-bold text-slate-700 hover:text-sky-600 shadow-sm transition-all active:scale-95"
+                >
+                  {copiedRef ? (
+                    <>
+                      <Check size={14} className="text-emerald-600" weight="bold" />
+                      <span className="text-emerald-600">Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy size={14} />
+                      <span>Copy ID</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Key Metrics Grid */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70">
+                  <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">Category</span>
+                  <span className="text-xs font-bold text-[#082B3F] capitalize truncate block">
+                    {submittedType === "doctor" ? "Doctor / Specialist" : submittedType === "lab" ? "Diagnostic Lab" : "Pharmacy Partner"}
+                  </span>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-amber-50/60 border border-amber-200/70">
+                  <span className="text-[11px] font-semibold text-amber-700/80 uppercase tracking-wider block mb-1">Review SLA</span>
+                  <span className="text-xs font-bold text-amber-900 flex items-center gap-1">
+                    <Clock size={14} weight="bold" className="text-amber-600" /> 12 – 24 Hours
+                  </span>
+                </div>
+              </div>
+
+              {/* Onboarding Timeline */}
+              <div className="space-y-2 pt-1">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Verification Steps</span>
+                
+                <div className="p-4 rounded-2xl border border-slate-200/70 bg-slate-50/50 space-y-3">
+                  {/* Step 1 */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 text-xs font-bold shadow-xs">
+                      ✓
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-bold text-slate-800">Application Received</div>
+                      <div className="text-[11px] text-slate-500 truncate">Form & compliance document uploads recorded</div>
+                    </div>
+                  </div>
+
+                  {/* Step Line */}
+                  <div className="ml-3 border-l-2 border-slate-200 h-2 -my-2" />
+
+                  {/* Step 2 */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center shrink-0 text-xs font-bold animate-pulse shadow-xs">
+                      •
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-bold text-sky-900">Credential Audit</div>
+                      <div className="text-[11px] text-sky-700/70 truncate">Verification of PMDC / Drug License / Tax Certificate</div>
+                    </div>
+                  </div>
+
+                  {/* Step Line */}
+                  <div className="ml-3 border-l-2 border-slate-200 h-2 -my-2" />
+
+                  {/* Step 3 */}
+                  <div className="flex items-center gap-3 opacity-60">
+                    <div className="w-6 h-6 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center shrink-0 text-xs font-bold">
+                      <Lock size={12} weight="bold" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-semibold text-slate-600">Portal Access Activation</div>
+                      <div className="text-[11px] text-slate-400 truncate">SMS & Email invitation dispatched upon approval</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer Actions */}
+              <div className="pt-2 flex flex-col sm:flex-row gap-2.5">
+                <a
+                  href={
+                    submittedType === "doctor"
+                      ? "http://localhost:3002"
+                      : `${process.env.NEXT_PUBLIC_VENDOR_URL || "http://localhost:3001"}/vendor`
+                  }
+                  className="flex-1 h-12 rounded-2xl bg-[#082B3F] hover:bg-[#0FA7E3] text-white text-xs font-bold transition-all shadow-md flex items-center justify-center gap-2 group"
+                >
+                  <span>Access Partner Portal</span>
+                  <ArrowRight size={14} weight="bold" className="group-hover:translate-x-0.5 transition-transform" />
+                </a>
+
+                <button
+                  type="button"
+                  onClick={() => setShowSuccessModal(false)}
+                  className="px-5 h-12 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-colors"
+                >
+                  Done
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+export default function PartnerWithUsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <PartnerWithUsContent />
+    </Suspense>
   );
 }

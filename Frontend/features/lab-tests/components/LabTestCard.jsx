@@ -6,10 +6,8 @@ import {
   FileText,
   House,
   ArrowRight,
-  ShoppingCart,
   Buildings,
 } from "@phosphor-icons/react";
-import { addToLabCart } from "@/lib/labCart";
 import { toast } from "sonner";
 
 function getLabName(test) {
@@ -97,7 +95,7 @@ export function LabTestCard({ test, showLabProvider = true }) {
         )}
       </div>
 
-      <div className="mt-auto flex items-center gap-2 border-t border-white/10 bg-black/20 px-4 py-3.5">
+      <div className="mt-auto flex items-center justify-between gap-3 border-t border-white/10 bg-black/20 px-5 py-3.5">
         <div className="min-w-0 flex-1">
           {price != null ? (
             <p className="truncate text-[18px] font-bold tracking-tight text-white">
@@ -108,23 +106,11 @@ export function LabTestCard({ test, showLabProvider = true }) {
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={() => {
-            addToLabCart(test);
-            toast.success("Added to lab cart");
-          }}
-          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/15 text-white transition-colors hover:bg-white/10"
-          aria-label="Add to lab cart"
-        >
-          <ShoppingCart size={17} weight="bold" />
-        </button>
-
         <Link
           href={href}
-          className="inline-flex h-11 shrink-0 items-center gap-1.5 rounded-full bg-[#16A9E0] px-4 text-[13px] font-bold text-white transition-colors hover:bg-[#1290c4]"
+          className="inline-flex h-11 items-center gap-1.5 rounded-full bg-[#16A9E0] px-5 text-[13px] font-bold text-white transition-colors hover:bg-[#1290c4] shadow-sm"
         >
-          Book
+          Book Now
           <ArrowRight size={14} weight="bold" />
         </Link>
       </div>

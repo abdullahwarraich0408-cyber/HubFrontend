@@ -14,6 +14,7 @@ import {
   Buildings,
   FileArrowUp,
   CreditCard,
+  NavigationArrow,
 } from "@phosphor-icons/react";
 import { Button } from "@/shared/components/Button";
 import { Input } from "@/shared/components/Input";
@@ -21,6 +22,7 @@ import { TIME_SLOTS } from "../data/mockLabTests";
 import { useLabTestTimeSlots, useBookLabTest, useUploadDocument, useReadPrescription } from "@/lib/hooks/useApi";
 import { paymentsApi } from "@/lib/api/index";
 import { openSignInModal } from "@/lib/authModalEvents";
+import { detectDeliveryAddress } from "@/lib/location";
 
 const STEPS = [
   { id: 1, label: "Test", icon: Flask },
@@ -40,8 +42,65 @@ export function LabBookingFlow({ test }) {
   const timeSlots = apiTimeSlots.length > 0 ? apiTimeSlots : TIME_SLOTS;
   const [step, setStep] = useState(1);
   const [collectionType, setCollectionType] = useState(test.homeCollection ? "HOME" : "VISIT_LAB");
-  const [patient, setPatient] = useState({ name: user?.name || "", gender: "", age: "", phone: user?.phone || "" });
-  const [address, setAddress] = useState({ line: "", city: "Karachi", phone: user?.phone || "" });
+  const [patient, setPatient] = useState(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const draft = localStorage.getItem("medzoos_draft_lab_patient");
+        if (draft) {
+          const parsed = JSON.parse(draft);
+          if (parsed && (parsed.name || parsed.phone || parsed.age || parsed.gender)) return parsed;
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+    return { name: user?.name || "", gender: "", age: "", phone: user?.phone || "" };
+  });
+  const [address, setAddress] = useState(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const draft = localStorage.getItem("medzoos_draft_lab_address");
+        if (draft) {
+          const parsed = JSON.parse(draft);
+          if (parsed && (parsed.line || parsed.city)) return parsed;
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+    return { line: "", city: "Karachi", phone: user?.phone || "" };
+  });
+
+  useEffect(() => {
+    if (user?.name) {
+      setPatient((p) => ({
+        ...p,
+        name: p.name && p.name.trim() !== "" ? p.name : user.name,
+      }));
+    }
+    if (user?.phone) {
+      setPatient((p) => ({
+        ...p,
+        phone: p.phone && p.phone.trim() !== "" ? p.phone : user.phone,
+      }));
+      setAddress((a) => ({
+        ...a,
+        phone: a.phone && a.phone.trim() !== "" ? a.phone : user.phone,
+      }));
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("medzoos_draft_lab_patient", JSON.stringify(patient));
+    }
+  }, [patient]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("medzoos_draft_lab_address", JSON.stringify(address));
+    }
+  }, [address]);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [collectionDate, setCollectionDate] = useState(new Date().toISOString().slice(0, 10));
   const [prescriptionUrl, setPrescriptionUrl] = useState("");
@@ -50,8 +109,57 @@ export function LabBookingFlow({ test }) {
   const [paymentMethod, setPaymentMethod] = useState("stripe");
   const [paying, setPaying] = useState(false);
 
-  const next = () => setStep((s) => Math.min(4, s + 1));
-  const detailsValid = patient.name.trim() && patient.phone.trim() && (collectionType === "VISIT_LAB" || address.line.trim());
+  const next = () => setStep((s) => Math.min(s + 1, STEPS.length));
+  const prev = () => setStep((s) => Math.max(s - 1, 1));
+
+  const detailsValid =
+    Boolean(patient.name?.trim()) &&
+    Boolean(patient.phone?.trim()) &&
+    (collectionType !== "HOME" || (Boolean(address.line?.trim()) && Boolean(address.city?.trim())));
+
+  const [detectingLocation, setDetectingLocation] = useState(false);
+
+  const handleAutoDetectLocation = async () => {
+    setDetectingLocation(true);
+    try {
+      const loc = await detectDeliveryAddress();
+      if (loc) {
+        const fullLine = loc.label || [loc.street, loc.city, loc.province].filter(Boolean).join(", ");
+        setAddress((prev) => ({
+          ...prev,
+          line: fullLine || prev.line,
+          city: loc.city || prev.city || "Karachi",
+        }));
+        toast.success(`Location detected: ${loc.city || "Success"}`);
+      }
+    } catch (err) {
+      toast.error(err?.message || "Could not detect location. Please enter manually.");
+    } finally {
+      setDetectingLocation(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleLocationChange = (e) => {
+      if (e.detail?.city) {
+        setAddress((prev) => ({ ...prev, city: e.detail.city }));
+      }
+    };
+
+    const savedCity = typeof window !== "undefined" ? localStorage.getItem("medzoos_user_city") : null;
+    if (savedCity) {
+      setAddress((prev) => ({ ...prev, city: savedCity }));
+    }
+
+    window.addEventListener("medzoos-location-changed", handleLocationChange);
+    return () => window.removeEventListener("medzoos-location-changed", handleLocationChange);
+  }, []);
+
+  useEffect(() => {
+    if (step === 2 && !address.line) {
+      handleAutoDetectLocation();
+    }
+  }, [step]);
 
   // Home collection must be prepaid; visit-lab can use cash at counter
   useEffect(() => {
@@ -112,6 +220,11 @@ export function LabBookingFlow({ test }) {
         collection_address: collectionType === "HOME" ? { ...address, phone: patient.phone } : undefined,
         prescription_url: prescriptionUrl || undefined,
       });
+
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("medzoos_draft_lab_patient");
+        localStorage.removeItem("medzoos_draft_lab_address");
+      }
 
       if (method === "stripe") {
         const bookingId = booking.booking?.id || booking.id;
@@ -199,10 +312,32 @@ export function LabBookingFlow({ test }) {
             </button>
           </div>
           {collectionType === "HOME" && (
-            <>
-              <textarea value={address.line} onChange={(e) => setAddress({ ...address, line: e.target.value })} placeholder="Street address" rows={3} className="w-full px-4 py-3 border rounded-[12px]" />
-              <Input value={address.city} onChange={(e) => setAddress({ ...address, city: e.target.value })} placeholder="City" />
-            </>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-[12px] font-semibold text-neutral-600">Sample Collection Address</label>
+                <button
+                  type="button"
+                  onClick={handleAutoDetectLocation}
+                  disabled={detectingLocation}
+                  className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-brand-primary hover:text-brand-dark transition-colors disabled:opacity-60"
+                >
+                  <NavigationArrow size={14} className={detectingLocation ? "animate-spin" : ""} />
+                  {detectingLocation ? "Detecting..." : "Auto-detect Location"}
+                </button>
+              </div>
+              <textarea
+                value={address.line}
+                onChange={(e) => setAddress({ ...address, line: e.target.value })}
+                placeholder="Street address (e.g. House #12, Street 4, Sector G-8)"
+                rows={3}
+                className="w-full px-4 py-3 border border-neutral-200 rounded-[12px] text-[13px] outline-none focus:border-brand-primary"
+              />
+              <Input
+                value={address.city}
+                onChange={(e) => setAddress({ ...address, city: e.target.value })}
+                placeholder="City (e.g. Lahore, Karachi, Gujranwala)"
+              />
+            </div>
           )}
           <div className="rounded-[12px] border border-neutral-200 bg-surface-subtle p-4 space-y-3">
             <div>
@@ -263,7 +398,10 @@ export function LabBookingFlow({ test }) {
               </div>
             )}
           </div>
-          <Button className="w-full h-[48px]" disabled={!detailsValid} onClick={next}>Continue to Slot</Button>
+          <div className="flex gap-3">
+            <Button variant="secondary" className="w-1/3 h-[48px]" onClick={prev}>Back</Button>
+            <Button className="w-2/3 h-[48px]" disabled={!detailsValid} onClick={next}>Continue to Slot</Button>
+          </div>
         </div>
       )}
 
@@ -316,13 +454,16 @@ export function LabBookingFlow({ test }) {
               ? "PDF report unlocks after Stripe payment."
               : "Pay at the lab counter when your sample is collected. Lab staff will mark payment paid — then your PDF report unlocks."}
           </p>
-          <Button className="w-full h-[48px]" disabled={!selectedSlot || bookLabTest.isPending || paying} onClick={handleConfirmBooking}>
-            {bookLabTest.isPending || paying
-              ? "Processing..."
-              : paymentMethod === "stripe"
-                ? "Book & pay with Stripe"
-                : "Book — pay cash at lab"}
-          </Button>
+          <div className="flex gap-3">
+            <Button variant="secondary" className="w-1/3 h-[48px]" onClick={prev}>Back</Button>
+            <Button className="w-2/3 h-[48px]" disabled={!selectedSlot || bookLabTest.isPending || paying} onClick={handleConfirmBooking}>
+              {bookLabTest.isPending || paying
+                ? "Processing..."
+                : paymentMethod === "stripe"
+                  ? "Book & pay with Stripe"
+                  : "Book — pay cash at lab"}
+            </Button>
+          </div>
         </div>
       )}
 
@@ -336,7 +477,7 @@ export function LabBookingFlow({ test }) {
             Visit the lab for sample collection and pay cash at the counter. Your PDF report appears in Reports after the lab confirms payment.
           </p>
           <div className="flex gap-3">
-            <Button variant="secondary" className="flex-1" onClick={() => router.push("/orders")}>View Orders</Button>
+            <Button variant="secondary" className="flex-1" onClick={() => router.push("/orders?type=lab")}>View Orders</Button>
             <Button className="flex-1" onClick={() => router.push("/account/reports")}>My Reports</Button>
           </div>
         </div>

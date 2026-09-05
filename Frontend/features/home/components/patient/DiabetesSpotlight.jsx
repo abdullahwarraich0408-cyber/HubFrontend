@@ -50,7 +50,7 @@ export function DiabetesSpotlight() {
           </div>
 
           <Link
-            href="/browse?category=diabetes"
+            href="/doctors?q=diabetes"
             className="group mt-6 inline-flex h-11 items-center gap-2 rounded-xl bg-[#0B6E99] px-5 text-[14px] font-semibold text-white transition-colors hover:bg-[#073B4C]"
           >
             Explore Diabetes Care

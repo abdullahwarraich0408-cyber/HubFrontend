@@ -3,37 +3,26 @@
 const CART_KEY = "medzoos_lab_cart";
 
 export function getLabCart() {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(CART_KEY) || localStorage.getItem("sehat1_lab_cart") || localStorage.getItem("pharmahub_lab_cart");
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
+  return [];
 }
 
-export function saveLabCart(items) {
+export function saveLabCart() {
   if (typeof window === "undefined") return;
-  localStorage.setItem(CART_KEY, JSON.stringify(items));
+  localStorage.removeItem(CART_KEY);
   window.dispatchEvent(new CustomEvent("lab-cart-updated"));
+  window.dispatchEvent(new Event("cart-updated"));
 }
 
-export function addToLabCart(test) {
-  const cart = getLabCart();
-  if (cart.some((item) => item.id === test.id)) return cart;
-  const next = [...cart, test];
-  saveLabCart(next);
-  return next;
+export function addToLabCart() {
+  return [];
 }
 
-export function removeFromLabCart(testId) {
-  const next = getLabCart().filter((item) => item.id !== testId);
-  saveLabCart(next);
-  return next;
+export function removeFromLabCart() {
+  return [];
 }
 
 export function clearLabCart() {
-  saveLabCart([]);
+  saveLabCart();
 }
 
 export function groupCartByLab(cart = []) {

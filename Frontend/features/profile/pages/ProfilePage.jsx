@@ -142,7 +142,21 @@ export function ProfilePage() {
       );
     }
     if (type === "address") setForm(item || EMPTY_ADDRESS);
-    if (type === "record") setForm(item || EMPTY_RECORD);
+    if (type === "record") {
+      let initialDate = item?.rawDate || "";
+      if (!initialDate && item?.date) {
+        const parsed = new Date(item.date);
+        if (!isNaN(parsed.getTime())) {
+          initialDate = parsed.toISOString().split("T")[0];
+        } else {
+          initialDate = item.date;
+        }
+      }
+      if (!initialDate) {
+        initialDate = new Date().toISOString().split("T")[0];
+      }
+      setForm(item ? { ...item, date: initialDate } : { ...EMPTY_RECORD, date: initialDate });
+    }
     if (type === "payment") setForm(item || EMPTY_PAYMENT);
   };
 
@@ -152,8 +166,7 @@ export function ProfilePage() {
   };
 
   const handleLogout = async () => {
-    await logout();
-    router.push("/");
+    await logout("/");
   };
 
   const saveFamilyMember = async () => {
@@ -231,11 +244,20 @@ export function ProfilePage() {
       return;
     }
     const records = [...profileData.medicalRecords];
+    let formattedDisplayDate = form.date;
+    if (form.date && /^\d{4}-\d{2}-\d{2}$/.test(form.date)) {
+      const [year, month, day] = form.date.split("-");
+      const d = new Date(Number(year), Number(month) - 1, Number(day));
+      if (!isNaN(d.getTime())) {
+        formattedDisplayDate = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+      }
+    }
     const payload = {
       id: modal.item?.id || createId(),
       type: form.type || "Lab Report",
       title: form.title.trim(),
-      date: form.date || new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      date: formattedDisplayDate || new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      rawDate: form.date || undefined,
       lab: form.lab?.trim() || "Medzoos",
     };
     if (modal.item) {
@@ -353,34 +375,37 @@ export function ProfilePage() {
               <p className="text-[14px] text-[var(--color-neutral-500)]">No family members yet. Add one to get started.</p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {familyMembers.map((member) => (
-                  <div key={member.id} className="p-5 border border-[var(--color-neutral-200)] rounded-[16px]">
-                    <div className="flex items-start justify-between mb-3">
-                      <Link href={`/family-health/members/${member.id}`} className="w-12 h-12 rounded-full bg-[var(--color-brand-light)] flex items-center justify-center hover:ring-2 hover:ring-[var(--color-brand-primary)]/20">
-                        <User size={24} className="text-[var(--color-brand-primary)]" weight="fill" />
-                      </Link>
-                      <div className="flex gap-1">
-                        <button type="button" onClick={() => openModal("family", member)} className="p-2 text-[var(--color-neutral-400)] hover:text-[var(--color-brand-primary)]">
-                          <PencilSimple size={16} />
-                        </button>
-                        <button type="button" onClick={() => removeFamilyMember(member.id)} className="p-2 text-[var(--color-neutral-400)] hover:text-[var(--color-status-danger)]">
-                          <Trash size={16} />
-                        </button>
+                {familyMembers.map((member) => {
+                  const mId = member.id || member._id || member.member_id;
+                  return (
+                    <div key={mId} className="p-5 border border-[var(--color-neutral-200)] rounded-[16px]">
+                      <div className="flex items-start justify-between mb-3">
+                        <Link href={`/family-health/members/${mId}`} className="w-12 h-12 rounded-full bg-[var(--color-brand-light)] flex items-center justify-center hover:ring-2 hover:ring-[var(--color-brand-primary)]/20">
+                          <User size={24} className="text-[var(--color-brand-primary)]" weight="fill" />
+                        </Link>
+                        <div className="flex gap-1">
+                          <button type="button" onClick={() => openModal("family", member)} className="p-2 text-[var(--color-neutral-400)] hover:text-[var(--color-brand-primary)]">
+                            <PencilSimple size={16} />
+                          </button>
+                          <button type="button" onClick={() => removeFamilyMember(mId)} className="p-2 text-[var(--color-neutral-400)] hover:text-[var(--color-status-danger)]">
+                            <Trash size={16} />
+                          </button>
+                        </div>
                       </div>
+                      <Link href={`/family-health/members/${mId}`} className="block hover:text-[var(--color-brand-primary)]">
+                        <h3 className="text-[16px] font-bold">{member.name}</h3>
+                      </Link>
+                      <p className="text-[13px] text-[var(--color-neutral-500)]">{member.relation}</p>
+                      {member.healthScore != null && (
+                        <p className="text-[12px] font-semibold text-[var(--color-brand-primary)] mt-2">Health Score: {member.healthScore}</p>
+                      )}
+                      {member.bloodGroup && <p className="text-[12px] text-[var(--color-neutral-600)] mt-1">Blood Group: {member.bloodGroup}</p>}
+                      {member.statusLines?.[0] && (
+                        <p className="text-[12px] text-[var(--color-neutral-500)] mt-2">{member.statusLines[0]}</p>
+                      )}
                     </div>
-                    <Link href={`/family-health/members/${member.id}`} className="block hover:text-[var(--color-brand-primary)]">
-                      <h3 className="text-[16px] font-bold">{member.name}</h3>
-                    </Link>
-                    <p className="text-[13px] text-[var(--color-neutral-500)]">{member.relation}</p>
-                    {member.healthScore != null && (
-                      <p className="text-[12px] font-semibold text-[var(--color-brand-primary)] mt-2">Health Score: {member.healthScore}</p>
-                    )}
-                    {member.bloodGroup && <p className="text-[12px] text-[var(--color-neutral-600)] mt-1">Blood Group: {member.bloodGroup}</p>}
-                    {member.statusLines?.[0] && (
-                      <p className="text-[12px] text-[var(--color-neutral-500)] mt-2">{member.statusLines[0]}</p>
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -808,7 +833,7 @@ export function ProfilePage() {
           <Input label="Title" value={form.title || ""} onChange={(e) => setForm({ ...form, title: e.target.value })} />
           <Input label="Type" value={form.type || ""} onChange={(e) => setForm({ ...form, type: e.target.value })} placeholder="Lab Report, Consultation..." />
           <Input label="Provider / Lab" value={form.lab || ""} onChange={(e) => setForm({ ...form, lab: e.target.value })} />
-          <Input label="Date" value={form.date || ""} onChange={(e) => setForm({ ...form, date: e.target.value })} placeholder="Jun 09, 2026" />
+          <Input label="Date" type="date" value={form.date || ""} onChange={(e) => setForm({ ...form, date: e.target.value })} />
         </div>
       </ProfileModal>
 

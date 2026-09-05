@@ -96,13 +96,26 @@ function ItemForm({ item, sectionKey, fields, onSaved }) {
     }
   };
 
+  function resolveImageUrl(url) {
+    if (!url || typeof url !== "string") return "";
+    const trimmed = url.trim();
+    if (!trimmed) return "";
+    if (trimmed.startsWith("http://") || trimmed.startsWith("https://") || trimmed.startsWith("data:")) {
+      return trimmed;
+    }
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
+    const origin = apiBase.replace(/\/api\/?$/, "");
+    const cleanPath = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+    return `${origin}${cleanPath}`;
+  }
+
   return (
     <form
       onSubmit={handleSave}
       className={`bg-white rounded-[16px] border border-neutral-200 p-4 flex flex-col gap-3 shadow-[0_4px_20px_rgba(0,0,0,0.03)] ${form.is_active === false ? "opacity-60" : ""}`}
     >
       {fields.includes("image_url") && form.image_url ? (
-        <img src={form.image_url} alt="" className="h-28 w-full object-cover rounded-xl" />
+        <img src={resolveImageUrl(form.image_url)} alt="" className="h-28 w-full object-cover rounded-xl" />
       ) : null}
       {fields.includes("title") && (
         <label className="text-[12px] font-semibold">

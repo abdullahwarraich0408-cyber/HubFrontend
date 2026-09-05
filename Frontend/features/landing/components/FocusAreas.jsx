@@ -13,16 +13,16 @@ const FOCUS_AREAS = [
     description:
       "Access the services commonly needed for ongoing diabetes management through one connected experience.",
     pills: [
-      "Diabetes medicines",
-      "Insulin",
-      "Diabetologists",
-      "HbA1c Tests",
-      "Blood Tests",
-      "Home Sampling",
-      "Regular Consultations",
+      { label: "Diabetes medicines", href: "/medicine?q=diabetes" },
+      { label: "Insulin", href: "/medicine?q=insulin" },
+      { label: "Diabetologists", href: "/doctors?q=diabetes" },
+      { label: "HbA1c Tests", href: "/lab-tests?q=hba1c" },
+      { label: "Blood Tests", href: "/lab-tests?q=blood" },
+      { label: "Home Sampling", href: "/lab-tests" },
+      { label: "Regular Consultations", href: "/doctors?q=diabetes" },
     ],
     cta: "Explore Diabetes Care",
-    href: "/browse?category=diabetes",
+    href: "/doctors?q=diabetes",
     image: "/images/diabetes-care.png",
     alt: "Healthcare professional discussing diabetes care with a patient at home",
   },
@@ -32,16 +32,16 @@ const FOCUS_AREAS = [
     description:
       "Find mental healthcare professionals for anxiety, depression, stress and other common mental health concerns.",
     pills: [
-      "Psychologists",
-      "Psychiatrists",
-      "Online Sessions",
-      "Clinic Visits",
-      "Anxiety Support",
-      "Stress Support",
-      "Depression Support",
+      { label: "Psychologists", href: "/doctors?specialty=psychologist" },
+      { label: "Psychiatrists", href: "/doctors?specialty=psychiatrist" },
+      { label: "Online Sessions", href: "/doctors?consult=online&q=mental" },
+      { label: "Clinic Visits", href: "/doctors?consult=in_person&q=mental" },
+      { label: "Anxiety Support", href: "/doctors?q=anxiety" },
+      { label: "Stress Support", href: "/doctors?q=stress" },
+      { label: "Depression Support", href: "/doctors?q=depression" },
     ],
     cta: "Explore Mental Health",
-    href: "/doctors?specialty=psychologist",
+    href: "/doctors?q=mental",
     image: "/images/mental-health.png",
     alt: "Psychologist in a calm supportive conversation with a patient",
   },
@@ -84,14 +84,19 @@ export function FocusAreas() {
                     {area.description}
                   </p>
                   <div className="mt-5 flex flex-wrap gap-2">
-                    {area.pills.map((pill) => (
-                      <span
-                        key={pill}
-                        className="rounded-full border border-[#17618E]/15 bg-[#EAF8F7] px-3 py-1.5 text-[12px] font-medium text-[#124362]"
-                      >
-                        {pill}
-                      </span>
-                    ))}
+                    {area.pills.map((pill) => {
+                      const label = typeof pill === "string" ? pill : pill.label;
+                      const pillHref = typeof pill === "string" ? area.href : pill.href;
+                      return (
+                        <Link
+                          key={label}
+                          href={pillHref}
+                          className="rounded-full border border-[#17618E]/15 bg-[#EAF8F7] px-3 py-1.5 text-[12px] font-medium text-[#124362] transition-colors hover:border-[#17618E] hover:bg-[#17618E] hover:text-white"
+                        >
+                          {label}
+                        </Link>
+                      );
+                    })}
                   </div>
                   <Link
                     href={area.href}

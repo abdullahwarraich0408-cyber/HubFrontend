@@ -21,6 +21,7 @@ import {
 import { cn } from "@/utils/cn";
 import { useQuery } from "@tanstack/react-query";
 import { publicHomeSlidesApi } from "@/lib/api/index";
+import { useAuth } from "@/lib/auth/AuthProvider";
 
 import { usePrescriptionModal } from "@/features/prescription/context/PrescriptionModalContext";
 
@@ -98,7 +99,7 @@ export const HERO_SLIDES = [
     cta: "Book a Lab Test",
     href: "/lab-tests",
     secondaryCta: "View Lab Bookings",
-    secondaryHref: "/orders",
+    secondaryHref: "/orders?type=lab",
     ctaIcon: Flask,
     badge: "Home Sampling Available at Selected Labs",
     image: "/images/hero-lab-test.png",
@@ -177,24 +178,58 @@ export function HomeHeroCarousel() {
   const [direction, setDirection] = useState(1);
   const touchStartX = useRef(null);
   const rootRef = useRef(null);
+  const { isAuthenticated } = useAuth();
+  const audience = isAuthenticated ? "returning" : "first_visit";
   const { data } = useQuery({
-    queryKey: ["home-slides", "first_visit"],
-    queryFn: () => publicHomeSlidesApi.list("first_visit"),
+    queryKey: ["home-slides", audience],
+    queryFn: () => publicHomeSlidesApi.list(audience),
     staleTime: 5 * 60 * 1000,
   });
 
   const slides =
     data?.slides?.length > 0
       ? data.slides.map((item, i) => {
-          const fallback = HERO_SLIDES[i] || HERO_SLIDES[0];
-          const action = item.action || fallback.id;
+          const actionMap = {
+            prescription: "prescription",
+            doctors: "consult",
+            pharmacy: "medicines",
+            labs: "labs",
+            hospitals: "consult",
+          };
+          const action = item.action || "doctors";
+          const fallbackId = actionMap[action] || "consult";
+          const fallback =
+            HERO_SLIDES.find((s) => s.id === fallbackId) ||
+            HERO_SLIDES[i] ||
+            HERO_SLIDES[0];
+
+          let href = item.href;
+          if (!href) {
+            if (
+              action === "doctors" ||
+              (item.cta && item.cta.toLowerCase().includes("doctor")) ||
+              (item.title && item.title.toLowerCase().includes("doctor"))
+            ) {
+              href = "/doctors";
+            } else if (
+              action === "hospitals" ||
+              (item.cta && item.cta.toLowerCase().includes("hospital"))
+            ) {
+              href = "/hospitals";
+            } else if (ACTION_HREF[action]) {
+              href = ACTION_HREF[action];
+            } else {
+              href = fallback.href;
+            }
+          }
+
           return {
             ...fallback,
             id: item.id,
             title: item.title || fallback.title,
             description: item.description || fallback.description,
             cta: item.cta || fallback.cta,
-            href: item.href || ACTION_HREF[action] || fallback.href,
+            href,
             ctaIcon: ACTION_ICON[action] || fallback.ctaIcon,
             image: item.image_url || fallback.image,
             badge: item.badge || fallback.badge,

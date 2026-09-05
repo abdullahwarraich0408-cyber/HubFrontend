@@ -13,7 +13,10 @@ import {
   useCreateDoctorPracticeLocation,
   useUpdateDoctorPracticeLocation,
   useDeleteDoctorPracticeLocation,
+  useUploadDocument,
 } from "@/lib/hooks/useApi";
+import { useQuery } from "@tanstack/react-query";
+import { inquiriesApi, uploadApi } from "@/lib/api/index";
 
 import { toast } from "sonner";
 import {
@@ -43,7 +46,123 @@ import {
   UserCheck,
   WarningCircle,
   Info,
+  FileText,
+  DownloadSimple,
 } from "@phosphor-icons/react";
+
+function extractDoctorDocLinks(doctor, inquiries = []) {
+  if (!doctor) return [];
+  const links = [];
+
+  const addLink = (url, label) => {
+    if (!url || typeof url !== "string" || !url.trim()) return;
+    const cleanUrl = url.trim();
+    if (!links.some((l) => l.url === cleanUrl)) {
+      links.push({ url: cleanUrl, label: label || "Attached Credential" });
+    }
+  };
+
+  // 1. Direct doctor properties
+  if (doctor.pmdc_certificate_url) addLink(doctor.pmdc_certificate_url, "PMDC / PMC Registration Certificate");
+  if (doctor.degree_certificate_url) addLink(doctor.degree_certificate_url, "Medical Degree (MBBS/FCPS)");
+  if (doctor.cnic_copy_url) addLink(doctor.cnic_copy_url, "CNIC Copy (Front & Back)");
+  if (doctor.experience_proof_url) addLink(doctor.experience_proof_url, "Hospital / Clinic Affiliation Proof");
+  if (doctor.license_url) addLink(doctor.license_url, "Practitioner License");
+
+  // 2. doctor.documents object or array
+  if (doctor.documents) {
+    if (Array.isArray(doctor.documents)) {
+      doctor.documents.forEach((d) => {
+        if (typeof d === "string") addLink(d, "Compliance Document");
+        else if (d && (d.file_url || d.url)) addLink(d.file_url || d.url, d.label || d.type || "Compliance Document");
+      });
+    } else if (typeof doctor.documents === "object") {
+      Object.entries(doctor.documents).forEach(([key, val]) => {
+        if (typeof val === "string" && (val.startsWith("http") || val.startsWith("/uploads") || val.startsWith("data:"))) {
+          let label = key.replaceAll("_", " ");
+          if (key.includes("pmdc")) label = "PMDC / PMC Certificate";
+          else if (key.includes("degree")) label = "Medical Degree (MBBS/FCPS)";
+          else if (key.includes("cnic")) label = "CNIC Copy";
+          else if (key.includes("experience")) label = "Affiliation Proof";
+          addLink(val, label);
+        }
+      });
+    }
+  }
+
+  // 3. Match from registration inquiries list
+  if (Array.isArray(inquiries) && inquiries.length > 0) {
+    const docEmail = (doctor.email || "").toLowerCase().trim();
+    const docName = (doctor.name || "").toLowerCase().replace(/^dr\.?\s*/i, "").trim();
+
+    let matchingInquiries = inquiries.filter((inq) => {
+      const inqEmail = (inq.email || "").toLowerCase().trim();
+      const inqMsg = (inq.message || "").toLowerCase();
+      const inqSub = (inq.subject || "").toLowerCase();
+      return (
+        (docEmail && inqEmail === docEmail) ||
+        (docEmail && inqMsg.includes(docEmail)) ||
+        (docName && docName.length > 2 && (inqMsg.includes(docName) || inqSub.includes(docName)))
+      );
+    });
+
+    if (matchingInquiries.length === 0) {
+      matchingInquiries = inquiries.filter((inq) => 
+        inq.metadata?.partner_type === "doctor" || 
+        inq.subject?.toLowerCase().includes("doctor")
+      );
+    }
+
+    matchingInquiries.forEach((inq) => {
+      if (inq.metadata?.documents && typeof inq.metadata.documents === "object") {
+        Object.entries(inq.metadata.documents).forEach(([key, val]) => {
+          if (typeof val === "string" && (val.startsWith("http") || val.startsWith("/uploads") || val.startsWith("data:"))) {
+            let label = key.replaceAll("_", " ");
+            if (key.includes("pmdc")) label = "PMDC / PMC Certificate";
+            else if (key.includes("degree")) label = "Medical Degree (MBBS/FCPS)";
+            else if (key.includes("cnic")) label = "CNIC Copy";
+            else if (key.includes("experience")) label = "Affiliation Proof";
+            addLink(val, label);
+          }
+        });
+      }
+
+      const regex = /(https?:\/\/[^\s\)\"\'>]+|\/uploads\/[^\s\)\"\'>]+)/g;
+      let match;
+      while ((match = regex.exec(inq.message || "")) !== null) {
+        const url = match[0];
+        let label = "Attached Credential";
+        if (url.includes("pmdc") || inq.message?.includes("pmdc")) label = "PMDC / PMC Certificate";
+        else if (url.includes("degree") || url.includes("mbbs") || url.includes("fcps")) label = "Medical Degree (MBBS/FCPS)";
+        else if (url.includes("cnic")) label = "CNIC Copy (Front & Back)";
+        else if (url.includes("experience") || url.includes("proof")) label = "Hospital Affiliation Proof";
+        addLink(url, label);
+      }
+    });
+  }
+
+  // 4. Fallback search across stringified doctor object
+  const allText = [
+    doctor.about || "",
+    doctor.bio || "",
+    Array.isArray(doctor.qualifications) ? doctor.qualifications.join("\n") : "",
+    JSON.stringify(doctor || {}),
+  ].join("\n");
+
+  const regex = /(https?:\/\/[^\s\)\"\'>]+|\/uploads\/[^\s\)\"\'>]+)/g;
+  let match;
+  while ((match = regex.exec(allText)) !== null) {
+    const url = match[0];
+    let label = "Attached Credential";
+    if (url.includes("pmdc")) label = "PMDC / PMC Certificate";
+    else if (url.includes("degree") || url.includes("mbbs") || url.includes("fcps")) label = "Medical Degree (MBBS/FCPS)";
+    else if (url.includes("cnic")) label = "CNIC Copy";
+    else if (url.includes("experience") || url.includes("proof")) label = "Hospital Affiliation Proof";
+    addLink(url, label);
+  }
+
+  return links;
+}
 
 const WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 const DEFAULT_SLOT = "09:00 AM - 01:00 PM";
@@ -178,6 +297,7 @@ export default function AdminDoctorsPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingDoctor, setEditingDoctor] = useState(null); // Doctor object being edited
   const [viewDoctor, setViewDoctor] = useState(null);
+  const [previewDoc, setPreviewDoc] = useState(null);
   const [activeDetailTab, setActiveDetailTab] = useState("overview"); // 'overview' | 'schedule' | 'appointments'
 
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -186,6 +306,38 @@ export default function AdminDoctorsPage() {
   const [editingLocationId, setEditingLocationId] = useState(null);
   const [locationForm, setLocationForm] = useState(emptyLocationForm);
   const [copiedId, setCopiedId] = useState(null);
+  const uploadDocumentMutation = useUploadDocument();
+  const [uploadingDoc, setUploadingDoc] = useState(false);
+
+  const { data: inquiries = [] } = useQuery({
+    queryKey: ["admin-inquiries"],
+    queryFn: async () => {
+      const res = await inquiriesApi.list();
+      return Array.isArray(res) ? res : res?.inquiries || [];
+    },
+  });
+
+  const handleDirectDocUpload = async (file) => {
+    if (!file || !viewDoctor) return;
+    setUploadingDoc(true);
+    try {
+      const res = await uploadDocumentMutation.mutateAsync(file);
+      const fileUrl = res?.url || res?.data?.url || (typeof res === "string" ? res : "");
+      const updatedAbout = `${viewDoctor.about || ""}\n\nVerification Document: ${fileUrl}`.trim();
+      
+      await updateDoctorMutation.mutateAsync({
+        id: viewDoctor.id,
+        data: { about: updatedAbout },
+      });
+
+      setViewDoctor((prev) => prev ? { ...prev, about: updatedAbout } : null);
+      toast.success("Document attached to doctor profile!");
+    } catch (err) {
+      toast.error(err?.message || "Failed to upload document");
+    } finally {
+      setUploadingDoc(false);
+    }
+  };
 
   const { data: doctorAppointmentsData } = useAdminDoctorAppointments(viewDoctor?.id, {
     enabled: Boolean(viewDoctor?.id && activeDetailTab === "appointments"),
@@ -205,6 +357,8 @@ export default function AdminDoctorsPage() {
     fee: "",
     hospital_id: "",
     photo_url: "",
+    days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    slots: "09:00 AM - 01:00 PM",
   });
 
   const [editFormData, setEditFormData] = useState({
@@ -269,6 +423,32 @@ export default function AdminDoctorsPage() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
+  const handleExportCSV = () => {
+    const headers = ["ID", "Doctor Name", "Email", "Specialty", "Experience Years", "Fee (PKR)", "Hospital", "Status", "Date Registered"];
+    const csvContent = [
+      headers.join(","),
+      ...filteredDoctors.map((d) => [
+        d.id,
+        `"${d.name || ""}"`,
+        d.email || "",
+        `"${d.specialty || ""}"`,
+        d.experience_years || 0,
+        d.fee || 0,
+        `"${d.hospital || ""}"`,
+        d.is_active ? "Active" : "Inactive",
+        new Date(d.created_at || Date.now()).toLocaleDateString(),
+      ].join(",")),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `doctors_export_${new Date().toISOString().split("T")[0]}.csv`;
+    link.click();
+    toast.success("Doctors directory exported successfully!");
+  };
+
   const handleAddDoctor = async (e) => {
     e.preventDefault();
     try {
@@ -278,8 +458,10 @@ export default function AdminDoctorsPage() {
         experience_years: Number(formData.experience_years) || 0,
         hospital_id: formData.hospital_id || null,
         photo_url: formData.photo_url || null,
+        days: formData.days || ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        slots: formData.slots || "09:00 AM - 01:00 PM",
       });
-      toast.success("Doctor added successfully!");
+      toast.success("Doctor profile and schedule created successfully!");
       setShowAddModal(false);
       setFormData({
         name: "",
@@ -290,6 +472,8 @@ export default function AdminDoctorsPage() {
         fee: "",
         hospital_id: "",
         photo_url: "",
+        days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        slots: "09:00 AM - 01:00 PM",
       });
     } catch (err) {
       toast.error(err.message || "Failed to add doctor");
@@ -486,6 +670,13 @@ export default function AdminDoctorsPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          <button
+            onClick={handleExportCSV}
+            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold transition-all shadow-sm"
+          >
+            <DownloadSimple size={16} weight="bold" />
+            <span>Export CSV</span>
+          </button>
           <button
             onClick={() => setShowAddModal(true)}
             className="flex items-center gap-2 px-5 py-2.5 bg-[#082B3F] hover:bg-[#0FA7E3] text-white rounded-xl text-xs font-bold transition-all shadow-sm"
@@ -801,10 +992,10 @@ export default function AdminDoctorsPage() {
         )}
       </div>
 
-      {/* Complete Doctor Detail Modal (Triggered by Eye Icon) */}
+      {/* Complete Doctor Detail Slide-Over Sheet (Triggered by Eye Icon) */}
       {viewDoctor && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#082B3F]/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col border border-slate-200 animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex justify-end bg-[#0C1A2E]/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-xl h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 border-l border-slate-200">
             
             {/* Modal Header */}
             <div className="p-6 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-blue-50/40 shrink-0">
@@ -934,6 +1125,74 @@ export default function AdminDoctorsPage() {
                         <p className="text-xs text-slate-400">Main practicing medical center</p>
                       </div>
                     </div>
+                  </div>
+
+                  {/* Verification Documents */}
+                  <div>
+                    <div className="flex items-center justify-between border-b border-slate-200 pb-2 mb-3">
+                      <h3 className="text-xs font-bold text-[#082B3F] uppercase tracking-wider">
+                        Verification Documents ({extractDoctorDocLinks(viewDoctor, inquiries).length})
+                      </h3>
+                      <label className="cursor-pointer text-[11px] font-bold text-[#17618E] hover:underline flex items-center gap-1 bg-[#DEEEF9] px-2.5 py-1 rounded-lg">
+                        <Plus size={12} weight="bold" />
+                        <span>{uploadingDoc ? "Uploading..." : "Attach Document"}</span>
+                        <input
+                          type="file"
+                          accept=".pdf,.png,.jpg,.jpeg,.webp"
+                          className="hidden"
+                          disabled={uploadingDoc}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleDirectDocUpload(file);
+                          }}
+                        />
+                      </label>
+                    </div>
+
+                    {extractDoctorDocLinks(viewDoctor, inquiries).length > 0 ? (
+                      <div className="space-y-3">
+                        {extractDoctorDocLinks(viewDoctor, inquiries).map((doc, idx) => (
+                          <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-xl border border-slate-200 bg-white gap-2">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <FileText size={20} className="text-[#17618E] shrink-0" />
+                              <div className="min-w-0">
+                                <div className="text-xs font-bold text-[#082B3F] truncate">{doc.label}</div>
+                                <div className="text-[11px] text-slate-400">Status: {viewDoctor.is_active ? "Verified" : "Pending Review"}</div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-center">
+                              <button
+                                type="button"
+                                onClick={() => setPreviewDoc({ title: doc.label, url: doc.url })}
+                                className="text-xs font-bold text-[#17618E] hover:underline px-3 py-1.5 bg-[#DEEEF9] rounded-lg"
+                              >
+                                View
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleUpdateStatus(viewDoctor.id, true)}
+                                className="text-xs font-bold text-white px-3 py-1.5 bg-[#17618E] hover:bg-[#082B3F] rounded-lg transition-colors"
+                              >
+                                Verify
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleUpdateStatus(viewDoctor.id, false)}
+                                className="text-xs font-bold text-white px-3 py-1.5 bg-[#DC2626] hover:bg-rose-700 rounded-lg transition-colors"
+                              >
+                                Reject
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="p-4 rounded-xl border border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center text-center gap-2">
+                        <FileText size={32} className="text-slate-300" />
+                        <div className="text-xs font-bold text-[#082B3F]">No compliance documents uploaded yet</div>
+                        <div className="text-[11px] text-slate-400">Practitioner needs to attach PMDC license & MBBS credentials.</div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Status Toggle Action */}
@@ -1568,6 +1827,47 @@ export default function AdminDoctorsPage() {
                 </select>
               </div>
 
+              <div>
+                <label className="block text-xs font-bold text-[#082B3F] mb-1.5 uppercase tracking-wider">
+                  Practice Working Days
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {WEEKDAYS.map((day) => (
+                    <button
+                      key={day}
+                      type="button"
+                      onClick={() => {
+                        const currentDays = formData.days || [];
+                        const updated = currentDays.includes(day)
+                          ? currentDays.filter((d) => d !== day)
+                          : [...currentDays, day];
+                        setFormData({ ...formData, days: updated });
+                      }}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                        (formData.days || []).includes(day)
+                          ? "bg-[#082B3F] text-white shadow-sm"
+                          : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      }`}
+                    >
+                      {day.slice(0, 3)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[#082B3F] mb-1.5 uppercase tracking-wider">
+                  Consultation Time Slot
+                </label>
+                <input
+                  type="text"
+                  value={formData.slots}
+                  onChange={(e) => setFormData({ ...formData, slots: e.target.value })}
+                  className="w-full h-10 px-3 rounded-xl border border-slate-200 outline-none focus:border-[#082B3F] text-xs font-medium text-[#082B3F]"
+                  placeholder="e.g. 09:00 AM - 01:00 PM, 05:00 PM - 08:00 PM"
+                />
+              </div>
+
               <div className="flex items-center justify-end gap-3 mt-4 pt-4 border-t border-slate-100">
                 <button
                   type="button"
@@ -1585,6 +1885,63 @@ export default function AdminDoctorsPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Inline Document Preview Modal */}
+      {previewDoc && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-[#082B3F]/75 backdrop-blur-md p-4 sm:p-6 animate-in fade-in duration-200" onClick={() => setPreviewDoc(null)}>
+          <div className="bg-white w-full max-w-4xl h-[85vh] rounded-2xl shadow-2xl overflow-hidden border border-slate-200 flex flex-col animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-sky-50 text-[#17618E] flex items-center justify-center font-bold">
+                  <FileText size={20} weight="bold" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-[#082B3F] capitalize">{previewDoc.title || "Document Preview"}</h3>
+                  <p className="text-[11px] text-slate-500 truncate max-w-md">{previewDoc.url}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <a
+                  href={previewDoc.url}
+                  download
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
+                >
+                  <DownloadSimple size={16} weight="bold" />
+                  <span>Download</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setPreviewDoc(null)}
+                  className="w-8 h-8 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 flex items-center justify-center transition-colors"
+                >
+                  <X size={18} weight="bold" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Content Body */}
+            <div className="flex-1 bg-slate-900/5 p-4 overflow-auto flex items-center justify-center relative">
+              {previewDoc.url?.toLowerCase().endsWith(".pdf") || previewDoc.url?.includes("pdf") ? (
+                <iframe
+                  src={previewDoc.url}
+                  className="w-full h-full rounded-xl border border-slate-200 bg-white shadow-inner"
+                  title={previewDoc.title}
+                />
+              ) : (
+                <img
+                  src={previewDoc.url}
+                  alt={previewDoc.title}
+                  className="max-w-full max-h-full object-contain rounded-xl shadow-lg border border-slate-200/50 bg-white"
+                />
+              )}
+            </div>
           </div>
         </div>
       )}

@@ -49,7 +49,7 @@ export function DoctorSidebar({
 
   const handleLogout = () => {
     partnerAuthApi.logout();
-    router.push(routes.login);
+    window.location.href = routes.login;
   };
 
   return (

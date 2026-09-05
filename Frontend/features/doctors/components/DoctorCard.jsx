@@ -75,10 +75,15 @@ function DoctorCover({ doctor }) {
   );
 }
 
-export function DoctorCard({ doctor, consultType = null, hospitalContext = null }) {
+export function DoctorCard({ doctor, consultType = null, hospitalContext = null, variant = "vertical" }) {
   const router = useRouter();
   const [showBookModal, setShowBookModal] = useState(false);
   const isOnlineTab = consultType === "online";
+  const candidates = useMemo(
+    () => photoCandidates(doctor),
+    [doctor?.photo, doctor?.image, doctor?.avatar]
+  );
+  const [index, setIndex] = useState(0);
 
   const allOptions = useMemo(
     () => buildDoctorConsultOptions(doctor, { hospitalContext }),
@@ -125,6 +130,106 @@ export function DoctorCard({ doctor, consultType = null, hospitalContext = null 
       startBooking(bookableOptions[0]);
     }
   };
+
+  if (variant === "horizontal") {
+    const photoSrc = candidates[index] || null;
+    const feeDisplay = bookableOptions[0]?.fee || doctor.fee || 2500;
+
+    return (
+      <>
+        <article className="group bg-white rounded-[20px] border border-[var(--color-neutral-200)] p-4 sm:p-6 text-[var(--color-ink-headline)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6 shadow-sm hover:shadow-md transition-all">
+          <div className="flex items-start gap-4 sm:gap-5 min-w-0 flex-1">
+            <Link href={profileHref} className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-[16px] overflow-hidden shrink-0 border border-[var(--color-neutral-200)] bg-[var(--color-surface-subtle)] block">
+              {photoSrc ? (
+                <img
+                  src={photoSrc}
+                  alt={doctor.name}
+                  className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                  onError={() => setIndex((i) => i + 1)}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#0B6E99] to-[#073B4C] text-white font-bold text-xl">
+                  {initialsFromName(doctor?.name)}
+                </div>
+              )}
+              {doctor.online && (
+                <span className="absolute bottom-1.5 right-1.5 flex items-center gap-1 px-1.5 py-0.5 bg-[var(--color-status-success)] text-white text-[9px] font-bold rounded-full shadow-sm">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                  Online
+                </span>
+              )}
+            </Link>
+
+            <div className="min-w-0 flex-1">
+              <Link href={profileHref} className="hover:text-[var(--color-brand-primary)] transition-colors">
+                <h3 className="text-[17px] sm:text-[19px] font-bold text-[var(--color-ink-headline)] leading-tight">
+                  {doctor.name}
+                </h3>
+              </Link>
+              <p className="text-[13px] font-semibold text-[var(--color-brand-primary)] mt-0.5">
+                {doctor.specialty || "General Physician"}
+              </p>
+
+              <div className="flex flex-wrap items-center gap-2 mt-2 text-[12px] text-[var(--color-neutral-500)]">
+                {doctor.experience && (
+                  <span className="px-2.5 py-0.5 bg-[var(--color-surface-subtle)] border border-[var(--color-neutral-200)] rounded-md font-medium">
+                    {doctor.experience}
+                  </span>
+                )}
+                {doctor.qualifications?.[0] && (
+                  <span className="truncate max-w-[200px]">
+                    {doctor.qualifications[0]}
+                  </span>
+                )}
+                {typeof doctor.rating === "number" && doctor.rating > 0 && (
+                  <span className="inline-flex items-center gap-1 text-[var(--color-ink-headline)] font-semibold">
+                    <Star size={13} weight="fill" className="text-[#F2B84B]" />
+                    {doctor.rating.toFixed(1)}
+                  </span>
+                )}
+              </div>
+
+              {doctor.hospital && (
+                <p className="text-[12px] text-[var(--color-neutral-500)] flex items-center gap-1 mt-2">
+                  <Buildings size={13} className="text-[var(--color-brand-primary)] shrink-0" />
+                  <span className="truncate">{doctor.hospital}</span>
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="w-full sm:w-auto flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 border-[var(--color-neutral-200)] pt-3 sm:pt-0 shrink-0 gap-3">
+            <div className="text-left sm:text-right">
+              <p className="text-[11px] text-[var(--color-neutral-400)] uppercase font-semibold tracking-wider">Fee</p>
+              <p className="text-[16px] sm:text-[18px] font-bold text-[var(--color-ink-headline)]">
+                PKR {feeDisplay.toLocaleString()}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleBookClick}
+                disabled={bookableOptions.length === 0}
+                className="inline-flex h-10 px-5 items-center justify-center gap-2 rounded-xl bg-[var(--color-brand-primary)] text-[13px] font-bold text-white transition-all hover:bg-[var(--color-brand-dark)] shadow-sm hover:shadow disabled:opacity-40"
+              >
+                <CalendarBlank size={15} weight="bold" />
+                Book Appointment
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <BookConsultModal
+          doctor={doctor}
+          options={bookableOptions}
+          open={showBookModal}
+          onClose={() => setShowBookModal(false)}
+          onSelect={startBooking}
+        />
+      </>
+    );
+  }
 
   return (
     <>

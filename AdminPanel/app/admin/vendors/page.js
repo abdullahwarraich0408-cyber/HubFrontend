@@ -6,7 +6,9 @@ import {
   Copy, Eye, CheckCircle, XCircle, PencilSimple, DownloadSimple, 
   CaretLeft, CaretRight, ArrowsDownUp, CaretDown, FileText, Trash, MapPin, Spinner, Clock
 } from "@phosphor-icons/react";
-import { useAdminVendors, useAdminCreateVendor, useUpdateVendorStatus, useUpdateVendorCredentials, useDeleteVendor, useReviewVendorDocument } from "@/lib/hooks/useApi";
+import { useAdminVendors, useAdminCreateVendor, useUpdateVendorStatus, useUpdateVendorCredentials, useDeleteVendor, useReviewVendorDocument, useUploadDocument } from "@/lib/hooks/useApi";
+import { useQuery } from "@tanstack/react-query";
+import { inquiriesApi, uploadApi } from "@/lib/api/index";
 import { detectDeliveryAddress, SUPPORTED_CITIES } from "@/lib/location";
 import { toast } from "sonner";
 
@@ -64,8 +66,108 @@ function PharmacyAvatar({ vendor, size = "md", className = "" }) {
   );
 }
 
+function extractedVendorDocs(vendor, inquiries = []) {
+  if (!vendor) return [];
+  const list = [];
+
+  const addDoc = (type, url) => {
+    if (!url || typeof url !== "string" || !url.trim()) return;
+    const cleanUrl = url.trim();
+    if (!list.some((d) => d.file_url === cleanUrl)) {
+      list.push({
+        id: `doc_${list.length + 1}`,
+        type: type || "compliance_document",
+        file_url: cleanUrl,
+        status: "pending",
+      });
+    }
+  };
+
+  if (Array.isArray(vendor.documents) && vendor.documents.length > 0) {
+    vendor.documents.forEach((d) => {
+      if (d && (d.file_url || d.url)) {
+        addDoc(d.type || "compliance_document", d.file_url || d.url);
+      }
+    });
+  }
+
+  if (vendor.trade_license_url) addDoc("trade_license", vendor.trade_license_url);
+  if (vendor.pharmacist_certificate_url) addDoc("pharmacist_certificate", vendor.pharmacist_certificate_url);
+  if (vendor.tax_certificate_url) addDoc("tax_certificate", vendor.tax_certificate_url);
+  if (vendor.bank_document_url) addDoc("bank_document", vendor.bank_document_url);
+
+  // Match from registration inquiries list
+  if (Array.isArray(inquiries) && inquiries.length > 0) {
+    const vEmail = (vendor.email || "").toLowerCase().trim();
+    const vName = (vendor.business_name || vendor.name || "").toLowerCase().trim();
+
+    let matchingInquiries = inquiries.filter((inq) => {
+      const inqEmail = (inq.email || "").toLowerCase().trim();
+      const inqMsg = (inq.message || "").toLowerCase();
+      const inqSub = (inq.subject || "").toLowerCase();
+      return (
+        (vEmail && inqEmail === vEmail) ||
+        (vEmail && inqMsg.includes(vEmail)) ||
+        (vName && vName.length > 2 && (inqMsg.includes(vName) || inqSub.includes(vName)))
+      );
+    });
+
+    if (matchingInquiries.length === 0) {
+      matchingInquiries = inquiries.filter((inq) => 
+        inq.metadata?.partner_type === "pharmacy" || 
+        inq.metadata?.partner_type === "vendor" ||
+        inq.subject?.toLowerCase().includes("pharmacy")
+      );
+    }
+
+    matchingInquiries.forEach((inq) => {
+      if (inq.metadata?.documents && typeof inq.metadata.documents === "object") {
+        Object.entries(inq.metadata.documents).forEach(([key, val]) => {
+          if (typeof val === "string" && (val.startsWith("http") || val.startsWith("/uploads") || val.startsWith("data:"))) {
+            addDoc(key, val);
+          }
+        });
+      }
+
+      const regex = /(https?:\/\/[^\s\)\"\'>]+|\/uploads\/[^\s\)\"\'>]+)/g;
+      let match;
+      while ((match = regex.exec(inq.message || "")) !== null) {
+        const url = match[0];
+        let type = "attached_credential";
+        if (url.includes("license") || inq.message?.includes("license")) type = "trade_license";
+        else if (url.includes("pharmacist")) type = "pharmacist_certificate";
+        else if (url.includes("tax")) type = "tax_certificate";
+        else if (url.includes("bank")) type = "bank_document";
+        addDoc(type, url);
+      }
+    });
+  }
+
+  // Fallback search across stringified vendor object
+  const allText = [
+    vendor.about || "",
+    vendor.notes || "",
+    JSON.stringify(vendor || {}),
+  ].join("\n");
+
+  const regex = /(https?:\/\/[^\s\)\"\'>]+|\/uploads\/[^\s\)\"\'>]+)/g;
+  let match;
+  while ((match = regex.exec(allText)) !== null) {
+    const url = match[0];
+    let type = "attached_credential";
+    if (url.includes("license")) type = "trade_license";
+    else if (url.includes("pharmacist")) type = "pharmacist_certificate";
+    else if (url.includes("tax")) type = "tax_certificate";
+    else if (url.includes("bank")) type = "bank_document";
+    addDoc(type, url);
+  }
+
+  return list;
+}
+
 export default function AdminVendorsPage() {
   const { data: vendors = [], isLoading } = useAdminVendors();
+  const [previewDoc, setPreviewDoc] = useState(null);
   const createVendorMutation = useAdminCreateVendor();
   const updateStatusMutation = useUpdateVendorStatus();
   const updateCredentialsMutation = useUpdateVendorCredentials();
@@ -85,6 +187,42 @@ export default function AdminVendorsPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [viewVendor, setViewVendor] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const uploadDocumentMutation = useUploadDocument();
+  const [uploadingDoc, setUploadingDoc] = useState(false);
+
+  const { data: inquiries = [] } = useQuery({
+    queryKey: ["admin-inquiries"],
+    queryFn: async () => {
+      const res = await inquiriesApi.list();
+      return Array.isArray(res) ? res : res?.inquiries || [];
+    },
+  });
+
+  const handleDirectDocUpload = async (file) => {
+    if (!file || !viewVendor) return;
+    setUploadingDoc(true);
+    try {
+      const res = await uploadDocumentMutation.mutateAsync(file);
+      const fileUrl = res?.url || res?.data?.url || (typeof res === "string" ? res : "");
+      
+      setViewVendor((prev) => {
+        if (!prev) return null;
+        const currentDocs = Array.isArray(prev.documents) ? prev.documents : [];
+        return {
+          ...prev,
+          documents: [
+            ...currentDocs,
+            { id: `doc_${Date.now()}`, type: "attached_credential", file_url: fileUrl, status: "pending" }
+          ]
+        };
+      });
+      toast.success("Document attached to pharmacy profile!");
+    } catch (err) {
+      toast.error(err?.message || "Failed to upload document");
+    } finally {
+      setUploadingDoc(false);
+    }
+  };
   const [internalNote, setInternalNote] = useState("");
   
   // Edit Credentials State
@@ -814,10 +952,29 @@ export default function AdminVendorsPage() {
 
               {/* Documents */}
               <div>
-                <h3 className="text-sm font-bold text-[#0C1A2E] uppercase tracking-wider border-b border-[#0C1A2E]/10 pb-2 mb-4">Verification Documents</h3>
-                {(viewVendor.documents || []).length > 0 ? (
+                <div className="flex items-center justify-between border-b border-[#0C1A2E]/10 pb-2 mb-4">
+                  <h3 className="text-sm font-bold text-[#0C1A2E] uppercase tracking-wider">
+                    Verification Documents ({extractedVendorDocs(viewVendor, inquiries).length})
+                  </h3>
+                  <label className="cursor-pointer text-xs font-bold text-[#17618E] hover:underline flex items-center gap-1 bg-[#DEEEF9] px-3 py-1 rounded-lg">
+                    <Plus size={14} weight="bold" />
+                    <span>{uploadingDoc ? "Uploading..." : "Attach Document"}</span>
+                    <input
+                      type="file"
+                      accept=".pdf,.png,.jpg,.jpeg,.webp"
+                      className="hidden"
+                      disabled={uploadingDoc}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleDirectDocUpload(file);
+                      }}
+                    />
+                  </label>
+                </div>
+
+                {extractedVendorDocs(viewVendor, inquiries).length > 0 ? (
                   <div className="space-y-3">
-                    {viewVendor.documents.map((document) => (
+                    {extractedVendorDocs(viewVendor, inquiries).map((document) => (
                       <div key={document.id} className="flex items-center justify-between p-3 rounded-lg border border-[#0C1A2E]/10 bg-white">
                         <div className="flex items-center gap-2">
                           <FileText size={20} className="text-[#17618E]" />
@@ -827,14 +984,13 @@ export default function AdminVendorsPage() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <a 
-                            href={document.file_url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
+                          <button
+                            type="button"
+                            onClick={() => setPreviewDoc({ title: document.type.replaceAll("_", " "), url: document.file_url })}
                             className="text-xs font-semibold text-[#17618E] hover:underline px-3 py-1.5 bg-[#DEEEF9] rounded"
                           >
                             View
-                          </a>
+                          </button>
                           <button
                             type="button"
                             onClick={async () => {
@@ -1163,6 +1319,63 @@ export default function AdminVendorsPage() {
               >
                 {deleteVendorMutation.isPending ? "Deleting..." : "Yes, Delete"}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Inline Document Preview Modal */}
+      {previewDoc && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-[#082B3F]/75 backdrop-blur-md p-4 sm:p-6 animate-in fade-in duration-200" onClick={() => setPreviewDoc(null)}>
+          <div className="bg-white w-full max-w-4xl h-[85vh] rounded-2xl shadow-2xl overflow-hidden border border-slate-200 flex flex-col animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-sky-50 text-[#17618E] flex items-center justify-center font-bold">
+                  <FileText size={20} weight="bold" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-[#082B3F] capitalize">{previewDoc.title || "Document Preview"}</h3>
+                  <p className="text-[11px] text-slate-500 truncate max-w-md">{previewDoc.url}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <a
+                  href={previewDoc.url}
+                  download
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
+                >
+                  <DownloadSimple size={16} weight="bold" />
+                  <span>Download</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setPreviewDoc(null)}
+                  className="w-8 h-8 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 flex items-center justify-center transition-colors"
+                >
+                  <X size={18} weight="bold" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Content Body */}
+            <div className="flex-1 bg-slate-900/5 p-4 overflow-auto flex items-center justify-center relative">
+              {previewDoc.url?.toLowerCase().endsWith(".pdf") || previewDoc.url?.includes("pdf") ? (
+                <iframe
+                  src={previewDoc.url}
+                  className="w-full h-full rounded-xl border border-slate-200 bg-white shadow-inner"
+                  title={previewDoc.title}
+                />
+              ) : (
+                <img
+                  src={previewDoc.url}
+                  alt={previewDoc.title}
+                  className="max-w-full max-h-full object-contain rounded-xl shadow-lg border border-slate-200/50 bg-white"
+                />
+              )}
             </div>
           </div>
         </div>

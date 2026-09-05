@@ -108,3 +108,6 @@ public/storage/
 # Optional: ignore very large static assets (uncomment if needed)
 # **/public/**/*.mp4
 # **/public/**/*.mov
+
+# Separate backend repository
+medzoos-backend/

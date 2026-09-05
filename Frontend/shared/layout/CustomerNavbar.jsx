@@ -28,6 +28,7 @@ import { usePrescriptionModal } from "@/features/prescription/context/Prescripti
 import { GlobalSearch } from "@/features/home/components/patient/GlobalSearch";
 import { UserMenu } from "@/features/home/components/patient/UserMenu";
 import { CustomerNotificationInbox } from "@/shared/notifications/NotificationInbox";
+import { NavbarLocationPicker } from "./NavbarLocationPicker";
 import { cn } from "@/utils/cn";
 
 const HIGHLIGHTS = [
@@ -41,8 +42,6 @@ export function CustomerNavbar() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { openPrescriptionModal } = usePrescriptionModal();
   const [cartCount, setCartCount] = useState(0);
-  const [currentLocation, setCurrentLocation] = useState("Karachi");
-  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -55,34 +54,6 @@ export function CustomerNavbar() {
   });
   const profileRole = profile?.role;
   const profileId = profile?.id ?? null;
-
-  const fetchLocation = () => {
-    if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser");
-      return;
-    }
-    setIsLoadingLocation(true);
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const { latitude, longitude } = position.coords;
-          const res = await fetch(
-            `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
-          );
-          const data = await res.json();
-          setCurrentLocation(data.city || data.locality || "Location found");
-        } catch {
-          setCurrentLocation("Unknown Location");
-        } finally {
-          setIsLoadingLocation(false);
-        }
-      },
-      () => {
-        alert("Unable to retrieve your location");
-        setIsLoadingLocation(false);
-      }
-    );
-  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -102,19 +73,22 @@ export function CustomerNavbar() {
 
     const updateCartCount = async () => {
       try {
+        let medicineCount = 0;
         if (isAuthenticated) {
           try {
             const data = await cartApi.get();
             const items = data.cart?.items || data.items || [];
-            setCartCount(items.reduce((acc, item) => acc + item.quantity, 0));
+            medicineCount = items.reduce((acc, item) => acc + (item.quantity || 1), 0);
           } catch {
             const guestCart = JSON.parse(localStorage.getItem("guest_cart") || "[]");
-            setCartCount(guestCart.reduce((acc, item) => acc + item.quantity, 0));
+            medicineCount = guestCart.reduce((acc, item) => acc + (item.quantity || 1), 0);
           }
         } else {
           const guestCart = JSON.parse(localStorage.getItem("guest_cart") || "[]");
-          setCartCount(guestCart.reduce((acc, item) => acc + item.quantity, 0));
+          medicineCount = guestCart.reduce((acc, item) => acc + (item.quantity || 1), 0);
         }
+
+        setCartCount(medicineCount);
       } catch {
         /* ignore cart sync errors in chrome */
       }
@@ -123,9 +97,11 @@ export function CustomerNavbar() {
     if (!authLoading) updateCartCount();
 
     window.addEventListener("cart-updated", updateCartCount);
+    window.addEventListener("lab-cart-updated", updateCartCount);
     window.addEventListener("auth-updated", updateCartCount);
     return () => {
       window.removeEventListener("cart-updated", updateCartCount);
+      window.removeEventListener("lab-cart-updated", updateCartCount);
       window.removeEventListener("auth-updated", updateCartCount);
     };
   }, [authLoading, isAuthenticated, pathname, isProfileLoading, profileId, profileRole]);
@@ -182,20 +158,7 @@ export function CustomerNavbar() {
 
             {/* Right Action Icons Group */}
             <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-              <button
-                type="button"
-                onClick={fetchLocation}
-                className="hidden items-center gap-1.5 rounded-xl px-2.5 py-2 text-[13px] text-[#334E68] transition-colors hover:bg-[#F1F7FA] hover:text-[#0B6E99] lg:inline-flex"
-                aria-label="Update delivery location"
-              >
-                {isLoadingLocation ? (
-                  <Spinner size={18} className="animate-spin" />
-                ) : (
-                  <MapPin size={18} />
-                )}
-                <span className="max-w-[110px] truncate font-medium">{currentLocation}</span>
-                <CaretDown size={12} />
-              </button>
+              <NavbarLocationPicker className="hidden lg:inline-block" />
 
               {/* Upload Rx Button (Visible on tablet & desktop) */}
               <button
@@ -350,17 +313,8 @@ export function CustomerNavbar() {
 
               {/* Location Picker in Drawer */}
               <div className="pt-2 border-t border-slate-100 flex items-center justify-between px-3 text-xs text-slate-600">
-                <span className="flex items-center gap-1.5">
-                  <MapPin size={16} className="text-[#0B6E99]" />
-                  <span>City: <strong>{currentLocation}</strong></span>
-                </span>
-                <button
-                  type="button"
-                  onClick={fetchLocation}
-                  className="text-[#0B6E99] font-bold hover:underline"
-                >
-                  Change
-                </button>
+                <span className="font-semibold text-slate-500">Your Location:</span>
+                <NavbarLocationPicker />
               </div>
             </div>
           </div>

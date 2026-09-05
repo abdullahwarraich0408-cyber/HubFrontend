@@ -73,6 +73,7 @@ export const productsApi = {
   review: (id, data) => api.patch(`/admin/products/${id}/review`, data),
   getById: (id) => api.get(`/products/${id}`),
   getReviews: (id) => api.get(`/products/${id}/reviews`),
+  createAdminProduct: (data) => api.post("/admin/products", data),
   create: (data) => api.post("/products", data),
   update: (id, data) => api.patch(`/products/${id}`, data),
   delete: (id) => api.delete(`/products/${id}`),

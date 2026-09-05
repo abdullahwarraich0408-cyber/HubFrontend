@@ -1,8 +1,17 @@
 /** In-memory access token — refresh token lives in HttpOnly cookie set by backend. */
 
 let memoryAccessToken = null;
+let isLoggingOutState = false;
 
 const USER_KEY = "medzoos_user";
+
+export function setLoggingOut(val) {
+  isLoggingOutState = Boolean(val);
+}
+
+export function isLoggingOut() {
+  return isLoggingOutState;
+}
 
 export function getMemoryAccessToken() {
   return memoryAccessToken;
@@ -36,11 +45,21 @@ export function persistUser(user) {
 }
 
 export function clearAuthStorage() {
+  setLoggingOut(true);
   clearMemoryAccessToken();
   if (typeof window === "undefined") return;
   localStorage.removeItem(USER_KEY);
   localStorage.removeItem("token");
   localStorage.removeItem("refreshToken");
+  localStorage.removeItem("sehat1_user");
+  localStorage.removeItem("pharmahub_user");
+  localStorage.removeItem("sehat1_token");
+  localStorage.removeItem("pharmahub_token");
+  try {
+    sessionStorage.clear();
+  } catch {
+    // ignore
+  }
 }
 
 export function hasAuthSession() {

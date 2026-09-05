@@ -112,6 +112,7 @@ export function relationshipEmoji(relationship) {
 }
 
 export function scoreColor(score) {
+  if (score == null) return "text-slate-600 bg-slate-100";
   if (score >= 80) return "text-emerald-600 bg-emerald-50";
   if (score >= 65) return "text-amber-600 bg-amber-50";
   return "text-rose-600 bg-rose-50";
@@ -139,7 +140,7 @@ export const EMPTY_MEMBER = {
   relationship: "Father",
   gender: "",
   date_of_birth: "",
-  blood_group: "B+",
+  blood_group: "",
   height_cm: "",
   weight_kg: "",
   phone: "",

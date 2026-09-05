@@ -17,21 +17,12 @@ const COLUMNS = [
     ],
   },
   {
-    title: "For Providers",
-    links: [
-      { label: "Doctors", href: "/partner-with-us" },
-      { label: "Pharmacies", href: "/partner-with-us" },
-      { label: "Laboratories", href: "/partner-with-us" },
-      { label: "Hospitals & Clinics", href: "/hospitals" },
-      { label: "Join Medzoos", href: "/partner-with-us" },
-    ],
-  },
-  {
     title: "Company",
     links: [
-      { label: "About", href: "/about" },
-      { label: "Contact", href: "/contact" },
+      { label: "About Us", href: "/about" },
+      { label: "Contact Us", href: "/contact" },
       { label: "Help Center", href: "/help" },
+      { label: "Become a Partner", href: "/partner-with-us" },
     ],
   },
   {
@@ -49,7 +40,7 @@ export function Footer() {
   return (
     <footer className="border-t border-[#102A43]/08 bg-[#102A43] text-white">
       <div className="landing-container py-14 md:py-16">
-        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-6 lg:gap-8">
+        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-5 lg:gap-8">
           <div className="lg:col-span-2">
             <BrandLogo href="#top" onDark />
             <p className="mt-4 max-w-xs text-[14px] leading-relaxed text-white/65">

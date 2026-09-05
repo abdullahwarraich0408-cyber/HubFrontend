@@ -37,34 +37,31 @@ export function CartPage() {
       const loggedIn = typeof window !== "undefined" ? hasAuthSession() : false;
       setIsAuthenticated(loggedIn);
 
+      let medItems = [];
       try {
         if (loggedIn) {
           const data = await cartApi.get();
-          setCartItems(data.cart?.items || data.items || []);
+          medItems = data.cart?.items || data.items || [];
         } else {
-          const guestCart = JSON.parse(localStorage.getItem('guest_cart') || '[]');
-          setCartItems(guestCart);
+          medItems = JSON.parse(localStorage.getItem("guest_cart") || "[]");
         }
       } catch (error) {
-        if (!error.message?.toLowerCase().includes("jwt expired")) {
-          toast.error("Failed to load cart");
-        }
-        // Fallback to guest cart if API fails
-        const guestCart = JSON.parse(localStorage.getItem('guest_cart') || '[]');
-        setCartItems(guestCart);
-      } finally {
-        setIsLoading(false);
+        medItems = JSON.parse(localStorage.getItem("guest_cart") || "[]");
       }
+
+      setCartItems(medItems);
+      setIsLoading(false);
     };
+
     fetchCart();
-    
+
     const handleCartUpdate = () => fetchCart();
-    if (typeof window !== 'undefined') {
-      window.addEventListener('cart-updated', handleCartUpdate);
+    if (typeof window !== "undefined") {
+      window.addEventListener("cart-updated", handleCartUpdate);
     }
     return () => {
-      if (typeof window !== 'undefined') {
-        window.removeEventListener('cart-updated', handleCartUpdate);
+      if (typeof window !== "undefined") {
+        window.removeEventListener("cart-updated", handleCartUpdate);
       }
     };
   }, []);
@@ -74,26 +71,52 @@ export function CartPage() {
   const tax = subtotal * 0.05;
   const total = Math.max(0, subtotal + shipping + tax - discount);
 
-  const updateQuantity = async (id, delta) => {
-    const item = cartItems.find((entry) => entry.id === id);
+  const updateQuantity = async (rawId, delta) => {
+    if (!rawId) return;
+    const item = cartItems.find(
+      (entry) => (entry.id || entry.product_id || entry.productId) === rawId
+    );
     if (!item) return;
-    const newQuantity = Math.max(1, item.quantity + delta);
-    
+
+    if (item.isLabTest) {
+      if (delta < 0) handleRemoveItem(rawId);
+      return;
+    }
+
+    const newQuantity = item.quantity + delta;
+    if (newQuantity <= 0) {
+      handleRemoveItem(rawId);
+      return;
+    }
+
     setIsUpdating(true);
     try {
       if (isAuthenticated) {
-        await cartApi.updateItem(id, newQuantity);
-      } else {
-        const guestCart = [...cartItems];
-        const idx = guestCart.findIndex(i => i.id === id);
-        if (idx > -1) {
-          guestCart[idx].quantity = newQuantity;
-          localStorage.setItem('guest_cart', JSON.stringify(guestCart));
+        try {
+          await cartApi.updateItem(rawId, newQuantity);
+        } catch {
+          /* ignore sync failure */
         }
       }
-      setCartItems(items => items.map(i => i.id === id ? { ...i, quantity: newQuantity } : i));
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new Event('cart-updated'));
+
+      const guestCart = JSON.parse(localStorage.getItem("guest_cart") || "[]");
+      const idx = guestCart.findIndex(
+        (i) => (i.id || i.product_id || i.productId) === rawId
+      );
+      if (idx > -1) {
+        guestCart[idx].quantity = newQuantity;
+        localStorage.setItem("guest_cart", JSON.stringify(guestCart));
+      }
+
+      setCartItems((items) =>
+        items.map((i) =>
+          (i.id || i.product_id || i.productId) === rawId
+            ? { ...i, quantity: newQuantity }
+            : i
+        )
+      );
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("cart-updated"));
       }
     } catch (err) {
       toast.error(err.message || "Could not update quantity");
@@ -102,19 +125,37 @@ export function CartPage() {
     }
   };
 
-  const handleRemoveItem = async (id) => {
+  const handleRemoveItem = async (rawId) => {
+    if (!rawId) return;
+    const item = cartItems.find(
+      (entry) => (entry.id || entry.product_id || entry.productId) === rawId
+    );
+
     try {
-      if (isAuthenticated) {
-        await cartApi.removeItem(id);
+      if (item?.isLabTest) {
+        removeFromLabCart(rawId);
       } else {
-        const guestCart = cartItems.filter(i => i.id !== id);
-        localStorage.setItem('guest_cart', JSON.stringify(guestCart));
+        if (isAuthenticated) {
+          try {
+            await cartApi.removeItem(rawId);
+          } catch {
+            /* fallback */
+          }
+        }
+        const guestCart = JSON.parse(
+          localStorage.getItem("guest_cart") || "[]"
+        ).filter((i) => (i.id || i.product_id || i.productId) !== rawId);
+        localStorage.setItem("guest_cart", JSON.stringify(guestCart));
       }
-      setCartItems(items => items.filter(i => i.id !== id));
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new Event('cart-updated'));
+
+      setCartItems((items) =>
+        items.filter((i) => (i.id || i.product_id || i.productId) !== rawId)
+      );
+
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("cart-updated"));
       }
-      toast.success("Item removed");
+      toast.success("Item removed from cart");
     } catch (err) {
       toast.error(err.message || "Could not remove item");
     }
@@ -220,88 +261,91 @@ export function CartPage() {
 
               {/* Items List */}
               <div className="divide-y divide-[var(--color-neutral-100)]">
-                {cartItems.map((item) => (
-                  <div key={item.id} className="grid grid-cols-1 sm:grid-cols-12 gap-4 sm:gap-6 p-5 sm:p-6 items-center group hover:bg-[var(--color-neutral-50)] transition-colors">
-                    
-                    {/* Product Info */}
-                    <div className="col-span-1 sm:col-span-6 flex gap-4 items-start sm:items-center">
-                      <div className="w-[80px] h-[80px] sm:w-[90px] sm:h-[90px] rounded-[12px] overflow-hidden bg-[var(--color-neutral-100)] border border-[var(--color-neutral-200)] shrink-0 relative">
-                        <img 
-                          src={item.image} 
-                          alt={item.name}
-                          className="w-full h-full object-cover mix-blend-multiply opacity-90 group-hover:scale-105 transition-transform duration-500"
-                        />
-                      </div>
-                      <div className="flex flex-col justify-center">
-                        <h3 className="text-[15px] font-bold text-[var(--color-neutral-900)] leading-snug mb-1">
-                          {item.name}
-                        </h3>
-                        <p className="text-[13px] font-medium text-[var(--color-brand-primary)] mb-2">
-                          By {item.vendor}
-                        </p>
-                        <div className="flex items-center gap-2">
-                          {item.inStock ? (
-                            <Badge variant="success" className="text-[10px] px-2 py-0.5">In Stock</Badge>
-                          ) : (
-                            <Badge variant="error" className="text-[10px] px-2 py-0.5">Out of Stock</Badge>
-                          )}
+                {cartItems.map((item) => {
+                  const targetId = item.id || item.product_id || item.productId;
+                  return (
+                    <div key={targetId || item.name} className="grid grid-cols-1 sm:grid-cols-12 gap-4 sm:gap-6 p-5 sm:p-6 items-center group hover:bg-[var(--color-neutral-50)] transition-colors">
+                      
+                      {/* Product Info */}
+                      <div className="col-span-1 sm:col-span-6 flex gap-4 items-start sm:items-center">
+                        <div className="w-[80px] h-[80px] sm:w-[90px] sm:h-[90px] rounded-[12px] overflow-hidden bg-[var(--color-neutral-100)] border border-[var(--color-neutral-200)] shrink-0 relative">
+                          <img 
+                            src={item.image} 
+                            alt={item.name}
+                            className="w-full h-full object-cover mix-blend-multiply opacity-90 group-hover:scale-105 transition-transform duration-500"
+                          />
                         </div>
-                        <div className="sm:hidden mt-3 font-bold text-[16px] text-[var(--color-neutral-900)]">
-                          Rs {item.price.toLocaleString()}
+                        <div className="flex flex-col justify-center">
+                          <h3 className="text-[15px] font-bold text-[var(--color-neutral-900)] leading-snug mb-1">
+                            {item.name}
+                          </h3>
+                          <p className="text-[13px] font-medium text-[var(--color-brand-primary)] mb-2">
+                            By {item.vendor}
+                          </p>
+                          <div className="flex items-center gap-2">
+                            {item.inStock ? (
+                              <Badge variant="success" className="text-[10px] px-2 py-0.5">In Stock</Badge>
+                            ) : (
+                              <Badge variant="error" className="text-[10px] px-2 py-0.5">Out of Stock</Badge>
+                            )}
+                          </div>
+                          <div className="sm:hidden mt-3 font-bold text-[16px] text-[var(--color-neutral-900)]">
+                            Rs {item.price.toLocaleString()}
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Quantity Control */}
-                    <div className="col-span-1 sm:col-span-3 flex justify-start sm:justify-center mt-2 sm:mt-0">
-                      <div className="flex items-center border border-[var(--color-neutral-200)] rounded-full bg-white shadow-sm overflow-hidden h-[36px]">
-                        <button 
-                          onClick={() => updateQuantity(item.id, -1)}
-                          disabled={item.quantity <= 1 || isUpdating}
-                          className="w-10 h-full flex items-center justify-center text-[var(--color-neutral-500)] hover:text-[var(--color-neutral-900)] hover:bg-[var(--color-neutral-100)] transition-colors disabled:opacity-50"
-                        >
-                          <Minus size={14} weight="bold" />
-                        </button>
-                        <span className="w-10 text-center text-[14px] font-bold text-[var(--color-neutral-900)]">
-                          {item.quantity}
+                      {/* Quantity Control */}
+                      <div className="col-span-1 sm:col-span-3 flex justify-start sm:justify-center mt-2 sm:mt-0">
+                        <div className="flex items-center border border-[var(--color-neutral-200)] rounded-full bg-white shadow-sm overflow-hidden h-[36px]">
+                          <button 
+                            onClick={() => updateQuantity(targetId, -1)}
+                            disabled={item.quantity <= 1 || isUpdating}
+                            className="w-10 h-full flex items-center justify-center text-[var(--color-neutral-500)] hover:text-[var(--color-neutral-900)] hover:bg-[var(--color-neutral-100)] transition-colors disabled:opacity-50"
+                          >
+                            <Minus size={14} weight="bold" />
+                          </button>
+                          <span className="w-10 text-center text-[14px] font-bold text-[var(--color-neutral-900)]">
+                            {item.quantity}
+                          </span>
+                          <button 
+                            onClick={() => updateQuantity(targetId, 1)}
+                            disabled={isUpdating}
+                            className="w-10 h-full flex items-center justify-center text-[var(--color-neutral-500)] hover:text-[var(--color-neutral-900)] hover:bg-[var(--color-neutral-100)] transition-colors"
+                          >
+                            <Plus size={14} weight="bold" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Desktop Price */}
+                      <div className="hidden sm:block col-span-2 text-right">
+                        <span className="text-[16px] font-bold text-[var(--color-neutral-900)]">
+                          Rs {(item.price * item.quantity).toLocaleString()}
                         </span>
+                      </div>
+
+                      {/* Delete Action */}
+                      <div className="hidden sm:flex col-span-1 justify-end">
                         <button 
-                          onClick={() => updateQuantity(item.id, 1)}
-                          disabled={isUpdating}
-                          className="w-10 h-full flex items-center justify-center text-[var(--color-neutral-500)] hover:text-[var(--color-neutral-900)] hover:bg-[var(--color-neutral-100)] transition-colors"
+                          onClick={() => handleRemoveItem(targetId)}
+                          className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--color-neutral-400)] hover:text-[var(--color-status-danger)] hover:bg-[var(--color-status-danger)]/10 transition-colors"
+                          title="Remove item"
                         >
-                          <Plus size={14} weight="bold" />
+                          <Trash size={18} weight="fill" />
                         </button>
                       </div>
-                    </div>
 
-                    {/* Desktop Price */}
-                    <div className="hidden sm:block col-span-2 text-right">
-                      <span className="text-[16px] font-bold text-[var(--color-neutral-900)]">
-                        Rs {(item.price * item.quantity).toLocaleString()}
-                      </span>
-                    </div>
-
-                    {/* Delete Action */}
-                    <div className="hidden sm:flex col-span-1 justify-end">
+                      {/* Mobile Delete */}
                       <button 
-                        onClick={() => handleRemoveItem(item.id)}
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--color-neutral-400)] hover:text-[var(--color-status-danger)] hover:bg-[var(--color-status-danger)]/10 transition-colors"
-                        title="Remove item"
+                        onClick={() => handleRemoveItem(targetId)}
+                        className="sm:hidden absolute top-5 right-5 text-[var(--color-neutral-400)] hover:text-[var(--color-status-danger)] transition-colors"
                       >
                         <Trash size={18} weight="fill" />
                       </button>
                     </div>
-
-                    {/* Mobile Delete */}
-                    <button 
-                      onClick={() => handleRemoveItem(item.id)}
-                      className="sm:hidden absolute top-5 right-5 text-[var(--color-neutral-400)] hover:text-[var(--color-status-danger)] transition-colors"
-                    >
-                      <Trash size={18} weight="fill" />
-                    </button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
             

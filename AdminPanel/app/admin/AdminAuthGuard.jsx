@@ -3,28 +3,24 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUserProfile } from "@/lib/hooks/useApi";
-import { CircleNotch, ShieldCheck, ArrowRight } from "@phosphor-icons/react";
+import { CircleNotch, ArrowRight } from "@phosphor-icons/react";
 import AdminSessionTimeoutModal from "./AdminSessionTimeoutModal";
 import { getAdminSession, subscribeToSessionEvents, clearAdminSession } from "@/lib/auth/adminSession";
 
 export default function AdminAuthGuard({ children }) {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
-  const [isAuthorized, setIsAuthorized] = useState(() => {
-    if (typeof window === "undefined") return false;
-    const session = getAdminSession();
-    return Boolean(session?.token && session?.user?.role === "admin");
-  });
+  const [isAuthorized, setIsAuthorized] = useState(false);
 
-  const { data: profile, isLoading, isError, error } = useUserProfile({
+  const { data: profile, isLoading } = useUserProfile({
     retry: 1,
-    enabled: isAuthorized,
+    enabled: mounted && isAuthorized,
   });
 
   useEffect(() => {
     setMounted(true);
     const session = getAdminSession();
-    if (!session.token) {
+    if (!session?.token) {
       window.location.replace("/portal-access?expired=true&reason=no_session");
       return;
     }
@@ -49,15 +45,15 @@ export default function AdminAuthGuard({ children }) {
 
   // Backend verification result check
   useEffect(() => {
-    if (mounted && !isLoading) {
+    if (mounted && isAuthorized && !isLoading) {
       if (profile && profile.role !== "admin") {
         clearAdminSession(false);
         window.location.replace("/portal-access?expired=true&reason=unauthorized");
       }
     }
-  }, [mounted, isLoading, profile]);
+  }, [mounted, isAuthorized, isLoading, profile]);
 
-  if (!isAuthorized) {
+  if (!mounted || !isAuthorized) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#082B3F] text-white p-6 font-[var(--font-plus-jakarta-sans)]">
         <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mb-6 shadow-inner border border-white/10">
@@ -72,10 +68,10 @@ export default function AdminAuthGuard({ children }) {
           onClick={() => {
             window.location.replace("/portal-access?expired=true&reason=manual");
           }}
-          className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-xs font-bold transition-all text-white"
+          className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0FA7E3] hover:bg-sky-400 text-xs font-bold transition-all text-white shadow-md"
         >
           <span>Go to Admin Login</span>
-          <ArrowRight size={14} />
+          <ArrowRight size={14} weight="bold" />
         </button>
       </div>
     );

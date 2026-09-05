@@ -37,6 +37,10 @@ export function LabCartPage() {
   const [paying, setPaying] = useState(false);
 
   useEffect(() => {
+    router.replace("/lab-tests");
+  }, [router]);
+
+  useEffect(() => {
     setCart(getLabCart());
     const refresh = () => setCart(getLabCart());
     window.addEventListener("lab-cart-updated", refresh);
@@ -44,10 +48,21 @@ export function LabCartPage() {
   }, []);
 
   useEffect(() => {
-    if (user?.name) setPatient((p) => ({ ...p, name: user.name }));
+    if (user?.name) {
+      setPatient((p) => ({
+        ...p,
+        name: p.name && p.name.trim() !== "" ? p.name : user.name,
+      }));
+    }
     if (user?.phone) {
-      setPatient((p) => ({ ...p, phone: user.phone }));
-      setAddress((a) => ({ ...a, phone: user.phone }));
+      setPatient((p) => ({
+        ...p,
+        phone: p.phone && p.phone.trim() !== "" ? p.phone : user.phone,
+      }));
+      setAddress((a) => ({
+        ...a,
+        phone: a.phone && a.phone.trim() !== "" ? a.phone : user.phone,
+      }));
     }
   }, [user]);
 
@@ -174,7 +189,8 @@ export function LabCartPage() {
                       type="button"
                       className="text-[12px] text-red-600 font-semibold"
                       onClick={() => {
-                        removeFromLabCart(t.id);
+                        const targetId = t.id || t.testId || t.product_id;
+                        removeFromLabCart(targetId);
                         setCart(getLabCart());
                       }}
                     >

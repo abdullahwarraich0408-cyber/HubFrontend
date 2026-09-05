@@ -69,6 +69,17 @@ export function useReviewAdminProduct() {
   });
 }
 
+export function useCreateAdminProduct() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data) => productsApi.createAdminProduct(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-products"] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+    },
+  });
+}
+
 export function useProduct(id) {
   return useQuery({
     queryKey: ["products", id],

@@ -6,7 +6,6 @@ import {
   House,
   MapPin,
   Clock,
-  ShoppingCart,
 } from "@phosphor-icons/react";
 import { useLab } from "@/lib/hooks/useApi";
 import { mapLabToFrontend, mapLabTestsToFrontend } from "@/lib/mappers/labTest";
@@ -103,16 +102,6 @@ export function LabDetailPage({ labId }) {
             <span className="rounded-full bg-[#16A9E0]/25 px-3 py-1.5 text-[12px] font-bold text-[#7DD3C7]">
               {tests.length} {tests.length === 1 ? "test" : "tests"}
             </span>
-          </div>
-
-          <div className="relative mt-6">
-            <Link
-              href="/lab-tests/cart"
-              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2.5 text-[13px] font-bold text-white transition-colors hover:bg-white/15"
-            >
-              <ShoppingCart size={15} weight="bold" />
-              View cart
-            </Link>
           </div>
         </div>
 

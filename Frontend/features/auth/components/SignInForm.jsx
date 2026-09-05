@@ -246,6 +246,7 @@ export function SignInForm({
           Don&apos;t have an account?{" "}
           <Link
             href={`/register${redirectTo !== "/" ? `?redirect=${encodeURIComponent(redirectTo)}` : ""}`}
+            onClick={() => onSuccess?.()}
             className="text-[var(--color-brand-primary)] font-bold hover:text-[var(--color-brand-dark)] transition-colors hover:underline decoration-2 underline-offset-4"
           >
             Create one now

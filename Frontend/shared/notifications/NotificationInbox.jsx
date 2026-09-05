@@ -44,7 +44,7 @@ export function NotificationInbox({
     <div className={cn("relative", className)} ref={ref}>
       <button
         type="button"
-        onClick={() => enabled && setOpen((value) => !value)}
+        onClick={() => setOpen((value) => !value)}
         className={
           isDark
             ? "relative p-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-200 hover:text-white hover:bg-slate-700/80 transition-colors"
@@ -63,7 +63,7 @@ export function NotificationInbox({
         ) : null}
       </button>
 
-      {open && enabled ? (
+      {open ? (
         <div
           className={cn(
             "absolute right-0 top-full mt-2 w-[340px] sm:w-[380px] rounded-2xl border shadow-xl z-50 overflow-hidden",

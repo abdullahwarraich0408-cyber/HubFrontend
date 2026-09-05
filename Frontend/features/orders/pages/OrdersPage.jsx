@@ -45,15 +45,27 @@ export function OrdersPage() {
   const { openPrescriptionModal } = usePrescriptionModal();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const typeParam = searchParams.get("type") || "all";
-  const initialTab = TABS.some((t) => t.id === typeParam) ? typeParam : "all";
+  const rawType = searchParams.get("type") || "all";
+  const typeMap = {
+    labs: "lab",
+    lab: "lab",
+    meds: "medicines",
+    medicines: "medicines",
+    rx: "prescription",
+    prescription: "prescription",
+    doctor: "doctor",
+    doctors: "doctor",
+    appointments: "doctor",
+  };
+  const initialTab = typeMap[rawType] || (TABS.some((t) => t.id === rawType) ? rawType : "all");
   const [activeSubtab, setActiveSubtab] = useState(initialTab);
   const { openSignIn } = useAuthModal();
   const { isAuthenticated } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    const next = searchParams.get("type") || "all";
-    if (TABS.some((t) => t.id === next)) setActiveSubtab(next);
+    const raw = searchParams.get("type") || "all";
+    const mapped = typeMap[raw] || (TABS.some((t) => t.id === raw) ? raw : "all");
+    setActiveSubtab(mapped);
   }, [searchParams]);
 
   const selectTab = (id) => {

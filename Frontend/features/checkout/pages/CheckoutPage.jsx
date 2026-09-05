@@ -9,22 +9,28 @@ import {
   MapPin, 
   Check, 
   LockKey,
-  Copy
+  Copy,
+  Flask
 } from "@phosphor-icons/react";
 import { Button } from "@/shared/components/Button";
 import { Input } from "@/shared/components/Input";
-import { useCart, useCreateOrder } from "@/lib/hooks/useApi";
-import { paymentsApi } from "@/lib/api/index";
-import { openSignInModal } from "@/lib/authModalEvents";
-import { useAuth } from "@/lib/auth/AuthProvider";
+import { clearLabCart } from "@/lib/labCart";
+import { useCreateLabOrder, useLabTestTimeSlots } from "@/lib/hooks/useApi";
 
 export function CheckoutPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, user } = useAuth();
   const loggedIn = isAuthenticated;
   const { data: cartData, isLoading: cartLoading } = useCart({ enabled: loggedIn });
   const createOrder = useCreateOrder();
+  const createLabOrder = useCreateLabOrder();
+  const { data: apiTimeSlots = [] } = useLabTestTimeSlots();
+  const timeSlots = apiTimeSlots.length > 0 ? apiTimeSlots : [
+    "7:00 AM – 9:00 AM", "9:00 AM – 11:00 AM", "11:00 AM – 1:00 PM",
+    "2:00 PM – 4:00 PM", "4:00 PM – 6:00 PM", "6:00 PM – 8:00 PM"
+  ];
+
   const [step, setStep] = useState(1);
   const [redirecting, setRedirecting] = useState(false);
   const [orderId, setOrderId] = useState("");
@@ -33,10 +39,23 @@ export function CheckoutPage() {
     lastName: "",
     phone: "",
     street: "",
-    city: "",
+    city: "Karachi",
     province: "",
     zip: "",
   });
+
+  const [patient, setPatient] = useState({ name: "", gender: "", age: "", phone: "" });
+  const [collectionType, setCollectionType] = useState("HOME");
+  const [selectedSlot, setSelectedSlot] = useState(timeSlots[0] || "9:00 AM – 11:00 AM");
+  const [collectionDate, setCollectionDate] = useState(new Date().toISOString().slice(0, 10));
+
+  useEffect(() => {
+    if (user?.name) setPatient((p) => ({ ...p, name: user.name }));
+    if (user?.phone) {
+      setPatient((p) => ({ ...p, phone: user.phone }));
+      setAddress((a) => ({ ...a, phone: a.phone || user.phone }));
+    }
+  }, [user]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -62,6 +81,7 @@ export function CheckoutPage() {
             setOrderId(result.orderIds?.[0] || "ORD-PENDING");
             setStep(3);
             toast.success("Payment successful!");
+            clearLabCart();
             window.dispatchEvent(new Event("cart-updated"));
           }
         })
@@ -76,10 +96,12 @@ export function CheckoutPage() {
     return JSON.parse(localStorage.getItem("guest_cart") || "[]");
   }, [loggedIn]);
 
-  const cartItems = loggedIn ? (cartData?.items || []) : guestCartItems;
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const shipping = subtotal > 2000 ? 0 : 150;
+  const medicineCartItems = loggedIn ? (cartData?.items || []) : guestCartItems;
+  const subtotal = medicineCartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const shipping = subtotal > 2000 || subtotal === 0 ? 0 : 150;
   const total = subtotal + shipping + subtotal * 0.05;
+
+  const cartItems = medicineCartItems;
 
   const startStripeCheckout = async (e) => {
     e.preventDefault();
@@ -99,34 +121,57 @@ export function CheckoutPage() {
     setRedirecting(true);
 
     try {
-      const payload = {
-        items: cartItems.map((item) => ({
-          product_id: item.productId || item.id,
-          quantity: item.quantity,
-          unit_price: item.price,
-        })),
-        delivery_address: {
-          street: address.street,
-          city: address.city,
-          zip: address.zip || "00000",
-        },
-      };
+      let createdOrderIds = [];
+      let createdBookingIds = [];
 
-      const result = await createOrder.mutateAsync(payload);
-      const createdOrders = result.orders || (result.order ? [result.order] : []);
-      const orderIds = createdOrders.map((order) => order.id).filter(Boolean);
-      const newOrderId = orderIds[0] || `ORD-${Date.now()}`;
-      setOrderId(newOrderId);
+      // 1. Process Medicine Product Order if items exist
+      if (medicineCartItems.length > 0) {
+        const payload = {
+          items: medicineCartItems.map((item) => ({
+            product_id: item.productId || item.id,
+            quantity: item.quantity,
+            unit_price: item.price,
+          })),
+          delivery_address: {
+            street: address.street || "Main Street",
+            city: address.city || "Karachi",
+            zip: address.zip || "00000",
+          },
+        };
+        const result = await createOrder.mutateAsync(payload);
+        const createdOrders = result.orders || (result.order ? [result.order] : []);
+        createdOrderIds = createdOrders.map((order) => order.id).filter(Boolean);
+      }
 
-      const orderTotal = createdOrders.reduce(
-        (sum, order) => sum + (order.total_amount || 0),
-        0
-      );
+      // 2. Process Lab Test Order if lab items exist
+      if (labCartItems.length > 0) {
+        const labResult = await createLabOrder.mutateAsync({
+          lab_test_ids: labCartItems.map((t) => t.id),
+          patient_name: patient.name || address.firstName || "Patient",
+          patient_gender: patient.gender || "Not specified",
+          patient_age: patient.age ? Number(patient.age) : undefined,
+          collection_type: collectionType,
+          collection_address: collectionType === "HOME" ? {
+            street: address.street || "Main Street",
+            city: address.city || "Karachi",
+            phone: patient.phone || address.phone,
+          } : undefined,
+          collection_date: new Date(collectionDate).toISOString(),
+          time_slot: selectedSlot,
+          payment_method: "stripe",
+        });
+        const bookings = labResult.orders || [];
+        createdBookingIds = bookings.map((b) => b.id).filter(Boolean);
+        clearLabCart();
+      }
+
+      const primaryId = createdOrderIds[0] || createdBookingIds[0] || `ORD-${Date.now()}`;
+      setOrderId(primaryId);
 
       const payment = await paymentsApi.checkout({
-        purpose: "order",
-        order_ids: orderIds,
-        total_amount: orderTotal,
+        purpose: createdBookingIds.length > 0 ? "lab" : "order",
+        order_ids: createdOrderIds.length > 0 ? createdOrderIds : undefined,
+        booking_ids: createdBookingIds.length > 0 ? createdBookingIds : undefined,
         payment_method: "stripe",
         frontend_url: typeof window !== "undefined" ? window.location.origin : undefined,
       });

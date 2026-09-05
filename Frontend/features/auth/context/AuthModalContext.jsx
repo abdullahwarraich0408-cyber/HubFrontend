@@ -1,17 +1,21 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { EmailSignInModal } from "@/features/auth/components/EmailSignInModal";
 import { AUTH_SIGN_IN_EVENT } from "@/lib/authModalEvents";
+import { isLoggingOut } from "@/lib/auth/tokenStore";
 
 const AuthModalContext = createContext(null);
 
 export function AuthModalProvider({ children }) {
+  const pathname = usePathname();
   const [signInOpen, setSignInOpen] = useState(false);
   const [redirectTo, setRedirectTo] = useState("/");
   const [expired, setExpired] = useState(false);
 
   const openSignIn = useCallback(({ redirect = "/", expired: sessionExpired = false } = {}) => {
+    if (isLoggingOut()) return;
     setRedirectTo(redirect);
     setExpired(sessionExpired);
     setSignInOpen(true);
@@ -23,7 +27,12 @@ export function AuthModalProvider({ children }) {
   }, []);
 
   useEffect(() => {
+    closeSignIn();
+  }, [pathname, closeSignIn]);
+
+  useEffect(() => {
     const handleOpenSignIn = (event) => {
+      if (isLoggingOut()) return;
       const { redirect = "/", expired: sessionExpired = false } = event.detail || {};
       openSignIn({ redirect, expired: sessionExpired });
     };

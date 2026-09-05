@@ -7,7 +7,10 @@ import {
   useUpdateLab,
   useUpdateLabStatus,
   useDeleteLab,
+  useUploadDocument,
 } from "@/lib/hooks/useApi";
+import { useQuery } from "@tanstack/react-query";
+import { inquiriesApi, uploadApi } from "@/lib/api/index";
 import { toast } from "sonner";
 import {
   Flask,
@@ -30,7 +33,122 @@ import {
   Info,
   WarningCircle,
   FileText,
+  DownloadSimple,
 } from "@phosphor-icons/react";
+
+function extractLabDocLinks(lab, inquiries = []) {
+  if (!lab) return [];
+  const links = [];
+
+  const addLink = (url, label) => {
+    if (!url || typeof url !== "string" || !url.trim()) return;
+    const cleanUrl = url.trim();
+    if (!links.some((l) => l.url === cleanUrl)) {
+      links.push({ url: cleanUrl, label: label || "Compliance Document" });
+    }
+  };
+
+  // 1. Direct lab properties
+  if (lab.lab_license_url) addLink(lab.lab_license_url, "Lab License / Registration Certificate");
+  if (lab.accreditation_url) addLink(lab.accreditation_url, "Accreditation Certificate (ISO/PNAC)");
+  if (lab.tax_certificate_url) addLink(lab.tax_certificate_url, "Tax Registration Certificate");
+  if (lab.bank_document_url) addLink(lab.bank_document_url, "Bank Proof / Account Details");
+
+  // 2. lab.documents object or array
+  if (lab.documents) {
+    if (Array.isArray(lab.documents)) {
+      lab.documents.forEach((d) => {
+        if (typeof d === "string") addLink(d, "Compliance Document");
+        else if (d && (d.file_url || d.url)) addLink(d.file_url || d.url, d.label || d.type || "Compliance Document");
+      });
+    } else if (typeof lab.documents === "object") {
+      Object.entries(lab.documents).forEach(([key, val]) => {
+        if (typeof val === "string" && (val.startsWith("http") || val.startsWith("/uploads") || val.startsWith("data:"))) {
+          let label = key.replaceAll("_", " ");
+          if (key.includes("license")) label = "Lab License / Registration";
+          else if (key.includes("accreditation")) label = "Accreditation Certificate";
+          else if (key.includes("tax")) label = "Tax Registration";
+          else if (key.includes("bank")) label = "Bank Account Proof";
+          addLink(val, label);
+        }
+      });
+    }
+  }
+
+  // 3. Match from registration inquiries list
+  if (Array.isArray(inquiries) && inquiries.length > 0) {
+    const labEmail = (lab.email || "").toLowerCase().trim();
+    const labName = (lab.name || "").toLowerCase().replace(/lab(oratory)?/i, "").trim();
+    const labLic = (lab.license_number || "").toLowerCase().trim();
+
+    let matchingInquiries = inquiries.filter((inq) => {
+      const inqEmail = (inq.email || "").toLowerCase().trim();
+      const inqMsg = (inq.message || "").toLowerCase();
+      const inqSub = (inq.subject || "").toLowerCase();
+      return (
+        (labEmail && inqEmail === labEmail) ||
+        (labEmail && inqMsg.includes(labEmail)) ||
+        (labLic && labLic.length > 3 && inqMsg.includes(labLic)) ||
+        (labName && labName.length > 2 && (inqMsg.includes(labName) || inqSub.includes(labName)))
+      );
+    });
+
+    if (matchingInquiries.length === 0) {
+      matchingInquiries = inquiries.filter((inq) => 
+        inq.metadata?.partner_type === "lab" || 
+        inq.subject?.toLowerCase().includes("lab")
+      );
+    }
+
+    matchingInquiries.forEach((inq) => {
+      if (inq.metadata?.documents && typeof inq.metadata.documents === "object") {
+        Object.entries(inq.metadata.documents).forEach(([key, val]) => {
+          if (typeof val === "string" && (val.startsWith("http") || val.startsWith("/uploads") || val.startsWith("data:"))) {
+            let label = key.replaceAll("_", " ");
+            if (key.includes("license")) label = "Lab License / Registration";
+            else if (key.includes("accreditation")) label = "Accreditation Certificate";
+            else if (key.includes("tax")) label = "Tax Registration";
+            else if (key.includes("bank")) label = "Bank Proof";
+            addLink(val, label);
+          }
+        });
+      }
+
+      const regex = /(https?:\/\/[^\s\)\"\'>]+|\/uploads\/[^\s\)\"\'>]+)/g;
+      let match;
+      while ((match = regex.exec(inq.message || "")) !== null) {
+        const url = match[0];
+        let label = "Compliance Document";
+        if (url.includes("license") || inq.message?.includes("license")) label = "Lab Registration / License";
+        else if (url.includes("accreditation")) label = "Quality Accreditation";
+        else if (url.includes("tax")) label = "Tax Certificate / NTN";
+        else if (url.includes("bank")) label = "Bank Account Proof";
+        addLink(url, label);
+      }
+    });
+  }
+
+  // 4. Fallback search across stringified lab object
+  const allText = [
+    lab.bio || "",
+    lab.license_number || "",
+    JSON.stringify(lab || {}),
+  ].join("\n");
+
+  const regex = /(https?:\/\/[^\s\)\"\'>]+|\/uploads\/[^\s\)\"\'>]+)/g;
+  let match;
+  while ((match = regex.exec(allText)) !== null) {
+    const url = match[0];
+    let label = "Compliance Document";
+    if (url.includes("license")) label = "Lab Registration / License";
+    else if (url.includes("accreditation")) label = "Quality Accreditation";
+    else if (url.includes("tax")) label = "Tax Certificate";
+    else if (url.includes("bank")) label = "Bank Proof";
+    addLink(url, label);
+  }
+
+  return links;
+}
 
 const SAMPLE_LAB_LOGOS = [
   "https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&q=80&w=250",
@@ -100,10 +218,43 @@ export default function AdminLabsPage() {
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [viewLab, setViewLab] = useState(null);
+  const [previewDoc, setPreviewDoc] = useState(null);
   const [editingLab, setEditingLab] = useState(null);
   const [activeDetailTab, setActiveDetailTab] = useState("overview"); // 'overview' | 'edit'
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
+  const uploadDocumentMutation = useUploadDocument();
+  const [uploadingDoc, setUploadingDoc] = useState(false);
+
+  const { data: inquiries = [] } = useQuery({
+    queryKey: ["admin-inquiries"],
+    queryFn: async () => {
+      const res = await inquiriesApi.list();
+      return Array.isArray(res) ? res : res?.inquiries || [];
+    },
+  });
+
+  const handleDirectDocUpload = async (file) => {
+    if (!file || !viewLab) return;
+    setUploadingDoc(true);
+    try {
+      const res = await uploadDocumentMutation.mutateAsync(file);
+      const fileUrl = res?.url || res?.data?.url || (typeof res === "string" ? res : "");
+      const updatedBio = `${viewLab.bio || ""}\n\nVerification Document: ${fileUrl}`.trim();
+      
+      await updateLabMutation.mutateAsync({
+        id: viewLab.id,
+        data: { bio: updatedBio },
+      });
+
+      setViewLab((prev) => prev ? { ...prev, bio: updatedBio } : null);
+      toast.success("Document attached to lab profile!");
+    } catch (err) {
+      toast.error(err?.message || "Failed to upload document");
+    } finally {
+      setUploadingDoc(false);
+    }
+  };
 
   const [formData, setFormData] = useState({
     name: "",
@@ -264,6 +415,31 @@ export default function AdminLabsPage() {
     }
   };
 
+  const handleExportCSV = () => {
+    const headers = ["ID", "Lab Name", "Email", "License Number", "City", "Phone", "Status", "Date Registered"];
+    const csvContent = [
+      headers.join(","),
+      ...filteredLabs.map((l) => [
+        l.id,
+        `"${l.name || ""}"`,
+        l.email || "",
+        `"${l.license_number || ""}"`,
+        `"${l.city || ""}"`,
+        `"${l.phone || ""}"`,
+        l.status || "pending",
+        new Date(l.created_at || Date.now()).toLocaleDateString(),
+      ].join(",")),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `labs_export_${new Date().toISOString().split("T")[0]}.csv`;
+    link.click();
+    toast.success("Lab directory exported successfully!");
+  };
+
   const renderStatusBadge = (status) => {
 
     const s = (status || "pending").toLowerCase();
@@ -309,6 +485,13 @@ export default function AdminLabsPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          <button
+            onClick={handleExportCSV}
+            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold transition-all shadow-sm"
+          >
+            <DownloadSimple size={16} weight="bold" />
+            <span>Export CSV</span>
+          </button>
           <button
             onClick={() => setShowAddModal(true)}
             className="flex items-center gap-2 px-5 py-2.5 bg-[#082B3F] hover:bg-[#0FA7E3] text-white rounded-xl text-xs font-bold transition-all shadow-sm"
@@ -576,10 +759,10 @@ export default function AdminLabsPage() {
         )}
       </div>
 
-      {/* Complete Lab Details Modal (Triggered by Eye Icon) */}
+      {/* Complete Lab Details Slide-Over Sheet (Triggered by Eye Icon) */}
       {viewLab && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#082B3F]/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col border border-slate-200 animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex justify-end bg-[#0C1A2E]/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-xl h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 border-l border-slate-200">
             
             {/* Modal Header */}
             <div className="p-6 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-blue-50/40 shrink-0">
@@ -686,6 +869,74 @@ export default function AdminLabsPage() {
                         {viewLab.created_at ? new Date(viewLab.created_at).toLocaleDateString() : "Active"}
                       </p>
                     </div>
+                  </div>
+
+                  {/* Verification Documents */}
+                  <div>
+                    <div className="flex items-center justify-between border-b border-slate-200 pb-2 mb-3">
+                      <h3 className="text-xs font-bold text-[#082B3F] uppercase tracking-wider">
+                        Verification Documents ({extractLabDocLinks(viewLab, inquiries).length})
+                      </h3>
+                      <label className="cursor-pointer text-[11px] font-bold text-[#17618E] hover:underline flex items-center gap-1 bg-[#DEEEF9] px-2.5 py-1 rounded-lg">
+                        <Plus size={12} weight="bold" />
+                        <span>{uploadingDoc ? "Uploading..." : "Attach Document"}</span>
+                        <input
+                          type="file"
+                          accept=".pdf,.png,.jpg,.jpeg,.webp"
+                          className="hidden"
+                          disabled={uploadingDoc}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleDirectDocUpload(file);
+                          }}
+                        />
+                      </label>
+                    </div>
+
+                    {extractLabDocLinks(viewLab, inquiries).length > 0 ? (
+                      <div className="space-y-3">
+                        {extractLabDocLinks(viewLab, inquiries).map((doc, idx) => (
+                          <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-xl border border-slate-200 bg-white gap-2">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <FileText size={20} className="text-[#17618E] shrink-0" />
+                              <div className="min-w-0">
+                                <div className="text-xs font-bold text-[#082B3F] truncate">{doc.label}</div>
+                                <div className="text-[11px] text-slate-400">Status: {viewLab.status === "approved" ? "Verified" : "Pending Review"}</div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-center">
+                              <button
+                                type="button"
+                                onClick={() => setPreviewDoc({ title: doc.label, url: doc.url })}
+                                className="text-xs font-bold text-[#17618E] hover:underline px-3 py-1.5 bg-[#DEEEF9] rounded-lg"
+                              >
+                                View
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleUpdateStatus(viewLab.id, "approved")}
+                                className="text-xs font-bold text-white px-3 py-1.5 bg-[#17618E] hover:bg-[#082B3F] rounded-lg transition-colors"
+                              >
+                                Verify
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleUpdateStatus(viewLab.id, "suspended")}
+                                className="text-xs font-bold text-white px-3 py-1.5 bg-[#DC2626] hover:bg-rose-700 rounded-lg transition-colors"
+                              >
+                                Reject
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="p-4 rounded-xl border border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center text-center gap-2">
+                        <FileText size={32} className="text-slate-300" />
+                        <div className="text-xs font-bold text-[#082B3F]">No compliance documents uploaded yet</div>
+                        <div className="text-[11px] text-slate-400">Laboratory needs to attach Lab Registration & Tax credentials.</div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -953,6 +1204,63 @@ export default function AdminLabsPage() {
               >
                 {deleteLabMutation.isPending ? "Deleting..." : "Yes, Delete"}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Inline Document Preview Modal */}
+      {previewDoc && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-[#082B3F]/75 backdrop-blur-md p-4 sm:p-6 animate-in fade-in duration-200" onClick={() => setPreviewDoc(null)}>
+          <div className="bg-white w-full max-w-4xl h-[85vh] rounded-2xl shadow-2xl overflow-hidden border border-slate-200 flex flex-col animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-sky-50 text-[#17618E] flex items-center justify-center font-bold">
+                  <FileText size={20} weight="bold" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-[#082B3F] capitalize">{previewDoc.title || "Document Preview"}</h3>
+                  <p className="text-[11px] text-slate-500 truncate max-w-md">{previewDoc.url}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <a
+                  href={previewDoc.url}
+                  download
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
+                >
+                  <DownloadSimple size={16} weight="bold" />
+                  <span>Download</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setPreviewDoc(null)}
+                  className="w-8 h-8 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 flex items-center justify-center transition-colors"
+                >
+                  <X size={18} weight="bold" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Content Body */}
+            <div className="flex-1 bg-slate-900/5 p-4 overflow-auto flex items-center justify-center relative">
+              {previewDoc.url?.toLowerCase().endsWith(".pdf") || previewDoc.url?.includes("pdf") ? (
+                <iframe
+                  src={previewDoc.url}
+                  className="w-full h-full rounded-xl border border-slate-200 bg-white shadow-inner"
+                  title={previewDoc.title}
+                />
+              ) : (
+                <img
+                  src={previewDoc.url}
+                  alt={previewDoc.title}
+                  className="max-w-full max-h-full object-contain rounded-xl shadow-lg border border-slate-200/50 bg-white"
+                />
+              )}
             </div>
           </div>
         </div>

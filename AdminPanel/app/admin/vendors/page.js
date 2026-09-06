@@ -417,11 +417,15 @@ export default function AdminVendorsPage() {
 
   const confirmDeleteVendor = async () => {
     if (!deleteTarget) return;
+    const vendorId = typeof deleteTarget === "object" ? deleteTarget.id : deleteTarget;
+    if (!vendorId) return;
+
     try {
-      await deleteVendorMutation.mutateAsync(deleteTarget.id);
-      toast.success(`"${deleteTarget.business_name || deleteTarget.name}" deleted successfully!`);
-      if (viewVendor?.id === deleteTarget.id) setViewVendor(null);
-      setSelectedVendors(prev => prev.filter(vId => vId !== deleteTarget.id));
+      await deleteVendorMutation.mutateAsync(vendorId);
+      const name = typeof deleteTarget === "object" ? (deleteTarget.business_name || deleteTarget.name || "Pharmacy") : "Pharmacy";
+      toast.success(`"${name}" deleted successfully!`);
+      if (viewVendor?.id === vendorId) setViewVendor(null);
+      setSelectedVendors(prev => prev.filter(vId => vId !== vendorId));
       setDeleteTarget(null);
     } catch (err) {
       toast.error(err.message || "Failed to delete vendor");
@@ -824,7 +828,7 @@ export default function AdminVendorsPage() {
               </div>
               <div className="flex items-center gap-2">
                 <button 
-                  onClick={() => handleDeleteVendor(viewVendor.id)} 
+                  onClick={() => handleDeleteVendor(viewVendor)} 
                   disabled={deleteVendorMutation.isPending}
                   className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#DC2626]/20 bg-[#DC2626]/5 text-[#DC2626] text-sm font-semibold hover:bg-[#DC2626]/10 transition-colors"
                   title="Delete Vendor"

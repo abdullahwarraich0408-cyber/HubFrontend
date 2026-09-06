@@ -56,7 +56,7 @@ function filterDoctors(doctors, focus) {
 
 function photoCandidates(doctor) {
   const primary = resolveDoctorPhotoUrl(
-    doctor?.photo || doctor?.image || doctor?.avatar || doctor?.photo_url
+    doctor?.photo_url || doctor?.photo || doctor?.image || doctor?.image_url || doctor?.avatar
   );
   const list = [];
   for (const url of [primary, DEFAULT_DOCTOR_PHOTO, FALLBACK_DOCTOR_PHOTO]) {

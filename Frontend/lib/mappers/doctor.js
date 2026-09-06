@@ -171,7 +171,7 @@ export function mapDoctorToFrontend(doctor) {
     online: doctor.online,
     availableToday: doctor.available_today,
     languages: Array.isArray(doctor.languages) ? doctor.languages : [],
-    photo: getDoctorPhoto(doctor.photo_url),
+    photo: getDoctorPhoto(doctor.photo_url || doctor.photo || doctor.image_url || doctor.avatar || doctor.image),
     slots: weeklySchedule,
     displaySlots: flattenDoctorSlots(doctor.slots),
     about: doctor.about,

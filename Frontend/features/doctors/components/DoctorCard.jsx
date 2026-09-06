@@ -34,7 +34,7 @@ function initialsFromName(name = "") {
 
 function photoCandidates(doctor) {
   const primary = resolveDoctorPhotoUrl(
-    doctor?.photo || doctor?.image || doctor?.avatar
+    doctor?.photo || doctor?.photo_url || doctor?.image || doctor?.image_url || doctor?.avatar || doctor?.photoUrl || doctor?.imageUrl
   );
   const list = [];
   for (const url of [primary, DEFAULT_DOCTOR_PHOTO, FALLBACK_DOCTOR_PHOTO]) {
@@ -46,7 +46,7 @@ function photoCandidates(doctor) {
 function DoctorCover({ doctor }) {
   const candidates = useMemo(
     () => photoCandidates(doctor),
-    [doctor?.photo, doctor?.image, doctor?.avatar]
+    [doctor?.photo, doctor?.photo_url, doctor?.image, doctor?.image_url, doctor?.avatar]
   );
   const [index, setIndex] = useState(0);
   const src = candidates[index] || null;
@@ -81,7 +81,7 @@ export function DoctorCard({ doctor, consultType = null, hospitalContext = null,
   const isOnlineTab = consultType === "online";
   const candidates = useMemo(
     () => photoCandidates(doctor),
-    [doctor?.photo, doctor?.image, doctor?.avatar]
+    [doctor?.photo, doctor?.photo_url, doctor?.image, doctor?.image_url, doctor?.avatar]
   );
   const [index, setIndex] = useState(0);
 

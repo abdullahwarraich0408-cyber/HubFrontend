@@ -61,6 +61,11 @@ function extractDoctorDocLinks(doctor, inquiries = []) {
   const addLink = (url, label) => {
     if (!url || typeof url !== "string" || !url.trim()) return;
     const cleanUrl = url.trim();
+
+    // Exclude profile photo / avatar URLs from verification documents list
+    const photoUrl = (doctor.photo_url || doctor.photo || doctor.avatar || doctor.image || "").trim();
+    if (photoUrl && cleanUrl === photoUrl) return;
+
     if (!links.some((l) => l.url === cleanUrl)) {
       links.push({ url: cleanUrl, label: label || "Attached Credential" });
     }
@@ -94,68 +99,56 @@ function extractDoctorDocLinks(doctor, inquiries = []) {
     }
   }
 
-  // 3. Match from registration inquiries list
+  // 3. Match registration inquiries strictly for THIS doctor by email
   if (Array.isArray(inquiries) && inquiries.length > 0) {
     const docEmail = (doctor.email || "").toLowerCase().trim();
-    const docName = (doctor.name || "").toLowerCase().replace(/^dr\.?\s*/i, "").trim();
 
-    let matchingInquiries = inquiries.filter((inq) => {
-      const inqEmail = (inq.email || "").toLowerCase().trim();
-      const inqMsg = (inq.message || "").toLowerCase();
-      const inqSub = (inq.subject || "").toLowerCase();
-      return (
-        (docEmail && inqEmail === docEmail) ||
-        (docEmail && inqMsg.includes(docEmail)) ||
-        (docName && docName.length > 2 && (inqMsg.includes(docName) || inqSub.includes(docName)))
-      );
-    });
+    if (docEmail) {
+      const matchingInquiries = inquiries.filter((inq) => {
+        const inqEmail = (inq.email || "").toLowerCase().trim();
+        const inqMsg = (inq.message || "").toLowerCase();
+        return inqEmail === docEmail || inqMsg.includes(docEmail);
+      });
 
-    if (matchingInquiries.length === 0) {
-      matchingInquiries = inquiries.filter((inq) => 
-        inq.metadata?.partner_type === "doctor" || 
-        inq.subject?.toLowerCase().includes("doctor")
-      );
+      matchingInquiries.forEach((inq) => {
+        if (inq.metadata?.documents && typeof inq.metadata.documents === "object") {
+          Object.entries(inq.metadata.documents).forEach(([key, val]) => {
+            if (typeof val === "string" && (val.startsWith("http") || val.startsWith("/uploads") || val.startsWith("data:"))) {
+              let label = key.replaceAll("_", " ");
+              if (key.includes("pmdc")) label = "PMDC / PMC Certificate";
+              else if (key.includes("degree")) label = "Medical Degree (MBBS/FCPS)";
+              else if (key.includes("cnic")) label = "CNIC Copy";
+              else if (key.includes("experience")) label = "Affiliation Proof";
+              addLink(val, label);
+            }
+          });
+        }
+
+        const regex = /(https?:\/\/[^\s\)\"\'>]+|\/uploads\/[^\s\)\"\'>]+)/g;
+        let match;
+        while ((match = regex.exec(inq.message || "")) !== null) {
+          const url = match[0];
+          let label = "Attached Credential";
+          if (url.includes("pmdc") || inq.message?.includes("pmdc")) label = "PMDC / PMC Certificate";
+          else if (url.includes("degree") || url.includes("mbbs") || url.includes("fcps")) label = "Medical Degree (MBBS/FCPS)";
+          else if (url.includes("cnic")) label = "CNIC Copy (Front & Back)";
+          else if (url.includes("experience") || url.includes("proof")) label = "Hospital Affiliation Proof";
+          addLink(url, label);
+        }
+      });
     }
-
-    matchingInquiries.forEach((inq) => {
-      if (inq.metadata?.documents && typeof inq.metadata.documents === "object") {
-        Object.entries(inq.metadata.documents).forEach(([key, val]) => {
-          if (typeof val === "string" && (val.startsWith("http") || val.startsWith("/uploads") || val.startsWith("data:"))) {
-            let label = key.replaceAll("_", " ");
-            if (key.includes("pmdc")) label = "PMDC / PMC Certificate";
-            else if (key.includes("degree")) label = "Medical Degree (MBBS/FCPS)";
-            else if (key.includes("cnic")) label = "CNIC Copy";
-            else if (key.includes("experience")) label = "Affiliation Proof";
-            addLink(val, label);
-          }
-        });
-      }
-
-      const regex = /(https?:\/\/[^\s\)\"\'>]+|\/uploads\/[^\s\)\"\'>]+)/g;
-      let match;
-      while ((match = regex.exec(inq.message || "")) !== null) {
-        const url = match[0];
-        let label = "Attached Credential";
-        if (url.includes("pmdc") || inq.message?.includes("pmdc")) label = "PMDC / PMC Certificate";
-        else if (url.includes("degree") || url.includes("mbbs") || url.includes("fcps")) label = "Medical Degree (MBBS/FCPS)";
-        else if (url.includes("cnic")) label = "CNIC Copy (Front & Back)";
-        else if (url.includes("experience") || url.includes("proof")) label = "Hospital Affiliation Proof";
-        addLink(url, label);
-      }
-    });
   }
 
-  // 4. Fallback search across stringified doctor object
-  const allText = [
+  // 4. Search text fields specific to THIS doctor (about, bio, qualifications)
+  const doctorText = [
     doctor.about || "",
     doctor.bio || "",
     Array.isArray(doctor.qualifications) ? doctor.qualifications.join("\n") : "",
-    JSON.stringify(doctor || {}),
   ].join("\n");
 
   const regex = /(https?:\/\/[^\s\)\"\'>]+|\/uploads\/[^\s\)\"\'>]+)/g;
   let match;
-  while ((match = regex.exec(allText)) !== null) {
+  while ((match = regex.exec(doctorText)) !== null) {
     const url = match[0];
     let label = "Attached Credential";
     if (url.includes("pmdc")) label = "PMDC / PMC Certificate";

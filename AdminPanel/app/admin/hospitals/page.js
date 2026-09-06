@@ -8,6 +8,7 @@ import {
   useUpdateHospitalStatus,
   useDeleteHospital,
   useAdminDoctors,
+  useUploadImage,
 } from "@/lib/hooks/useApi";
 import { isValidPakistaniPhone, formatPakistaniPhoneInput } from "@/lib/validators/pakistanPhone";
 import { toast } from "sonner";
@@ -37,6 +38,9 @@ import {
   CalendarCheck,
   UserCheck,
   DownloadSimple,
+  UploadSimple,
+  CircleNotch,
+  Image as ImageIcon,
 } from "@phosphor-icons/react";
 
 const emptyForm = {
@@ -50,23 +54,33 @@ const emptyForm = {
   email: "",
 };
 
-const SAMPLE_HOSPITAL_LOGOS = [
-  "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&q=80&w=250",
-  "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=250",
-  "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&q=80&w=250",
-  "https://images.unsplash.com/photo-1538108149393-fbbd81895907?auto=format&fit=crop&q=80&w=250",
-];
+function sanitizeImageUrl(url) {
+  if (!url || typeof url !== "string") return "";
+  const trimmed = url.trim();
+  if (!trimmed) return "";
+
+  if (trimmed.includes("google.com/") && (trimmed.includes("imgurl=") || trimmed.includes("url="))) {
+    try {
+      const parsed = new URL(trimmed);
+      const imgParam = parsed.searchParams.get("imgurl") || parsed.searchParams.get("url");
+      if (imgParam) {
+        return decodeURIComponent(imgParam);
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+  return trimmed;
+}
 
 function HospitalAvatar({ hospital, size = "md", className = "" }) {
   const [hasError, setHasError] = useState(false);
-  const logo = hospital?.logo || hospital?.cover_image;
+  const rawLogo = hospital?.logo || hospital?.cover_image;
+  const logo = sanitizeImageUrl(rawLogo);
 
   const resolvedUrl = useMemo(() => {
     if (!logo) {
-      const charSum = (hospital?.name || "hospital")
-        .split("")
-        .reduce((acc, char) => acc + char.charCodeAt(0), 0);
-      return SAMPLE_HOSPITAL_LOGOS[Math.abs(charSum) % SAMPLE_HOSPITAL_LOGOS.length];
+      return null;
     }
     if (logo.startsWith("http://") || logo.startsWith("https://") || logo.startsWith("data:")) {
       return logo;
@@ -74,7 +88,7 @@ function HospitalAvatar({ hospital, size = "md", className = "" }) {
     const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
     const base = apiBase.replace(/\/api\/?$/, "");
     return logo.startsWith("/") ? `${base}${logo}` : `${base}/${logo}`;
-  }, [logo, hospital?.name]);
+  }, [logo]);
 
   const sizeClasses = {
     sm: "w-8 h-8 rounded-lg text-xs",
@@ -98,6 +112,125 @@ function HospitalAvatar({ hospital, size = "md", className = "" }) {
       className={`${sizeClasses} bg-gradient-to-br from-[#0FA7E3] to-[#082B3F] text-white flex items-center justify-center font-bold shrink-0 shadow-sm ${className}`}
     >
       <Buildings size={size === "lg" ? 28 : 20} weight="bold" />
+    </div>
+  );
+}
+
+function HospitalImageInput({ value, onChange, label = "Image (Optional)" }) {
+  const uploadImageMutation = useUploadImage();
+  const [uploading, setUploading] = useState(false);
+  const [showUrlInput, setShowUrlInput] = useState(false);
+  const [imgError, setImgError] = useState(false);
+
+  const cleanUrl = useMemo(() => sanitizeImageUrl(value), [value]);
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+
+    setUploading(true);
+    setImgError(false);
+    try {
+      const res = await uploadImageMutation.mutateAsync(file);
+      const url = res?.url || res?.data?.url || (typeof res === "string" ? res : "");
+      if (!url) {
+        throw new Error("Failed to get uploaded image URL");
+      }
+      onChange(url);
+      toast.success("Image uploaded successfully!");
+    } catch (err) {
+      toast.error(err?.message || "Failed to upload image");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-center justify-between">
+        <label className="block text-xs font-bold text-[#082B3F] uppercase tracking-wider">
+          {label}
+        </label>
+        <button
+          type="button"
+          onClick={() => setShowUrlInput((prev) => !prev)}
+          className="text-[11px] font-semibold text-slate-500 hover:text-[#082B3F] transition-colors"
+        >
+          {showUrlInput ? "Hide URL input" : value ? "Edit URL" : "Paste URL"}
+        </button>
+      </div>
+
+      <div className="flex items-center gap-3">
+        {cleanUrl ? (
+          <div className="relative group w-10 h-10 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 flex-shrink-0 shadow-sm">
+            {!imgError ? (
+              <img
+                src={cleanUrl}
+                alt="Preview"
+                className="w-full h-full object-cover"
+                onError={() => setImgError(true)}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-slate-400">
+                <ImageIcon size={18} />
+              </div>
+            )}
+          </div>
+        ) : null}
+
+        <div className="flex-1 flex flex-wrap items-center gap-2">
+          <label className="cursor-pointer inline-flex items-center gap-2 h-10 px-3.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-[#082B3F] text-xs font-bold text-[#082B3F] transition-all shadow-sm">
+            {uploading ? (
+              <>
+                <CircleNotch size={16} className="animate-spin text-[#0FA7E3]" />
+                <span>Uploading...</span>
+              </>
+            ) : (
+              <>
+                <UploadSimple size={16} weight="bold" className="text-[#0FA7E3]" />
+                <span>{value ? "Change Image" : "Select File"}</span>
+              </>
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              disabled={uploading}
+              onChange={handleFileChange}
+              className="hidden"
+            />
+          </label>
+
+          {value && (
+            <button
+              type="button"
+              onClick={() => {
+                onChange("");
+                setImgError(false);
+              }}
+              className="h-10 px-3 rounded-xl border border-rose-100 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold transition-all flex items-center gap-1"
+              title="Remove Image"
+            >
+              <Trash size={15} />
+              <span>Remove</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {showUrlInput && (
+        <input
+          type="url"
+          value={value || ""}
+          onChange={(e) => {
+            const sanitized = sanitizeImageUrl(e.target.value);
+            onChange(sanitized);
+            setImgError(false);
+          }}
+          className="w-full h-10 px-3 mt-1 rounded-xl border border-slate-200 outline-none focus:border-[#082B3F] text-xs font-medium text-[#082B3F]"
+          placeholder="https://..."
+        />
+      )}
     </div>
   );
 }
@@ -887,21 +1020,17 @@ export default function AdminHospitalsPage() {
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-bold text-[#082B3F] mb-1.5 uppercase tracking-wider">Logo URL</label>
-                      <input
-                        type="url"
+                      <HospitalImageInput
                         value={editFormData.logo}
-                        onChange={(e) => setEditFormData({ ...editFormData, logo: e.target.value })}
-                        className="w-full h-10 px-3 rounded-xl border border-slate-200 outline-none focus:border-[#082B3F] text-xs font-medium"
+                        onChange={(url) => setEditFormData({ ...editFormData, logo: url })}
+                        label="Hospital Logo"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-[#082B3F] mb-1.5 uppercase tracking-wider">Banner Image URL</label>
-                      <input
-                        type="url"
+                      <HospitalImageInput
                         value={editFormData.cover_image}
-                        onChange={(e) => setEditFormData({ ...editFormData, cover_image: e.target.value })}
-                        className="w-full h-10 px-3 rounded-xl border border-slate-200 outline-none focus:border-[#082B3F] text-xs font-medium"
+                        onChange={(url) => setEditFormData({ ...editFormData, cover_image: url })}
+                        label="Banner Image"
                       />
                     </div>
                   </div>
@@ -1048,27 +1177,17 @@ export default function AdminHospitalsPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-[#082B3F] mb-1.5 uppercase tracking-wider">
-                    Logo URL (Optional)
-                  </label>
-                  <input
-                    type="url"
+                  <HospitalImageInput
                     value={addFormData.logo}
-                    onChange={(e) => setAddFormData({ ...addFormData, logo: e.target.value })}
-                    className="w-full h-10 px-3 rounded-xl border border-slate-200 outline-none focus:border-[#082B3F] text-xs font-medium text-[#082B3F]"
-                    placeholder="https://..."
+                    onChange={(url) => setAddFormData({ ...addFormData, logo: url })}
+                    label="Hospital Logo (Optional)"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-[#082B3F] mb-1.5 uppercase tracking-wider">
-                    Banner URL (Optional)
-                  </label>
-                  <input
-                    type="url"
+                  <HospitalImageInput
                     value={addFormData.cover_image}
-                    onChange={(e) => setAddFormData({ ...addFormData, cover_image: e.target.value })}
-                    className="w-full h-10 px-3 rounded-xl border border-slate-200 outline-none focus:border-[#082B3F] text-xs font-medium text-[#082B3F]"
-                    placeholder="https://..."
+                    onChange={(url) => setAddFormData({ ...addFormData, cover_image: url })}
+                    label="Banner Image (Optional)"
                   />
                 </div>
               </div>

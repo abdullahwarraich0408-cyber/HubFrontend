@@ -14,6 +14,7 @@ import {
   useUpdateDoctorPracticeLocation,
   useDeleteDoctorPracticeLocation,
   useUploadDocument,
+  useUploadImage,
 } from "@/lib/hooks/useApi";
 import { useQuery } from "@tanstack/react-query";
 import { inquiriesApi, uploadApi } from "@/lib/api/index";
@@ -48,6 +49,9 @@ import {
   Info,
   FileText,
   DownloadSimple,
+  UploadSimple,
+  CircleNotch,
+  Image as ImageIcon,
 } from "@phosphor-icons/react";
 
 function extractDoctorDocLinks(doctor, inquiries = []) {
@@ -167,14 +171,24 @@ function extractDoctorDocLinks(doctor, inquiries = []) {
 const WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 const DEFAULT_SLOT = "09:00 AM - 01:00 PM";
 
-const SAMPLE_DOCTOR_PHOTOS = [
-  "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=300",
-  "https://images.unsplash.com/photo-1594824813620-72ec0b75ff60?auto=format&fit=crop&q=80&w=300",
-  "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=300",
-  "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=300",
-  "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=300",
-  "https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&q=80&w=300",
-];
+function sanitizeImageUrl(url) {
+  if (!url || typeof url !== "string") return "";
+  const trimmed = url.trim();
+  if (!trimmed) return "";
+
+  if (trimmed.includes("google.com/") && (trimmed.includes("imgurl=") || trimmed.includes("url="))) {
+    try {
+      const parsed = new URL(trimmed);
+      const imgParam = parsed.searchParams.get("imgurl") || parsed.searchParams.get("url");
+      if (imgParam) {
+        return decodeURIComponent(imgParam);
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+  return trimmed;
+}
 
 export function DoctorAvatar({ doctor, size = "md", className = "" }) {
   const [hasError, setHasError] = useState(false);
@@ -183,14 +197,12 @@ export function DoctorAvatar({ doctor, size = "md", className = "" }) {
     .slice(0, 2)
     .toUpperCase();
 
-  const photoUrl = doctor?.photo_url || doctor?.photo || doctor?.avatar || doctor?.image;
+  const rawPhoto = doctor?.photo_url || doctor?.photo || doctor?.avatar || doctor?.image;
+  const photoUrl = sanitizeImageUrl(rawPhoto);
 
   const resolvedUrl = useMemo(() => {
     if (!photoUrl) {
-      const charSum = (doctor?.name || "doctor")
-        .split("")
-        .reduce((acc, char) => acc + char.charCodeAt(0), 0);
-      return SAMPLE_DOCTOR_PHOTOS[Math.abs(charSum) % SAMPLE_DOCTOR_PHOTOS.length];
+      return null;
     }
     if (
       photoUrl.startsWith("http://") ||
@@ -202,7 +214,7 @@ export function DoctorAvatar({ doctor, size = "md", className = "" }) {
     const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
     const base = apiBase.replace(/\/api\/?$/, "");
     return photoUrl.startsWith("/") ? `${base}${photoUrl}` : `${base}/${photoUrl}`;
-  }, [photoUrl, doctor?.name]);
+  }, [photoUrl]);
 
   const sizeClasses = {
     sm: "w-8 h-8 rounded-lg text-[10px]",
@@ -226,6 +238,123 @@ export function DoctorAvatar({ doctor, size = "md", className = "" }) {
       className={`${sizeClasses} bg-gradient-to-br from-[#0FA7E3] to-[#082B3F] text-white flex items-center justify-center font-bold shrink-0 shadow-sm ${className}`}
     >
       {initials}
+    </div>
+  );
+}
+
+function DoctorPhotoInput({ value, onChange, label = "Photo (Optional)" }) {
+  const uploadImageMutation = useUploadImage();
+  const [uploading, setUploading] = useState(false);
+  const [showUrlInput, setShowUrlInput] = useState(false);
+  const [imgError, setImgError] = useState(false);
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+
+    setUploading(true);
+    setImgError(false);
+    try {
+      const res = await uploadImageMutation.mutateAsync(file);
+      const url = res?.url || res?.data?.url || (typeof res === "string" ? res : "");
+      if (!url) {
+        throw new Error("Failed to get uploaded image URL");
+      }
+      onChange(url);
+      toast.success("Doctor photo uploaded successfully!");
+    } catch (err) {
+      toast.error(err?.message || "Failed to upload image");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-center justify-between">
+        <label className="block text-xs font-bold text-[#082B3F] uppercase tracking-wider">
+          {label}
+        </label>
+        <button
+          type="button"
+          onClick={() => setShowUrlInput((prev) => !prev)}
+          className="text-[11px] font-semibold text-slate-500 hover:text-[#082B3F] transition-colors"
+        >
+          {showUrlInput ? "Hide URL input" : value ? "Edit URL" : "Paste URL instead"}
+        </button>
+      </div>
+
+      <div className="flex items-center gap-3">
+        {value ? (
+          <div className="relative group w-10 h-10 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 flex-shrink-0 shadow-sm">
+            {!imgError ? (
+              <img
+                src={value}
+                alt="Doctor preview"
+                className="w-full h-full object-cover"
+                onError={() => setImgError(true)}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-slate-400">
+                <ImageIcon size={18} />
+              </div>
+            )}
+          </div>
+        ) : null}
+
+        <div className="flex-1 flex flex-wrap items-center gap-2">
+          <label className="cursor-pointer inline-flex items-center gap-2 h-10 px-3.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-[#082B3F] text-xs font-bold text-[#082B3F] transition-all shadow-sm">
+            {uploading ? (
+              <>
+                <CircleNotch size={16} className="animate-spin text-[#0FA7E3]" />
+                <span>Uploading...</span>
+              </>
+            ) : (
+              <>
+                <UploadSimple size={16} weight="bold" className="text-[#0FA7E3]" />
+                <span>{value ? "Change Image" : "Select Image File"}</span>
+              </>
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              disabled={uploading}
+              onChange={handleFileChange}
+              className="hidden"
+            />
+          </label>
+
+          {value && (
+            <button
+              type="button"
+              onClick={() => {
+                onChange("");
+                setImgError(false);
+              }}
+              className="h-10 px-3 rounded-xl border border-rose-100 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold transition-all flex items-center gap-1"
+              title="Remove Photo"
+            >
+              <Trash size={15} />
+              <span>Remove</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {showUrlInput && (
+        <input
+          type="url"
+          value={value || ""}
+          onChange={(e) => {
+            const sanitized = sanitizeImageUrl(e.target.value);
+            onChange(sanitized);
+            setImgError(false);
+          }}
+          className="w-full h-10 px-3 mt-1 rounded-xl border border-slate-200 outline-none focus:border-[#082B3F] text-xs font-medium text-[#082B3F]"
+          placeholder="https://images.unsplash..."
+        />
+      )}
     </div>
   );
 }
@@ -1525,15 +1654,10 @@ export default function AdminDoctorsPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-[#082B3F] mb-1.5 uppercase tracking-wider">
-                    Photo URL (Optional)
-                  </label>
-                  <input
-                    type="url"
+                  <DoctorPhotoInput
                     value={editFormData.photo_url}
-                    onChange={(e) => setEditFormData({ ...editFormData, photo_url: e.target.value })}
-                    className="w-full h-10 px-3 rounded-xl border border-slate-200 outline-none focus:border-[#082B3F] text-xs font-medium text-[#082B3F]"
-                    placeholder="https://..."
+                    onChange={(url) => setEditFormData({ ...editFormData, photo_url: url })}
+                    label="Doctor Photo (Optional)"
                   />
                 </div>
               </div>
@@ -1765,15 +1889,10 @@ export default function AdminDoctorsPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-[#082B3F] mb-1.5 uppercase tracking-wider">
-                    Photo URL (Optional)
-                  </label>
-                  <input
-                    type="url"
+                  <DoctorPhotoInput
                     value={formData.photo_url}
-                    onChange={(e) => setFormData({ ...formData, photo_url: e.target.value })}
-                    className="w-full h-10 px-3 rounded-xl border border-slate-200 outline-none focus:border-[#082B3F] text-xs font-medium text-[#082B3F]"
-                    placeholder="https://images.unsplash..."
+                    onChange={(url) => setFormData({ ...formData, photo_url: url })}
+                    label="Doctor Photo (Optional)"
                   />
                 </div>
               </div>

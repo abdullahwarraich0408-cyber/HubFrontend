@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -64,19 +64,34 @@ export default function AdminAnalyticsPage() {
     }
   };
 
-  // Chart Data Preparation
-  const chartData = orders.reduce((acc, order) => {
-    const date = new Date(order.created_at || order.date || Date.now());
-    const month = date.toLocaleString("default", { month: "short" });
-    const existing = acc.find((item) => item.name === month);
-    if (existing) {
-      existing.orders += 1;
-    } else {
-      acc.push({ name: month, orders: 1 });
+  // Chart Data Preparation: 6 consecutive calendar months
+  const finalChartData = useMemo(() => {
+    const now = new Date();
+    const months = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push({
+        name: d.toLocaleString("default", { month: "short" }),
+        year: d.getFullYear(),
+        monthNum: d.getMonth(),
+        orders: 0,
+      });
     }
-    return acc;
-  }, []);
-  const finalChartData = chartData.reverse().slice(0, 6);
+
+    if (Array.isArray(orders) && orders.length > 0) {
+      orders.forEach((order) => {
+        const orderDate = new Date(order.created_at || order.createdAt || order.date || Date.now());
+        const oMonth = orderDate.getMonth();
+        const oYear = orderDate.getFullYear();
+        const match = months.find((m) => m.monthNum === oMonth && m.year === oYear);
+        if (match) {
+          match.orders += 1;
+        }
+      });
+    }
+
+    return months;
+  }, [orders]);
 
   // Recent 5 Customers
   const recentCustomers = customers.slice(0, 5);
@@ -216,19 +231,26 @@ export default function AdminAnalyticsPage() {
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={finalChartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                <BarChart data={finalChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="orderVolumeGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#0FA7E3" stopOpacity={1} />
+                      <stop offset="100%" stopColor="#082B3F" stopOpacity={0.85} />
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                   <XAxis
                     dataKey="name"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 12, fill: "#64748b" }}
+                    tick={{ fontSize: 12, fill: "#64748b", fontWeight: 600 }}
                     dy={10}
                   />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 12, fill: "#64748b" }}
+                    allowDecimals={false}
+                    tick={{ fontSize: 12, fill: "#64748b", fontWeight: 600 }}
                     dx={-10}
                   />
                   <RechartsTooltip
@@ -237,10 +259,13 @@ export default function AdminAnalyticsPage() {
                       border: "1px solid #e2e8f0",
                       boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.08)",
                       fontSize: "12px",
+                      backgroundColor: "#ffffff",
+                      padding: "8px 12px",
                     }}
                     labelStyle={{ fontWeight: "bold", color: "#082B3F" }}
+                    formatter={(value) => [`${value} orders`, "Order Volume"]}
                   />
-                  <Bar dataKey="orders" fill="#082B3F" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="orders" fill="url(#orderVolumeGrad)" maxBarSize={40} radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             )}

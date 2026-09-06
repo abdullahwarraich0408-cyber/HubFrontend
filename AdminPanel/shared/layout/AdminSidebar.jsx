@@ -100,7 +100,7 @@ export function AdminSidebar() {
     const refreshToken =
       typeof window !== "undefined" ? localStorage.getItem("refreshToken") : null;
 
-    clearAdminSession();
+    clearAdminSession(false);
 
     try {
       const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";

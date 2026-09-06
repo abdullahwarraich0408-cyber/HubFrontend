@@ -53,6 +53,11 @@ export default function AdminLoginPage() {
 
         const msg = messages[reason] || messages.session_expired;
         toast.error(msg);
+
+        try {
+          const cleanUrl = window.location.pathname;
+          window.history.replaceState({}, document.title, cleanUrl);
+        } catch (_) {}
       }
     }
   }, []);
@@ -60,6 +65,7 @@ export default function AdminLoginPage() {
   const handleAdminLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setSessionExpiryReason(null);
 
     try {
       const response = await post("/auth/login", { email: email.trim().toLowerCase(), password });

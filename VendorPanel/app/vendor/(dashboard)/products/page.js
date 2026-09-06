@@ -212,7 +212,11 @@ function MyProductsPage() {
                             )}
                             <button className="w-full text-left px-3 py-2 text-sm hover:bg-neutral-50" onClick={() => { setStockProduct(product); setStockValue(String(product.inventory?.available_quantity ?? product.stock ?? 0)); setMenuId(null); }}>Update Stock</button>
                             <MenuItem href={partnerRoutes.vendor.inventory}>View Inventory</MenuItem>
-                            <button className="w-full text-left px-3 py-2 text-sm hover:bg-neutral-50" onClick={() => setListing.mutateAsync({ id: product.id, listing_status: "ARCHIVED" }).then(() => toast.success("Product archived."))}>Archive</button>
+                            {String(product.listing_status).toUpperCase() === "ARCHIVED" ? (
+                              <button className="w-full text-left px-3 py-2 text-sm hover:bg-neutral-50" onClick={() => setListing.mutateAsync({ id: product.id, listing_status: "INACTIVE" }).then(() => toast.success("Product unarchived.")).catch((err) => toast.error(err.message))}>Unarchive</button>
+                            ) : (
+                              <button className="w-full text-left px-3 py-2 text-sm hover:bg-neutral-50" onClick={() => setListing.mutateAsync({ id: product.id, listing_status: "ARCHIVED" }).then(() => toast.success("Product archived.")).catch((err) => toast.error(err.message))}>Archive</button>
+                            )}
                             <button className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50" onClick={() => { setDeleting(product); setMenuId(null); }}>Delete</button>
                           </div>
                         ) : null}

@@ -199,6 +199,7 @@ export function LabLoginPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="lab@medzoos.com"
+                    autoComplete="off"
                     required
                     className="w-full h-[46px] pl-10 pr-4 text-[14px] bg-white border border-[#D9DEE5] rounded-xl text-[#082B3F] placeholder:text-[#667085]/60 focus:outline-none focus:border-[#17618E] focus:ring-2 focus:ring-[#17618E]/20 transition-all"
                   />
@@ -228,6 +229,7 @@ export function LabLoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
+                    autoComplete="new-password"
                     required
                     className="w-full h-[46px] pl-10 pr-11 text-[14px] bg-white border border-[#D9DEE5] rounded-xl text-[#082B3F] placeholder:text-[#667085]/60 focus:outline-none focus:border-[#17618E] focus:ring-2 focus:ring-[#17618E]/20 transition-all"
                   />

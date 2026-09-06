@@ -97,7 +97,12 @@ export function LabDashboardLayout({ children }) {
       <PartnerAuthGuard role="lab">
         <div className="min-h-screen bg-[#F6F8FA] flex flex-col">
           {/* Top Header Toolbar */}
-          <header className="sticky top-0 z-30 flex items-center justify-between h-16 px-4 md:px-8 bg-white/95 backdrop-blur-xs border-b border-[#D9DEE5] shadow-2xs">
+          <header
+            className={cn(
+              "sticky top-0 z-30 flex items-center justify-between h-16 px-4 md:px-8 bg-white/95 backdrop-blur-xs border-b border-[#D9DEE5] shadow-2xs transition-all duration-250 ease-in-out",
+              isCollapsed ? "md:ml-[80px]" : "md:ml-[280px]"
+            )}
+          >
             {/* Mobile Hamburger & Brand */}
             <div className="flex items-center gap-3">
               <button

@@ -216,7 +216,7 @@ export default function LabDashboardPage() {
                   <th className="py-3.5 px-4 font-bold">Collection</th>
                   <th className="py-3.5 px-4 font-bold">Date / Slot</th>
                   <th className="py-3.5 px-4 font-bold">Status</th>
-                  <th className="py-3.5 px-6 text-right font-bold">Action</th>
+                  <th className="py-3.5 px-6 text-right font-bold">Details</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-100 text-[13px]">
@@ -261,7 +261,7 @@ export default function LabDashboardPage() {
                         className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#D9DEE5] text-[12px] font-semibold text-[#17618E] hover:bg-[#DEEEF9] hover:border-[#17618E]/40 transition-colors"
                       >
                         <Eye size={13} />
-                        <span>Manage</span>
+                        <span>View Details</span>
                       </button>
                     </td>
                   </tr>

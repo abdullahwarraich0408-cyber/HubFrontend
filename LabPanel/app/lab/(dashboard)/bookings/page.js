@@ -43,6 +43,7 @@ import {
 import {
   BOOKING_STATUSES,
   STATUS_LABELS,
+  getStatusLabel,
   normalizeStatus,
 } from "@/lib/constants/lab";
 
@@ -195,7 +196,7 @@ export default function LabBookingsPage() {
   const handleStatusChange = async (id, nextStatus, note = "") => {
     try {
       await updateStatusMutation.mutateAsync({ id, status: nextStatus, note });
-      toast.success(`Booking marked as ${STATUS_LABELS[nextStatus] || nextStatus}`);
+      toast.success(`Booking marked as ${getStatusLabel(nextStatus)}`);
     } catch (err) {
       toast.error(err.message || "Failed to update booking status");
     }

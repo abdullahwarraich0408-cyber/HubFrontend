@@ -3,6 +3,7 @@
 import {
   BOOKING_STATUSES,
   STATUS_LABELS,
+  getStatusLabel,
   DEFAULT_COLLECTION_CITIES,
   DEFAULT_OPERATING_HOURS,
   normalizeStatus,
@@ -871,7 +872,7 @@ export const labLocalStoreApi = {
 
     if (updatedBooking) {
       addNotification({
-        title: `Status: ${STATUS_LABELS[norm] || norm}`,
+        title: `Status: ${getStatusLabel(norm)}`,
         message: `Order ${updatedBooking.booking_number} (${updatedBooking.patient_name}) updated.`,
         type: "status",
       });

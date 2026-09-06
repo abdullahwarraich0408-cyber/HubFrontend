@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Building2,
   MapPin,
@@ -26,6 +26,7 @@ import {
   useCreateLabCollector,
   useUpdateLabCollector,
   useDeleteLabCollector,
+  useUpdateLabPortalPassword,
 } from "@/lib/hooks/usePartnerPortal";
 import {
   DEFAULT_COLLECTION_CITIES,
@@ -50,6 +51,7 @@ export default function LabSettingsPage() {
   const createCollectorMutation = useCreateLabCollector();
   const updateCollectorMutation = useUpdateLabCollector();
   const deleteCollectorMutation = useDeleteLabCollector();
+  const updatePasswordMutation = useUpdateLabPortalPassword();
 
   // Active Tab
   const [activeTab, setActiveTab] = useState("general");
@@ -135,18 +137,37 @@ export default function LabSettingsPage() {
 
   // Add City Tag
   const handleAddCity = (e) => {
-    e?.preventDefault();
-    const trimmed = newCity.trim();
-    if (!trimmed) return;
-    if (form.collectionCities.includes(trimmed)) {
-      toast.error(`${trimmed} is already in the collection areas list.`);
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    const raw = newCity.trim();
+    if (!raw) {
+      cityInputRef.current?.focus();
       return;
     }
-    setForm((prev) => ({
-      ...prev,
-      collectionCities: [...prev.collectionCities, trimmed],
-    }));
+
+    const items = raw
+      .split(/[,;\n]+/)
+      .map((c) => c.trim())
+      .filter(Boolean);
+
+    setForm((prev) => {
+      const currentList = [...(prev.collectionCities || [])];
+      for (const item of items) {
+        const formatted = item.replace(/\b\w/g, (char) => char.toUpperCase());
+        const exists = currentList.some(
+          (c) => c.toLowerCase() === formatted.toLowerCase()
+        );
+        if (exists) {
+          toast.error(`"${formatted}" is already in the collection areas list.`);
+        } else {
+          currentList.push(formatted);
+        }
+      }
+      return { ...prev, collectionCities: currentList };
+    });
+
     setNewCity("");
+    setTimeout(() => cityInputRef.current?.focus(), 50);
   };
 
   // Remove City Tag
@@ -233,7 +254,7 @@ export default function LabSettingsPage() {
   };
 
   // Password Change
-  const handleChangePassword = (e) => {
+  const handleChangePassword = async (e) => {
     e.preventDefault();
     if (!passwordForm.current || !passwordForm.new) {
       toast.error("Please enter current and new password.");
@@ -243,8 +264,16 @@ export default function LabSettingsPage() {
       toast.error("New passwords do not match.");
       return;
     }
-    toast.success("Security password updated successfully.");
-    setPasswordForm({ current: "", new: "", confirm: "" });
+    try {
+      await updatePasswordMutation.mutateAsync({
+        current: passwordForm.current,
+        new: passwordForm.new,
+      });
+      toast.success("Security password updated successfully.");
+      setPasswordForm({ current: "", new: "", confirm: "" });
+    } catch (err) {
+      toast.error(err.message || "Failed to update password.");
+    }
   };
 
   return (
@@ -468,26 +497,35 @@ export default function LabSettingsPage() {
                     </button>
                   </span>
                 ))}
-                <div className="flex items-center gap-1.5 flex-1 min-w-[140px]">
+                <div className="flex items-center gap-1.5 flex-1 min-w-[200px]">
                   <input
+                    ref={cityInputRef}
                     type="text"
                     value={newCity}
                     onChange={(e) => setNewCity(e.target.value)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         e.preventDefault();
-                        handleAddCity();
+                        e.stopPropagation();
+                        handleAddCity(e);
                       }
                     }}
                     placeholder="Add city & press Enter..."
-                    className="w-full text-[12px] bg-transparent text-[#082B3F] placeholder:text-[#667085] focus:outline-none"
+                    className="flex-1 text-[12px] bg-white border border-[#D9DEE5] rounded-lg px-2.5 py-1.5 text-[#082B3F] placeholder:text-[#667085] focus:outline-none focus:border-[#17618E]"
                   />
                   <button
                     type="button"
-                    onClick={handleAddCity}
-                    className="p-1 rounded bg-[#17618E] text-white text-[11px] font-bold hover:bg-[#124362]"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleAddCity(e);
+                    }}
+                    title="Add city"
+                    aria-label="Add city"
+                    className="h-8 px-2.5 rounded-lg bg-[#17618E] text-white text-[12px] font-semibold hover:bg-[#124362] flex items-center gap-1 transition-all shadow-xs cursor-pointer shrink-0"
                   >
                     <Plus size={14} />
+                    <span>Add</span>
                   </button>
                 </div>
               </div>

@@ -237,6 +237,14 @@ export function useUpdateLabPortalProfile() {
   });
 }
 
+export function useUpdateLabPortalPassword() {
+  return useMutation({
+    mutationFn: async ({ current, new: newPassword }) => {
+      return labPortalApi.updatePassword(current, newPassword);
+    },
+  });
+}
+
 export function useLabPortalBookings(options = {}) {
   return useQuery({
     queryKey: ["lab-portal-bookings"],

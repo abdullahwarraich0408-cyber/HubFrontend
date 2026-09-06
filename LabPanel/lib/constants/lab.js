@@ -20,12 +20,30 @@ export const STATUS_LABELS = {
   [BOOKING_STATUSES.COMPLETED]: "Completed",
   [BOOKING_STATUSES.CANCELLED]: "Cancelled",
   [BOOKING_STATUSES.REJECTED]: "Rejected",
-  // Legacy aliases
+  // Legacy & backend aliases
   pending: "New",
   confirmed: "Accepted",
+  collector_assigned: "Collector Assigned",
+  sample_collected: "Sample Collected",
+  processing: "Processing",
   testing: "Processing",
+  report_ready: "Report Ready",
   report_uploaded: "Report Ready",
+  completed: "Completed",
+  cancelled: "Cancelled",
+  rejected: "Rejected",
 };
+
+export function getStatusLabel(status) {
+  if (!status) return "";
+  const str = String(status).trim();
+  if (STATUS_LABELS[str]) return STATUS_LABELS[str];
+  const upper = str.toUpperCase();
+  if (STATUS_LABELS[upper]) return STATUS_LABELS[upper];
+  const lower = str.toLowerCase();
+  if (STATUS_LABELS[lower]) return STATUS_LABELS[lower];
+  return str.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
 
 export const STATUS_BADGE_STYLES = {
   [BOOKING_STATUSES.NEW]: {

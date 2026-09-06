@@ -45,6 +45,16 @@ export function clearPartnerSession() {
   localStorage.removeItem(PARTNER_REFRESH_KEY);
   localStorage.removeItem(PARTNER_ROLE_KEY);
   localStorage.removeItem(PARTNER_DATA_KEY);
+
+  // Remove remembered login credentials upon sign out (Bug-15)
+  localStorage.removeItem("lab_remembered_email");
+  localStorage.removeItem("lab_remembered_password");
+  localStorage.removeItem("doctor_remembered_email");
+  localStorage.removeItem("doctor_remembered_password");
+  localStorage.removeItem("doctor_remember_me");
+  localStorage.removeItem("token");
+  localStorage.removeItem("refreshToken");
+  localStorage.removeItem("medzoos_user");
 }
 
 export function isPartnerAuthenticated(expectedRole) {

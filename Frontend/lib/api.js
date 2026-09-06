@@ -1,7 +1,39 @@
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
+function getStoredToken() {
+  if (typeof window === 'undefined') return null;
+  const partnerToken = localStorage.getItem('partnerToken');
+  if (partnerToken) return partnerToken;
+  const token = localStorage.getItem('token');
+  return token && token !== 'cookie-auth-active' ? token : null;
+}
+
+function getStoredRefreshToken() {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem('partnerRefreshToken') || localStorage.getItem('refreshToken') || null;
+}
+
+function updateStoredTokens(accessToken, refreshToken) {
+  if (typeof window === 'undefined') return;
+  const hadPartnerToken = Boolean(localStorage.getItem('partnerToken'));
+  if (hadPartnerToken) {
+    if (accessToken) localStorage.setItem('partnerToken', accessToken);
+    if (refreshToken) localStorage.setItem('partnerRefreshToken', refreshToken);
+  }
+  if (accessToken) localStorage.setItem('token', accessToken);
+  if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
+}
+
+function clearStoredTokens() {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem('token');
+  localStorage.removeItem('refreshToken');
+  localStorage.removeItem('partnerToken');
+  localStorage.removeItem('partnerRefreshToken');
+}
+
 async function apiFetch(path, options = {}) {
-  let token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  let token = getStoredToken();
 
   const headers = {
     'Content-Type': 'application/json',
@@ -31,28 +63,28 @@ async function apiFetch(path, options = {}) {
 
   // Automatically refresh expired tokens on 401
   if (response.status === 401 && typeof window !== 'undefined' && path !== '/auth/refresh' && path !== '/auth/login') {
-    const refreshToken = localStorage.getItem('refreshToken');
+    const refreshToken = getStoredRefreshToken();
     if (refreshToken) {
       try {
         const refreshResponse = await fetch(`${BASE_URL}/auth/refresh`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refreshToken }),
           credentials: 'include',
         });
 
         if (refreshResponse.ok) {
           const refreshData = await refreshResponse.json();
           const newTokens = refreshData.data?.tokens || refreshData.tokens || refreshData.data;
+          const newAccessToken = newTokens?.accessToken || newTokens?.token;
+          const newRefreshToken = newTokens?.refreshToken;
 
-          if (newTokens?.accessToken) {
-            localStorage.setItem('token', newTokens.accessToken);
-            if (newTokens.refreshToken) {
-              localStorage.setItem('refreshToken', newTokens.refreshToken);
-            }
+          if (newAccessToken) {
+            updateStoredTokens(newAccessToken, newRefreshToken);
 
             const retryHeaders = {
               ...headers,
-              Authorization: `Bearer ${newTokens.accessToken}`,
+              Authorization: `Bearer ${newAccessToken}`,
             };
 
             response = await fetch(`${BASE_URL}${path}`, {
@@ -62,8 +94,7 @@ async function apiFetch(path, options = {}) {
             });
           }
         } else {
-          localStorage.removeItem('token');
-          localStorage.removeItem('refreshToken');
+          clearStoredTokens();
         }
       } catch (err) {
         console.error("Auto token refresh failed:", err);
@@ -81,8 +112,7 @@ async function apiFetch(path, options = {}) {
 
   if (!response.ok) {
     if (response.status === 401 && typeof window !== 'undefined') {
-      localStorage.removeItem('token');
-      localStorage.removeItem('refreshToken');
+      clearStoredTokens();
     }
     throw new Error(json.message || `HTTP error! status: ${response.status}`);
   }

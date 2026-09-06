@@ -62,7 +62,15 @@ export function VendorOrdersPage() {
     }
     try {
       await updateStatus.mutateAsync({ id: order.id, status: action.status });
-      toast.success(action.status === "ACCEPTED" ? "Order accepted." : action.status === "READY_FOR_PICKUP" ? "Order marked as ready." : "Order updated.");
+      toast.success(
+        action.status === "ACCEPTED"
+          ? "Order accepted."
+          : action.status === "READY_FOR_PICKUP"
+          ? "Order marked as ready."
+          : action.status === "COMPLETED" || action.status === "DELIVERED"
+          ? "Order marked as completed."
+          : "Order updated."
+      );
     } catch (error) {
       toast.error(error.message || "This order has already been updated.");
     }

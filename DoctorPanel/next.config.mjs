@@ -3,12 +3,11 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const projectRoot = path.dirname(fileURLToPath(import.meta.url));
-const backendUrl =
-  process.env.BACKEND_URL ||
-  process.env.NEXT_PUBLIC_BACKEND_URL ||
-  (process.env.NODE_ENV === "production"
-    ? "https://backend.medzoos.com"
-    : "http://127.0.0.1:5000");
+const apiTarget = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5001/api";
+const derivedBackendUrl = apiTarget.startsWith("http")
+  ? apiTarget.replace(/\/api\/?$/, "")
+  : "http://localhost:5001";
+const backendUrl = process.env.BACKEND_URL || derivedBackendUrl;
 
 const nextConfig = {
   turbopack: {

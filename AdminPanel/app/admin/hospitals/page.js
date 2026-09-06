@@ -85,7 +85,7 @@ function HospitalAvatar({ hospital, size = "md", className = "" }) {
     if (logo.startsWith("http://") || logo.startsWith("https://") || logo.startsWith("data:")) {
       return logo;
     }
-    const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
     const base = apiBase.replace(/\/api\/?$/, "");
     return logo.startsWith("/") ? `${base}${logo}` : `${base}/${logo}`;
   }, [logo]);

@@ -38,12 +38,15 @@ export function resolvePhotoUrl(photo) {
   if (value.startsWith("http://") || value.startsWith("https://") || value.startsWith("data:") || value.startsWith("blob:")) {
     return value;
   }
-  const cleanPath = value.startsWith("/") ? value : `/${value}`;
-  const origin =
+  const apiTarget =
+    process.env.NEXT_PUBLIC_API_URL ||
     process.env.NEXT_PUBLIC_BACKEND_URL ||
     process.env.BACKEND_URL ||
-    "http://127.0.0.1:5000";
-  return `${String(origin).replace(/\/$/, "")}${cleanPath}`;
+    "http://localhost:5001/api";
+  const origin = apiTarget.startsWith("http")
+    ? apiTarget.replace(/\/api\/?$/, "")
+    : "http://localhost:5001";
+  return `${origin.replace(/\/$/, "")}${cleanPath}`;
 }
 
 export function DoctorSettingsPage() {

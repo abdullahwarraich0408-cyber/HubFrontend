@@ -204,7 +204,7 @@ export function DoctorAvatar({ doctor, size = "md", className = "" }) {
     ) {
       return photoUrl;
     }
-    const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
     const base = apiBase.replace(/\/api\/?$/, "");
     return photoUrl.startsWith("/") ? `${base}${photoUrl}` : `${base}/${photoUrl}`;
   }, [photoUrl]);

@@ -20,6 +20,17 @@ const SAMPLE_PHARMACY_LOGOS = [
   "https://images.unsplash.com/photo-1586015555751-63c252277d3f?auto=format&fit=crop&q=80&w=250",
 ];
 
+function resolveDocUrl(url) {
+  if (!url || typeof url !== "string") return "#";
+  const trimmed = url.trim();
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://") || trimmed.startsWith("data:") || trimmed.startsWith("blob:")) {
+    return trimmed;
+  }
+  const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
+  const base = apiBase.replace(/\/api\/?$/, "");
+  return trimmed.startsWith("/") ? `${base}${trimmed}` : `${base}/${trimmed}`;
+}
+
 function PharmacyAvatar({ vendor, size = "md", className = "" }) {
   const [hasError, setHasError] = useState(false);
   const initials = (vendor?.business_name || vendor?.name || "P").slice(0, 2).toUpperCase();
@@ -35,7 +46,7 @@ function PharmacyAvatar({ vendor, size = "md", className = "" }) {
     if (logo.startsWith("http://") || logo.startsWith("https://") || logo.startsWith("data:")) {
       return logo;
     }
-    const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
     const base = apiBase.replace(/\/api\/?$/, "");
     return logo.startsWith("/") ? `${base}${logo}` : `${base}/${logo}`;
   }, [logo, vendor?.business_name, vendor?.name]);
@@ -1346,7 +1357,7 @@ export default function AdminVendorsPage() {
 
               <div className="flex items-center gap-2">
                 <a
-                  href={previewDoc.url}
+                  href={resolveDocUrl(previewDoc.url)}
                   download
                   target="_blank"
                   rel="noopener noreferrer"
@@ -1369,13 +1380,13 @@ export default function AdminVendorsPage() {
             <div className="flex-1 bg-slate-900/5 p-4 overflow-auto flex items-center justify-center relative">
               {previewDoc.url?.toLowerCase().endsWith(".pdf") || previewDoc.url?.includes("pdf") ? (
                 <iframe
-                  src={previewDoc.url}
+                  src={resolveDocUrl(previewDoc.url)}
                   className="w-full h-full rounded-xl border border-slate-200 bg-white shadow-inner"
                   title={previewDoc.title}
                 />
               ) : (
                 <img
-                  src={previewDoc.url}
+                  src={resolveDocUrl(previewDoc.url)}
                   alt={previewDoc.title}
                   className="max-w-full max-h-full object-contain rounded-xl shadow-lg border border-slate-200/50 bg-white"
                 />

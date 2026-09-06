@@ -122,6 +122,7 @@ async function refreshCustomerSession() {
       body: JSON.stringify({
         deviceId: getDeviceId(),
         platform: "web",
+        refreshToken: typeof window !== "undefined" ? (localStorage.getItem("refreshToken") || localStorage.getItem("partnerRefreshToken")) : undefined,
       }),
     });
 

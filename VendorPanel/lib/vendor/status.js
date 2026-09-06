@@ -73,7 +73,7 @@ export const STAFF_ROLES = ["MANAGER", "PHARMACIST", "INVENTORY_MANAGER", "ORDER
 export const RETURN_STATUSES = ["REQUESTED", "UNDER_REVIEW", "APPROVED", "REJECTED", "RECEIVED", "REFUNDED", "CLOSED"];
 
 export function nextOrderAction(status) {
-  const value = String(status || "").toUpperCase();
+  const value = String(status || "").toUpperCase().replace(/[\s-]+/g, "_");
   if (["NEW", "PENDING"].includes(value)) {
     return [
       { label: "Accept Order", status: "ACCEPTED" },
@@ -88,5 +88,9 @@ export function nextOrderAction(status) {
   }
   if (value === "PREPARING") return [{ label: "Mark Ready", status: "READY_FOR_PICKUP" }];
   if (value === "READY_FOR_PICKUP") return [{ label: "Hand to Rider", status: "OUT_FOR_DELIVERY" }];
+  if (["OUT_FOR_DELIVERY", "SHIPPED"].includes(value)) {
+    return [{ label: "Mark Completed", status: "COMPLETED" }];
+  }
+  if (value === "DELIVERED") return [{ label: "Mark Completed", status: "COMPLETED" }];
   return [];
 }

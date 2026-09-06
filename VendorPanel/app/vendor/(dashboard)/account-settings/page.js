@@ -32,6 +32,30 @@ function buildDefaultHours() {
   }));
 }
 
+function getFileUrl(url) {
+  if (!url || typeof url !== "string") return "#";
+  const trimmed = url.trim();
+  if (
+    trimmed.startsWith("http://") ||
+    trimmed.startsWith("https://") ||
+    trimmed.startsWith("data:") ||
+    trimmed.startsWith("blob:")
+  ) {
+    return trimmed;
+  }
+  const apiBase =
+    process.env.NEXT_PUBLIC_API_URL ||
+    process.env.NEXT_PUBLIC_BACKEND_URL ||
+    "http://localhost:5001/api";
+
+  const backendBase = apiBase.startsWith("http")
+    ? apiBase.replace(/\/api\/?$/, "")
+    : "http://localhost:5001";
+  
+  const cleanPath = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+  return `${backendBase.replace(/\/$/, "")}${cleanPath}`;
+}
+
 export default function AccountSettingsPage() {
   const { data: profile } = useVendorProfile();
   const { data: availability } = useVendorAvailability();
@@ -47,6 +71,7 @@ export default function AccountSettingsPage() {
   const [documents, setDocuments] = useState({});
   const [serviceAreasText, setServiceAreasText] = useState(null);
   const [uploadingKey, setUploadingKey] = useState("");
+  const [previewDoc, setPreviewDoc] = useState(null);
 
   const derivedHours = useMemo(() => {
     const map = new Map(operatingHours.map((entry) => [Number(entry.day_of_week), entry]));
@@ -178,15 +203,19 @@ export default function AccountSettingsPage() {
         >
           <label className="text-sm font-semibold">Pharmacy availability
             <select name="availability" defaultValue={availability?.holiday_mode_enabled ? "vacation" : availability?.is_open === false ? "closed" : "open"} className="mt-1.5 w-full h-[46px] border rounded-lg px-3">
-              <option value="open">Open</option>
-              <option value="closed">Temporarily Closed</option>
-              <option value="vacation">Vacation Mode</option>
+              <option value="open">Open & accepting orders</option>
+              <option value="closed">Temporarily closed</option>
+              <option value="vacation">Holiday mode</option>
             </select>
           </label>
-          <Input name="holiday_ends_at" type="datetime-local" label="Scheduled reopening" defaultValue={availability?.holiday_ends_at ? new Date(availability.holiday_ends_at).toISOString().slice(0, 16) : ""} />
-          <label className="flex gap-2 text-sm font-semibold"><input type="checkbox" name="delivery_enabled" defaultChecked={profile?.delivery_enabled !== false} /> Delivery enabled</label>
-          <label className="flex gap-2 text-sm font-semibold"><input type="checkbox" name="pickup_enabled" defaultChecked={profile?.pickup_enabled} /> Pickup enabled</label>
-          <Input name="service_radius_km" type="number" label="Delivery radius (km)" defaultValue={profile?.service_radius_km || 10} />
+          <label className="text-sm font-semibold">Holiday ends at (optional)
+            <input type="datetime-local" name="holiday_ends_at" defaultValue={availability?.holiday_ends_at ? new Date(availability.holiday_ends_at).toISOString().slice(0, 16) : ""} className="mt-1.5 w-full h-[46px] border rounded-lg px-3" />
+          </label>
+          <div className="flex gap-6">
+            <label className="text-sm flex items-center gap-2 font-semibold"><input type="checkbox" name="delivery_enabled" defaultChecked={availability?.delivery_enabled !== false} /> Enable delivery</label>
+            <label className="text-sm flex items-center gap-2 font-semibold"><input type="checkbox" name="pickup_enabled" defaultChecked={availability?.pickup_enabled !== false} /> Enable pickup</label>
+          </div>
+          <Input name="service_radius_km" type="number" label="Service radius (km)" defaultValue={availability?.service_radius_km || 10} />
           <Input name="min_order_amount" type="number" label="Minimum order (PKR)" defaultValue={profile?.min_order_amount || 0} />
           <Input name="preparation_time_minutes" type="number" label="Preparation time (minutes)" defaultValue={profile?.preparation_time_minutes || 30} />
           <label className="text-sm font-semibold">Service areas (one per line)
@@ -222,14 +251,13 @@ export default function AccountSettingsPage() {
                 <span className="text-xs uppercase">{(profile?.documents || []).find((doc) => doc.type === type)?.status || "NOT_SUBMITTED"}</span>
               </div>
               {effectiveDocuments[key] ? (
-                <a
-                  className="text-sm font-semibold text-brand-primary hover:underline inline-flex items-center gap-1"
-                  href={effectiveDocuments[key].startsWith("http") ? effectiveDocuments[key] : effectiveDocuments[key].startsWith("/") ? effectiveDocuments[key] : `/${effectiveDocuments[key]}`}
-                  target="_blank"
-                  rel="noreferrer"
+                <button
+                  type="button"
+                  onClick={() => setPreviewDoc({ title: label, url: getFileUrl(effectiveDocuments[key]) })}
+                  className="text-sm font-semibold text-brand-primary hover:underline inline-flex items-center gap-1 cursor-pointer"
                 >
                   View file ↗
-                </a>
+                </button>
               ) : null}
               <label className="mt-3 block text-sm font-semibold text-brand-primary cursor-pointer">
                 {uploadingKey === key ? "Uploading..." : "Upload"}
@@ -237,6 +265,52 @@ export default function AccountSettingsPage() {
               </label>
             </div>
           ))}
+        </div>
+      )}
+
+      {previewDoc && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200">
+            <div className="p-4 border-b flex items-center justify-between bg-slate-50">
+              <div>
+                <h3 className="font-bold text-slate-900">{previewDoc.title}</h3>
+                <p className="text-xs text-slate-500 truncate max-w-md">{previewDoc.url}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <a
+                  href={previewDoc.url}
+                  download
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
+                >
+                  Download
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setPreviewDoc(null)}
+                  className="w-8 h-8 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 flex items-center justify-center font-bold transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+            <div className="flex-1 bg-slate-900/5 p-4 overflow-auto flex items-center justify-center min-h-[480px]">
+              {previewDoc.url?.toLowerCase().includes(".pdf") ? (
+                <iframe
+                  src={previewDoc.url}
+                  className="w-full h-[550px] rounded-xl border border-slate-200 bg-white"
+                  title={previewDoc.title}
+                />
+              ) : (
+                <img
+                  src={previewDoc.url}
+                  alt={previewDoc.title}
+                  className="max-w-full max-h-[550px] object-contain rounded-xl shadow-md border border-slate-200 bg-white"
+                />
+              )}
+            </div>
+          </div>
         </div>
       )}
 

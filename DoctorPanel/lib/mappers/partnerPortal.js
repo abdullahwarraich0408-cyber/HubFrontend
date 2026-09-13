@@ -55,25 +55,40 @@ export function mapDoctorProfileToApi(profile) {
 
 export function mapDoctorAppointmentFromApi(appointment, doctorOnline = true) {
   const consultationMode = appointment.consultation_mode || null;
-  const isOnline =
-    consultationMode === "online" || (!consultationMode && Boolean(appointment.meeting_id));
+  const preferredMode = appointment.preferred_consultation_mode || null;
+  const effectiveMode = consultationMode || preferredMode;
+  const isOnline = effectiveMode === "online" || (!effectiveMode && Boolean(appointment.meeting_id));
+  const isInPerson = effectiveMode === "in_person";
   const needsModeSelection = appointment.status === "confirmed" && !consultationMode;
+  const appointmentType = String(
+    appointment.appointment_type || appointment.appointmentType || "new"
+  ).toLowerCase();
 
   return {
     id: appointment.id,
+    customerId: appointment.customer_id || appointment.customer?.id || null,
     patient: appointment.customer?.name || "Unknown",
+    patientEmail: appointment.customer?.email || "",
     type: consultationMode === "in_person"
       ? "In-Person"
       : consultationMode === "online"
         ? "Online Checkup"
         : needsModeSelection
           ? "Awaiting patient choice"
-          : "Video Call",
+          : preferredMode === "in_person"
+            ? "In-Person"
+            : preferredMode === "online"
+              ? "Online Checkup"
+              : "Video Call",
+    appointmentType,
+    isFollowUp: appointmentType === "follow_up",
+    parentAppointmentId: appointment.parent_appointment_id || null,
     consultationMode,
     needsModeSelection,
     isOnline,
-    isInPerson: consultationMode === "in_person",
+    isInPerson,
     date: formatDate(appointment.appointment_date),
+    dateIso: appointment.appointment_date || null,
     time: appointment.slot,
     status: appointment.status,
     phone: appointment.customer?.phone || "",
@@ -89,14 +104,27 @@ export function mapDoctorAppointmentFromApi(appointment, doctorOnline = true) {
 }
 
 export function mapDoctorPatientFromApi(patient) {
+  const conditionsArray = Array.isArray(patient.conditions)
+    ? patient.conditions
+    : undefined;
+  const conditionText =
+    typeof patient.condition === "string"
+      ? patient.condition
+      : Array.isArray(patient.condition)
+        ? patient.condition.join(", ")
+        : conditionsArray
+          ? conditionsArray.join(", ")
+          : "General";
+
   return {
     id: patient.id,
     name: patient.name,
     email: patient.email || "",
     phone: patient.phone || "",
-    lastVisit: formatDate(patient.lastVisit),
-    condition: patient.condition || "General",
-    appointmentsCount: patient.appointmentsCount || 1,
+    lastVisit: formatDate(patient.lastVisit || patient.last_visit),
+    condition: conditionText,
+    conditions: conditionsArray,
+    appointmentsCount: patient.appointmentsCount || patient.appointments_count || 1,
   };
 }
 

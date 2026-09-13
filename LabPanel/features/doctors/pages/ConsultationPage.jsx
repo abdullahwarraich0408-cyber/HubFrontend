@@ -59,7 +59,7 @@ export function ConsultationPage({ meetingId }) {
   const jitsiSrc = useMemo(() => {
     if (!videoRoom?.jitsi_room) return null;
     const displayName = encodeURIComponent(appointment?.doctorName || partner?.name || "Doctor");
-    return `https://meet.jit.si/${videoRoom.jitsi_room}#config.prejoinPageEnabled=false&userInfo.displayName="${displayName}"`;
+    return `https://meet.element.io/${videoRoom.jitsi_room}#config.prejoinPageEnabled=false&config.disableDeepLinking=true&userInfo.displayName="${displayName}"`;
   }, [videoRoom?.jitsi_room, appointment?.doctorName, partner?.name]);
 
   const handleStartConsultation = async () => {

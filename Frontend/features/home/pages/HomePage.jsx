@@ -18,6 +18,7 @@ import { SpecialtyStrip } from "../components/patient/SpecialtyStrip";
 import { CampaignBanners } from "../components/patient/CampaignBanners";
 import { ClosingBand } from "../components/patient/ClosingBand";
 import { LoggedInFooter } from "../components/patient/LoggedInFooter";
+import { FollowUpRecommendedCard } from "../components/patient/FollowUpRecommendedCard";
 
 export function HomePage() {
   const doctorsQuery = useDoctors();
@@ -33,6 +34,10 @@ export function HomePage() {
     <div className="w-full bg-white">
       <div className="home-container mx-auto pt-6 md:pt-7 lg:pt-8">
         <HomeHeroCarousel />
+      </div>
+
+      <div className="mt-6 md:mt-8">
+        <FollowUpRecommendedCard />
       </div>
 
       <div className="mt-10 md:mt-12 lg:mt-14">

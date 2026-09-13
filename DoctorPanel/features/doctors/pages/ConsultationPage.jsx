@@ -96,10 +96,12 @@ export function ConsultationPage({ meetingId }) {
   const videoAccess = videoData?.videoAccess;
 
   const jitsiSrc = useMemo(() => {
+    if (videoData?.videoRoom?.embed_url) return videoData.videoRoom.embed_url;
     if (!videoRoom?.jitsi_room) return null;
     const displayName = encodeURIComponent(appointment?.doctorName || partner?.name || "Doctor");
-    return `https://meet.element.io/${videoRoom.jitsi_room}#config.prejoinPageEnabled=false&config.requireDisplayName=false&config.disableDeepLinking=true&config.startWithAudioMuted=false&config.startWithVideoMuted=false&userInfo.displayName="${displayName}"`;
-  }, [videoRoom?.jitsi_room, appointment?.doctorName, partner?.name]);
+    const host = videoRoom?.jitsi_host || "https://meet.element.io";
+    return `${host}/${videoRoom.jitsi_room}#config.prejoinPageEnabled=false&config.requireDisplayName=false&config.disableDeepLinking=true&config.startWithAudioMuted=false&config.startWithVideoMuted=false&userInfo.displayName="${displayName}"`;
+  }, [videoData?.videoRoom?.embed_url, videoRoom?.jitsi_room, videoRoom?.jitsi_host, appointment?.doctorName, partner?.name]);
 
   const handleStartConsultation = async () => {
     if (!appointmentId) return;

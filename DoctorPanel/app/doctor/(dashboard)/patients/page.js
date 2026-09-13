@@ -3,10 +3,15 @@
 import { useMemo, useState } from "react";
 import { Users, Search, ChevronRight, Eye, Phone } from "lucide-react";
 import { PatientDetailModal } from "@/features/doctor-panel/components/PatientDetailModal";
-import { useDoctorPortalPatients } from "@/lib/hooks/usePartnerPortal";
+import {
+  useDoctorPortalPatients,
+  useDoctorFollowUps,
+} from "@/lib/hooks/usePartnerPortal";
 
 export default function DoctorPatientsPage() {
   const { data: patients = [], isLoading } = useDoctorPortalPatients();
+  const { data: upcomingFollowUps = [] } = useDoctorFollowUps({ status: "upcoming" });
+  const { data: overdueFollowUps = [] } = useDoctorFollowUps({ status: "overdue" });
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [search, setSearch] = useState("");
 
@@ -24,11 +29,18 @@ export default function DoctorPatientsPage() {
   }, [patients, search]);
 
   const totalPatientsCount = patients.length;
-  const seenThisMonthCount = useMemo(
-    () => patients.filter((p) => (p.appointmentsCount || 0) > 0).length,
-    [patients]
-  );
-  const followUpsDueCount = Math.min(4, totalPatientsCount);
+  const seenThisMonthCount = useMemo(() => {
+    const now = new Date();
+    const month = now.getMonth();
+    const year = now.getFullYear();
+    return patients.filter((p) => {
+      if (!p.lastVisit) return (p.appointmentsCount || 0) > 0;
+      const d = new Date(p.lastVisit);
+      if (Number.isNaN(d.getTime())) return (p.appointmentsCount || 0) > 0;
+      return d.getMonth() === month && d.getFullYear() === year;
+    }).length;
+  }, [patients]);
+  const followUpsDueCount = upcomingFollowUps.length + overdueFollowUps.length;
 
   if (isLoading) {
     return (

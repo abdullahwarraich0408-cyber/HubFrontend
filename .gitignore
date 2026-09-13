@@ -109,5 +109,7 @@ public/storage/
 # **/public/**/*.mp4
 # **/public/**/*.mov
 
-# Separate backend repository
+# Separate app repositories (each has its own .git — do not nest in HubFrontend)
 medzoos-backend/
+DoctorApp/
+Medzoos/

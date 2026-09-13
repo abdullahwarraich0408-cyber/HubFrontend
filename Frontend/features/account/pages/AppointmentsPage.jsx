@@ -10,10 +10,10 @@ import {
   XCircle,
   DownloadSimple,
   ChatCircleText,
-  Stethoscope,
   Buildings,
   UploadSimple,
   CreditCard,
+  ArrowsClockwise,
 } from "@phosphor-icons/react";
 import { Button } from "@/shared/components/Button";
 import { Badge } from "@/shared/components/Badge";
@@ -23,18 +23,34 @@ import {
   useJoinDoctorConsultation,
   useSelectConsultationMode,
   useSubmitDoctorReview,
+  usePatientFollowUps,
 } from "@/lib/hooks/useApi";
 import { paymentsApi } from "@/lib/api/index";
 import { formatDoctorDisplayName } from "@/lib/hooks/useTelehealth";
 import { toast } from "sonner";
 import { ViewPrescriptionModal } from "@/features/account/components/ViewPrescriptionModal";
+import { RescheduleAppointmentModal } from "@/features/account/components/RescheduleAppointmentModal";
+import { BookFollowUpModal } from "@/features/account/components/BookFollowUpModal";
+import { VisitDocumentsSection } from "@/features/account/components/VisitDocumentsSection";
+import { AppointmentTimeline } from "@/features/account/components/AppointmentTimeline";
+import { PreVisitPreparation } from "@/features/account/components/PreVisitPreparation";
+import { PostVisitSummary } from "@/features/account/components/PostVisitSummary";
+import { SharedHistoryManageSection } from "@/features/account/components/SharedHistoryManageSection";
+import {
+  buildPatientTimeline,
+  formatAppointmentStatusLabel,
+  formatFollowUpStatusLabel,
+  formatPaymentLabel,
+} from "@/lib/appointmentJourney";
 
 const STATUS_VARIANT = {
   pending: "warning",
   confirmed: "info",
+  checked_in: "info",
   in_progress: "info",
   completed: "success",
   cancelled: "danger",
+  no_show: "danger",
 };
 
 function ReviewModal({ appointment, onClose, onSubmit, isPending }) {
@@ -136,36 +152,65 @@ function ConsultationModePicker({ appointment, onSelect, isPending }) {
   );
 }
 
-function AppointmentCard({ appointment, onCancel, onJoin, onReview, onChat, onSelectMode, isSelectingMode, onViewPrescription, onPay, payingId }) {
+function canRescheduleAppointment(appointment) {
+  return ["pending", "confirmed"].includes(appointment.status);
+}
+
+function AppointmentCard({
+  appointment,
+  followUp,
+  onCancel,
+  onJoin,
+  onReview,
+  onChat,
+  onSelectMode,
+  isSelectingMode,
+  onViewPrescription,
+  onPay,
+  payingId,
+  onReschedule,
+  onBookFollowUp,
+  onViewFollowUpAppointment,
+}) {
   const needsPay =
     appointment.paymentStatus !== "paid" &&
     ["stripe", "card", "online"].includes(String(appointment.paymentMethod || "").toLowerCase());
+  const timeline = buildPatientTimeline(appointment, { followUp });
 
   return (
     <div className="bg-white border border-neutral-200 rounded-[16px] p-5">
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
             <h3 className="text-[16px] font-bold text-ink-headline">{appointment.doctorName}</h3>
-            <Badge variant={STATUS_VARIANT[appointment.status] || "neutral"}>{appointment.status}</Badge>
+            <Badge variant={STATUS_VARIANT[appointment.status] || "neutral"}>
+              {formatAppointmentStatusLabel(appointment.status)}
+            </Badge>
             {appointment.consultationMode === "online" && (
               <Badge variant="info">Online</Badge>
             )}
             {appointment.isInPerson && (
-              <Badge variant="neutral">In-Clinic</Badge>
+              <Badge variant="neutral">In-clinic</Badge>
             )}
             {!appointment.consultationMode && appointment.preferredMode === "online" && (
               <Badge variant="info">Online (booked)</Badge>
             )}
             {!appointment.consultationMode && appointment.preferredMode === "in_person" && (
-              <Badge variant="neutral">In-Clinic (booked)</Badge>
+              <Badge variant="neutral">In-clinic (booked)</Badge>
             )}
             {needsPay && <Badge variant="warning">Payment due</Badge>}
           </div>
           <p className="text-[13px] text-neutral-500 mb-1">{appointment.specialty} · {appointment.hospital}</p>
           <p className="text-[13px] text-neutral-600">{appointment.date} · {appointment.slot}</p>
-          <p className="text-[13px] text-neutral-600">Fee: PKR {Number(appointment.fee || 0).toLocaleString()} · Payment: {appointment.paymentStatus}</p>
+          <p className="text-[13px] text-neutral-600">
+            Fee: PKR {Number(appointment.fee || 0).toLocaleString()} · {formatPaymentLabel(appointment)}
+          </p>
           {appointment.reason && <p className="text-[13px] text-neutral-500 mt-2">Reason: {appointment.reason}</p>}
+          {appointment.status === "no_show" && (
+            <p className="text-[13px] font-semibold text-rose-700 mt-2">
+              Missed Appointment — this visit was marked as no-show.
+            </p>
+          )}
           {appointment.needsModeSelection && (
             <ConsultationModePicker
               appointment={appointment}
@@ -173,17 +218,26 @@ function AppointmentCard({ appointment, onCancel, onJoin, onReview, onChat, onSe
               isPending={isSelectingMode}
             />
           )}
-          {appointment.isInPerson && ["confirmed", "in_progress"].includes(appointment.status) && (
-            <div className="mt-3 p-3 bg-neutral-50 border border-neutral-200 rounded-[10px]">
-              <div className="flex items-center gap-2 text-[13px] font-semibold text-ink-headline mb-1">
-                <Stethoscope size={16} className="text-brand-primary" />
-                In-person visit scheduled
+          <div className="mt-4 p-3 bg-neutral-50 border border-neutral-200 rounded-[12px]">
+            <p className="text-[11px] font-bold uppercase tracking-wide text-neutral-500 mb-2">
+              Visit timeline
+            </p>
+            <AppointmentTimeline steps={timeline} status={appointment.status} compact />
+          </div>
+          <PreVisitPreparation appointment={appointment} />
+          <PostVisitSummary
+            appointment={appointment}
+            followUp={followUp}
+            onViewPrescription={onViewPrescription}
+            onBookFollowUp={onBookFollowUp}
+            onViewFollowUpAppointment={onViewFollowUpAppointment}
+          />
+          {["pending", "confirmed", "checked_in", "in_progress"].includes(appointment.status) &&
+            appointment.status !== "completed" && (
+              <div className="mt-3">
+                <VisitDocumentsSection appointmentId={appointment.id} compact />
               </div>
-              <p className="text-[12px] text-neutral-600">
-                Please arrive at <span className="font-medium">{appointment.hospital}</span> on {appointment.date} at {appointment.slot}.
-              </p>
-            </div>
-          )}
+            )}
         </div>
         <div className="flex flex-wrap gap-2">
           {needsPay && (
@@ -206,13 +260,19 @@ function AppointmentCard({ appointment, onCancel, onJoin, onReview, onChat, onSe
               Join Consultation
             </Button>
           )}
+          {canRescheduleAppointment(appointment) && (
+            <Button variant="secondary" onClick={() => onReschedule(appointment)}>
+              <ArrowsClockwise size={16} className="mr-2" />
+              Reschedule
+            </Button>
+          )}
           {appointment.status === "pending" && (
             <Button variant="secondary" onClick={() => onCancel(appointment.id)}>
               <XCircle size={16} className="mr-2" />
               Cancel
             </Button>
           )}
-          {appointment.prescription && (
+          {appointment.prescription && appointment.status !== "completed" && (
             <Button variant="secondary" onClick={() => onViewPrescription(appointment)}>
               <DownloadSimple size={16} className="mr-2" />
               Prescription Ready
@@ -230,18 +290,122 @@ function AppointmentCard({ appointment, onCancel, onJoin, onReview, onChat, onSe
   );
 }
 
+function formatFollowUpDate(value) {
+  if (!value) return "";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return String(value);
+  return d.toLocaleDateString("en-PK", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function FollowUpCard({ followUp, onBook, onViewAppointment }) {
+  const doctorName = followUp.doctor?.name
+    ? `Dr. ${String(followUp.doctor.name).replace(/^Dr\.?\s*/i, "")}`
+    : "Your doctor";
+  const booked = Boolean(followUp.booked_appointment_id);
+  const needsRebooking = followUp.status === "needs_rebooking";
+  const canBook =
+    !booked &&
+    ["planned", "notified", "needs_rebooking", "overdue"].includes(followUp.status);
+
+  return (
+    <div
+      className={`bg-white border rounded-[16px] p-5 ${
+        needsRebooking ? "border-amber-300 bg-amber-50/40" : "border-neutral-200"
+      }`}
+    >
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
+            <h3 className="text-[16px] font-bold text-ink-headline">
+              {needsRebooking ? "Follow-up Needs Rebooking" : doctorName}
+            </h3>
+            <Badge
+              variant={
+                booked
+                  ? "success"
+                  : needsRebooking || followUp.status === "overdue"
+                    ? "danger"
+                    : "info"
+              }
+            >
+              {booked ? "Follow-up Booked" : formatFollowUpStatusLabel(followUp.status)}
+            </Badge>
+          </div>
+          {needsRebooking ? (
+            <>
+              <p className="text-[14px] font-semibold text-ink-headline mb-1">{doctorName}</p>
+              <p className="text-[13px] text-neutral-600 mb-2">
+                Your previous follow-up appointment was cancelled or missed. The doctor&apos;s
+                follow-up recommendation is still active.
+              </p>
+            </>
+          ) : null}
+          <p className="text-[13px] text-neutral-500 mb-1">
+            {followUp.doctor?.specialty || "Follow-up"} · Recommended{" "}
+            {formatFollowUpDate(followUp.recommended_date)}
+          </p>
+          {followUp.booking_window?.from && followUp.booking_window?.to && (
+            <p className="text-[13px] text-neutral-600">
+              Book between {formatFollowUpDate(followUp.booking_window.from)} –{" "}
+              {formatFollowUpDate(followUp.booking_window.to)}
+            </p>
+          )}
+          {(followUp.reason || followUp.notes) && (
+            <p className="text-[13px] text-neutral-500 mt-2">{followUp.reason || followUp.notes}</p>
+          )}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {canBook && (
+            <Button onClick={() => onBook(followUp)}>
+              {needsRebooking ? "Choose New Time" : "Book Follow-up"}
+            </Button>
+          )}
+          {booked && (
+            <Button variant="secondary" onClick={() => onViewAppointment(followUp)}>
+              View Appointment
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function AppointmentsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: appointments = [], isLoading, refetch } = useDoctorAppointments();
+  const followUpsQuery = usePatientFollowUps();
   const cancelAppointment = useCancelDoctorAppointment();
   const joinConsultation = useJoinDoctorConsultation();
   const selectConsultationMode = useSelectConsultationMode();
   const submitReview = useSubmitDoctorReview();
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState(() => searchParams.get("tab") === "follow-ups" ? "follow-ups" : "all");
   const [reviewTarget, setReviewTarget] = useState(null);
   const [prescriptionTarget, setPrescriptionTarget] = useState(null);
+  const [rescheduleTarget, setRescheduleTarget] = useState(null);
+  const [bookFollowUpTarget, setBookFollowUpTarget] = useState(null);
   const [payingId, setPayingId] = useState(null);
+
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab === "follow-ups") setFilter("follow-ups");
+  }, [searchParams]);
+
+  useEffect(() => {
+    const bookId = searchParams.get("book");
+    const list = followUpsQuery.data || [];
+    if (!bookId || !list.length) return;
+    const match = list.find((f) => f.id === bookId);
+    if (match && !match.booked_appointment_id) {
+      setFilter("follow-ups");
+      setBookFollowUpTarget(match);
+    }
+  }, [searchParams, followUpsQuery.data]);
 
   useEffect(() => {
     const payment = searchParams.get("payment");
@@ -267,13 +431,51 @@ export function AppointmentsPage() {
     }
   }, [searchParams, refetch]);
 
+  const plannedFollowUps = useMemo(() => {
+    return (followUpsQuery.data || []).filter(
+      (f) => !["cancelled", "declined"].includes(f.status),
+    );
+  }, [followUpsQuery.data]);
+
   const filtered = useMemo(() => {
+    if (filter === "follow-ups" || filter === "sharing") return [];
     if (filter === "all") return appointments;
     if (filter === "upcoming") {
-      return appointments.filter((item) => ["pending", "confirmed", "in_progress"].includes(item.status));
+      return appointments.filter((item) =>
+        ["pending", "confirmed", "checked_in", "in_progress"].includes(item.status),
+      );
+    }
+    if (filter === "cancelled") {
+      return appointments.filter((item) =>
+        ["cancelled", "no_show"].includes(item.status),
+      );
     }
     return appointments.filter((item) => item.status === filter);
   }, [appointments, filter]);
+
+  const followUpByParent = useMemo(() => {
+    const map = new Map();
+    for (const fu of followUpsQuery.data || []) {
+      if (fu.parent_appointment_id) map.set(fu.parent_appointment_id, fu);
+      if (fu.consultation_id) map.set(`c:${fu.consultation_id}`, fu);
+    }
+    return map;
+  }, [followUpsQuery.data]);
+
+  const resolveFollowUpForAppointment = (appointment) => {
+    if (!appointment) return null;
+    return (
+      followUpByParent.get(appointment.id) ||
+      (followUpsQuery.data || []).find(
+        (fu) =>
+          fu.parent_appointment_id === appointment.id ||
+          fu.booked_appointment_id === appointment.id ||
+          (appointment.raw?.consultation?.id &&
+            fu.consultation_id === appointment.raw.consultation.id),
+      ) ||
+      null
+    );
+  };
 
   const handlePay = async (appointment) => {
     setPayingId(appointment.id);
@@ -360,8 +562,10 @@ export function AppointmentsPage() {
           {[
             { id: "all", label: "All" },
             { id: "upcoming", label: "Upcoming" },
+            { id: "follow-ups", label: "Planned Follow-ups" },
+            { id: "sharing", label: "Record Sharing" },
             { id: "completed", label: "Completed" },
-            { id: "cancelled", label: "Cancelled" },
+            { id: "cancelled", label: "Cancelled / Missed" },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -373,11 +577,45 @@ export function AppointmentsPage() {
               }`}
             >
               {tab.label}
+              {tab.id === "follow-ups" && plannedFollowUps.length > 0
+                ? ` (${plannedFollowUps.length})`
+                : ""}
             </button>
           ))}
         </div>
 
-        {isLoading ? (
+        {filter === "sharing" ? (
+          <SharedHistoryManageSection />
+        ) : filter === "follow-ups" ? (
+          followUpsQuery.isLoading ? (
+            <div className="text-[14px] text-neutral-500">Loading follow-ups...</div>
+          ) : plannedFollowUps.length === 0 ? (
+            <div className="bg-white border border-neutral-200 rounded-[16px] p-10 text-center">
+              <CalendarCheck size={40} className="mx-auto text-brand-primary mb-4" />
+              <h2 className="text-[18px] font-bold mb-2">No planned follow-ups</h2>
+              <p className="text-[14px] text-neutral-500 mb-4">
+                When your doctor recommends a follow-up, it will appear here for booking.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {plannedFollowUps.map((followUp) => (
+                <FollowUpCard
+                  key={followUp.id}
+                  followUp={followUp}
+                  onBook={setBookFollowUpTarget}
+                  onViewAppointment={(fu) => {
+                    setFilter("upcoming");
+                    toast.message("Look for your booked follow-up in Upcoming appointments");
+                    if (fu.booked_appointment_id) {
+                      // keep filter useful; appointments list shows all upcoming
+                    }
+                  }}
+                />
+              ))}
+            </div>
+          )
+        ) : isLoading ? (
           <div className="text-[14px] text-neutral-500">Loading appointments...</div>
         ) : filtered.length === 0 ? (
           <div className="bg-white border border-neutral-200 rounded-[16px] p-10 text-center">
@@ -394,6 +632,7 @@ export function AppointmentsPage() {
               <AppointmentCard
                 key={appointment.id}
                 appointment={appointment}
+                followUp={resolveFollowUpForAppointment(appointment)}
                 onCancel={handleCancel}
                 onJoin={handleJoin}
                 onReview={setReviewTarget}
@@ -403,6 +642,9 @@ export function AppointmentsPage() {
                 onViewPrescription={setPrescriptionTarget}
                 onPay={handlePay}
                 payingId={payingId}
+                onReschedule={setRescheduleTarget}
+                onBookFollowUp={setBookFollowUpTarget}
+                onViewFollowUpAppointment={() => setFilter("upcoming")}
               />
             ))}
           </div>
@@ -421,6 +663,24 @@ export function AppointmentsPage() {
           <ViewPrescriptionModal
             appointment={prescriptionTarget}
             onClose={() => setPrescriptionTarget(null)}
+          />
+        )}
+
+        {rescheduleTarget && (
+          <RescheduleAppointmentModal
+            appointment={rescheduleTarget}
+            onClose={() => setRescheduleTarget(null)}
+          />
+        )}
+
+        {bookFollowUpTarget && (
+          <BookFollowUpModal
+            followUp={bookFollowUpTarget}
+            onClose={() => {
+              setBookFollowUpTarget(null);
+              followUpsQuery.refetch?.();
+              refetch?.();
+            }}
           />
         )}
       </div>

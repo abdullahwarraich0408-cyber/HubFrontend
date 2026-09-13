@@ -38,6 +38,24 @@ export const doctorPortalApi = {
   getStats: () => api.get("/partners/doctor/stats"),
   createPrescription: (data) => api.post("/partners/doctor/prescriptions", data),
   getPrescription: (appointmentId) => api.get(`/partners/doctor/prescriptions/${appointmentId}`),
+  getFollowUps: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return api.get(query ? `/partners/doctor/follow-ups?${query}` : "/partners/doctor/follow-ups");
+  },
+  getFollowUp: (id) => api.get(`/partners/doctor/follow-ups/${id}`),
+  upsertConsultationFollowUp: (consultationId, data) =>
+    api.put(`/partners/doctor/consultations/${consultationId}/follow-up`, data),
+  remindFollowUp: (id) => api.post(`/partners/doctor/follow-ups/${id}/remind`, {}),
+  cancelFollowUp: (id) => api.post(`/partners/doctor/follow-ups/${id}/cancel`, {}),
+  markAppointmentPaid: (id) => api.post(`/partners/doctor/appointments/${id}/mark-paid`, {}),
+  getVisitDocuments: (appointmentId) =>
+    api.get(`/partners/doctor/appointments/${appointmentId}/documents`),
+  createVisitDocument: (appointmentId, data) =>
+    api.post(`/partners/doctor/appointments/${appointmentId}/documents`, data),
+  removeVisitDocument: (appointmentId, documentId) =>
+    api.delete(`/partners/doctor/appointments/${appointmentId}/documents/${documentId}`),
+  getAppointmentSharedHistory: (appointmentId) =>
+    api.get(`/partners/doctor/appointments/${appointmentId}/shared-history`),
 };
 
 export const labPortalApi = {

@@ -277,6 +277,55 @@ export const doctorsApi = {
   submitReview: (doctorId, data) => api.post(`/doctors/${doctorId}/reviews`, data, { auth: "customer" }),
 };
 
+export const followUpsApi = {
+  list: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return api.get(query ? `/customer/follow-ups?${query}` : "/customer/follow-ups", {
+      auth: "customer",
+    });
+  },
+  getById: (id) => api.get(`/customer/follow-ups/${id}`, { auth: "customer" }),
+  getAvailableSlots: (id) =>
+    api.get(`/customer/follow-ups/${id}/available-slots`, { auth: "customer" }),
+  book: (id, data) => api.post(`/customer/follow-ups/${id}/book`, data, { auth: "customer" }),
+  decline: (id, reason) =>
+    api.post(`/customer/follow-ups/${id}/decline`, { reason }, { auth: "customer" }),
+};
+
+export const visitDocumentsApi = {
+  list: (appointmentId) =>
+    api.get(`/customer/appointments/${appointmentId}/documents`, { auth: "customer" }),
+  create: (appointmentId, data) =>
+    api.post(`/customer/appointments/${appointmentId}/documents`, data, { auth: "customer" }),
+  fromRecord: (appointmentId, recordId) =>
+    api.post(
+      `/customer/appointments/${appointmentId}/documents/from-record`,
+      { record_id: recordId },
+      { auth: "customer" },
+    ),
+  remove: (appointmentId, documentId) =>
+    api.delete(`/customer/appointments/${appointmentId}/documents/${documentId}`, {
+      auth: "customer",
+    }),
+};
+
+export const medicalHistoryApi = {
+  listShareable: () => api.get("/customer/medical-history/shareable", { auth: "customer" }),
+  listShares: () => api.get("/customer/medical-history/shares", { auth: "customer" }),
+  shareWithAppointment: (appointmentId, grants) =>
+    api.post(
+      `/customer/medical-history/appointments/${appointmentId}/share`,
+      { grants },
+      { auth: "customer" },
+    ),
+  revokeAppointmentShares: (appointmentId) =>
+    api.post(`/customer/medical-history/appointments/${appointmentId}/revoke`, {}, {
+      auth: "customer",
+    }),
+  revokeGrant: (grantId) =>
+    api.post(`/customer/medical-history/grants/${grantId}/revoke`, {}, { auth: "customer" }),
+};
+
 export const hospitalsApi = {
   getAll: (params = {}) => {
     const query = new URLSearchParams(params).toString();

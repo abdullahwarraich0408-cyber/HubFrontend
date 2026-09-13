@@ -21,6 +21,7 @@ import { Input } from "@/shared/components/Input";
 import { DoctorSlotPicker } from "./DoctorSlotPicker";
 import { BookingAuthModal } from "./BookingAuthModal";
 import { BookConsultModal } from "./BookConsultModal";
+import { ShareMedicalHistoryStep } from "./ShareMedicalHistoryStep";
 import { buildDoctorConsultOptions } from "../utils/consultOptions";
 import { useBookDoctorAppointment } from "@/lib/hooks/useApi";
 import { paymentsApi } from "@/lib/api/index";
@@ -117,6 +118,7 @@ export function AppointmentFlow({
     initialDate || new Date().toISOString().slice(0, 10)
   );
   const [paymentMethod, setPaymentMethod] = useState("card");
+  const [shareGrantKeys, setShareGrantKeys] = useState([]);
   const [purpose, setPurpose] = useState("consultation");
   const [patientName, setPatientName] = useState(user?.name || "");
   const [patientPhone, setPatientPhone] = useState(user?.phone || "");
@@ -151,17 +153,26 @@ export function AppointmentFlow({
       setShowAuthModal(true);
       return;
     }
-    await submitBooking();
+    if (!patientName.trim()) {
+      toast.error("Please enter patient name");
+      return;
+    }
+    setStep("share");
   };
 
-  const submitBooking = async () => {
+  const submitBooking = async (shareGrants = []) => {
     if (!consultType || !selectedOption) {
       toast.error("Please select a consultation type");
       return;
     }
 
     try {
-      const method = paymentMethod === "card" ? "stripe" : paymentMethod;
+      const method =
+        paymentMethod === "card"
+          ? "stripe"
+          : paymentMethod === "cod"
+            ? "pay_at_clinic"
+            : paymentMethod;
       const appointment = await bookAppointment.mutateAsync({
         doctor_id: doctor.id,
         slot: selectedSlot,
@@ -175,6 +186,7 @@ export function AppointmentFlow({
           selectedOption.practiceLocationId !== "legacy"
             ? selectedOption.practiceLocationId
             : undefined,
+        share_grants: Array.isArray(shareGrants) ? shareGrants : [],
       });
       const booked = appointment.appointment || appointment;
       setBookedAppointment(booked);
@@ -221,7 +233,7 @@ export function AppointmentFlow({
 
   return (
     <div>
-      {step < 3 && (
+      {(step === 1 || step === 2) && (
         <div className="flex items-start gap-4 p-4 md:p-5 bg-white rounded-[16px] border border-[var(--color-neutral-200)] mb-6">
           <div className="relative w-16 h-16 rounded-[14px] overflow-hidden shrink-0 border border-[var(--color-neutral-100)]">
             <Image src={doctor.photo} alt={doctor.name} fill className="object-cover" />
@@ -447,15 +459,23 @@ export function AppointmentFlow({
                 disabled={bookAppointment.isPending || !patientName.trim()}
                 onClick={handleConfirmBooking}
               >
-                {bookAppointment.isPending
-                  ? "Processing..."
-                  : paymentMethod === "card"
-                    ? "Book & pay with Stripe"
-                    : "Confirm booking"}
+                Continue to share history
               </Button>
             </div>
           </div>
         </div>
+      )}
+
+      {step === "share" && (
+        <ShareMedicalHistoryStep
+          doctorName={doctor.name}
+          selectedKeys={shareGrantKeys}
+          onChangeSelectedKeys={setShareGrantKeys}
+          onBack={() => setStep(2)}
+          onSkip={() => submitBooking([])}
+          onShareAndContinue={(grants) => submitBooking(grants)}
+          isSubmitting={bookAppointment.isPending}
+        />
       )}
 
       {step === 3 && (

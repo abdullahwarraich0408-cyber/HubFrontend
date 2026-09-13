@@ -60,12 +60,16 @@ export function ConsultationRoom({ meetingId, role = "patient" }) {
   const waitingForDoctor = !isDoctor && appointment?.status === "confirmed";
 
   const jitsiSrc = useMemo(() => {
+    if (videoData?.videoRoom?.embed_url) return videoData.videoRoom.embed_url;
     if (!videoRoom?.jitsi_room) return null;
     const displayName = encodeURIComponent(
-      isDoctor ? appointment?.doctorName || "Doctor" : user?.name || "Patient"
+      isDoctor
+        ? appointment?.doctorName || user?.name || "Doctor"
+        : user?.name || "Patient"
     );
-    return `https://meet.element.io/${videoRoom.jitsi_room}#config.prejoinPageEnabled=false&config.requireDisplayName=false&config.disableDeepLinking=true&config.startWithAudioMuted=false&config.startWithVideoMuted=false&userInfo.displayName="${displayName}"`;
-  }, [videoRoom?.jitsi_room, isDoctor, appointment?.doctorName, user?.name]);
+    const host = videoRoom?.jitsi_host || "https://meet.element.io";
+    return `${host}/${videoRoom.jitsi_room}#config.prejoinPageEnabled=false&config.requireDisplayName=false&config.disableDeepLinking=true&config.startWithAudioMuted=false&config.startWithVideoMuted=false&userInfo.displayName="${displayName}"`;
+  }, [videoData?.videoRoom?.embed_url, videoRoom?.jitsi_room, videoRoom?.jitsi_host, isDoctor, appointment?.doctorName, user?.name]);
 
   const handleStartConsultation = async () => {
     if (!appointmentId) return;

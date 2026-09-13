@@ -157,8 +157,13 @@ export function useCreateDoctorPrescription() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload) => doctorPortalApi.createPrescription(payload),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["doctor-portal-appointments"] });
+      if (variables?.appointment_id || variables?.appointmentId) {
+        queryClient.invalidateQueries({
+          queryKey: ["doctor-prescription", variables.appointment_id || variables.appointmentId],
+        });
+      }
     },
   });
 }
@@ -167,11 +172,43 @@ export function useDoctorPrescription(appointmentId, options = {}) {
   return useQuery({
     queryKey: ["doctor-prescription", appointmentId],
     enabled: Boolean(appointmentId),
+    retry: false,
     queryFn: async () => {
       const data = await doctorPortalApi.getPrescription(appointmentId);
       return data.prescription;
     },
     ...options,
+  });
+}
+
+export function useDoctorFollowUps(options = {}) {
+  const { status, ...queryOptions } = options;
+  return useQuery({
+    queryKey: ["doctor-portal-follow-ups", status || "all"],
+    queryFn: async () => {
+      const params = status ? { status } : {};
+      const data = await doctorPortalApi.getFollowUps(params);
+      return data.followUps || data.follow_ups || [];
+    },
+    ...queryOptions,
+  });
+}
+
+export function useRemindDoctorFollowUp() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => doctorPortalApi.remindFollowUp(id),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["doctor-portal-follow-ups"] }),
+  });
+}
+
+export function useCancelDoctorFollowUp() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => doctorPortalApi.cancelFollowUp(id),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["doctor-portal-follow-ups"] }),
   });
 }
 

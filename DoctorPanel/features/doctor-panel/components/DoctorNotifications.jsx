@@ -5,12 +5,10 @@ import Link from "next/link";
 import { Bell, X, Calendar, Info, CheckCheck, Sparkles } from "lucide-react";
 import { useInboxNotifications, formatNotificationTime } from "@/lib/hooks/useInboxNotifications";
 import { getSocket } from "@/lib/socket";
-import { DOCTOR_NOTIFICATIONS } from "../data/doctorData";
 
 export function DoctorNotifications({ className }) {
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState("all");
-  const [readSystemIds, setReadSystemIds] = useState(() => new Set());
   const ref = useRef(null);
   const { notifications, unreadCount, markRead, markAllRead } = useInboxNotifications({
     getSocket: () => getSocket("partner"),
@@ -26,40 +24,24 @@ export function DoctorNotifications({ className }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const allNotifications = useMemo(() => {
-    const apiIds = new Set((notifications || []).map((n) => String(n.id)));
-    const systemDefaults = DOCTOR_NOTIFICATIONS.filter((d) => !apiIds.has(String(d.id))).map((d) => ({
-      ...d,
-      read: d.read || readSystemIds.has(d.id),
-    }));
-    return [...(notifications || []), ...systemDefaults];
-  }, [notifications, readSystemIds]);
-
   const filteredNotifications = useMemo(() => {
+    const list = notifications || [];
     if (filter === "appointments") {
-      return allNotifications.filter((n) =>
-        String(n.type || "").includes("appointment") || n.title?.toLowerCase().includes("appointment")
+      return list.filter(
+        (n) =>
+          String(n.type || "").includes("appointment") ||
+          n.title?.toLowerCase().includes("appointment")
       );
     }
     if (filter === "system") {
-      return allNotifications.filter(
+      return list.filter(
         (n) =>
           !String(n.type || "").includes("appointment") &&
           !n.title?.toLowerCase().includes("appointment")
       );
     }
-    return allNotifications;
-  }, [allNotifications, filter]);
-
-  const handleMarkItemRead = (id) => {
-    markRead(id);
-    setReadSystemIds((prev) => new Set([...prev, id]));
-  };
-
-  const handleMarkAllRead = () => {
-    markAllRead();
-    setReadSystemIds(new Set(DOCTOR_NOTIFICATIONS.map((d) => d.id)));
-  };
+    return list;
+  }, [notifications, filter]);
 
   return (
     <div className={`relative ${className || ""}`} ref={ref}>
@@ -89,7 +71,7 @@ export function DoctorNotifications({ className }) {
             </div>
             {unreadCount > 0 && (
               <button
-                onClick={handleMarkAllRead}
+                onClick={() => markAllRead()}
                 className="text-xs font-semibold text-teal-700 hover:text-teal-800 transition-colors flex items-center gap-1"
               >
                 <CheckCheck size={14} />
@@ -128,7 +110,8 @@ export function DoctorNotifications({ className }) {
                 const inner = (
                   <>
                     <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0 border border-teal-200/60 mt-0.5">
-                      {String(n.type || "").includes("appointment") || n.title?.toLowerCase().includes("appointment") ? (
+                      {String(n.type || "").includes("appointment") ||
+                      n.title?.toLowerCase().includes("appointment") ? (
                         <Calendar size={16} />
                       ) : (
                         <Info size={16} />
@@ -159,7 +142,7 @@ export function DoctorNotifications({ className }) {
                         href={n.link}
                         className="flex items-start gap-3 flex-1 min-w-0"
                         onClick={() => {
-                          if (!n.read) handleMarkItemRead(n.id);
+                          if (!n.read) markRead(n.id);
                           setOpen(false);
                         }}
                       >
@@ -169,13 +152,13 @@ export function DoctorNotifications({ className }) {
                       <button
                         type="button"
                         className="flex items-start gap-3 flex-1 min-w-0 text-left"
-                        onClick={() => !n.read && handleMarkItemRead(n.id)}
+                        onClick={() => !n.read && markRead(n.id)}
                       >
                         {inner}
                       </button>
                     )}
                     <button
-                      onClick={() => handleMarkItemRead(n.id)}
+                      onClick={() => markRead(n.id)}
                       className="p-1 text-slate-400 hover:text-slate-700 rounded transition-colors shrink-0"
                       title="Dismiss notification"
                     >

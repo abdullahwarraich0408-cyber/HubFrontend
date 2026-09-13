@@ -14,7 +14,8 @@ import {
   FileText,
   Clock,
   XCircle,
-  Eye
+  Eye,
+  AlertTriangle,
 } from "lucide-react";
 import { Badge } from "@/shared/components/Badge";
 import { AppointmentDetailModal } from "@/features/doctor-panel/components/AppointmentDetailModal";
@@ -22,17 +23,32 @@ import {
   useDoctorPortalAppointments,
   useUpdateDoctorAppointmentStatus,
 } from "@/lib/hooks/usePartnerPortal";
+import { doctorPortalApi } from "@/lib/api/index";
+import { toast } from "sonner";
 import Link from "next/link";
 import { partnerRoutes } from "@/lib/constants/partnerRoutes";
 
 export default function DoctorAppointmentsPage() {
-  const { data: appointments = [], isLoading } = useDoctorPortalAppointments();
+  const { data: appointments = [], isLoading, refetch } = useDoctorPortalAppointments();
   const updateStatus = useUpdateDoctorAppointmentStatus();
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [openMenuId, setOpenMenuId] = useState(null);
+
+  const handleMarkPaid = async (id) => {
+    try {
+      await doctorPortalApi.markAppointmentPaid(id);
+      toast.success("Marked as paid at clinic");
+      refetch?.();
+      setSelectedAppointment((prev) =>
+        prev?.id === id ? { ...prev, paymentStatus: "paid" } : prev,
+      );
+    } catch (error) {
+      toast.error(error.message || "Could not mark paid");
+    }
+  };
 
   const todayFormatted = new Date().toLocaleDateString("en-US", {
     month: "short",
@@ -217,6 +233,11 @@ export default function DoctorAppointmentsPage() {
                           <span className="font-semibold text-slate-900 group-hover:text-teal-700 transition-colors">
                             {apt.patient}
                           </span>
+                          {apt.isFollowUp ? (
+                            <span className="text-[9px] font-extrabold tracking-wide uppercase px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200/70">
+                              Follow-up
+                            </span>
+                          ) : null}
                         </div>
                       </td>
                       <td className="py-3.5 px-4 text-slate-600 max-w-[220px] truncate">
@@ -276,10 +297,18 @@ export default function DoctorAppointmentsPage() {
                           )}
                           {apt.status === "confirmed" && !apt.isOnline && apt.type !== "Video Call" && (
                             <button
-                              onClick={() => handleStatusChange(apt.id, "in_progress")}
+                              onClick={() => handleStatusChange(apt.id, "checked_in")}
                               className="px-3 py-1 bg-slate-900 hover:bg-slate-800 text-white rounded-md text-xs font-semibold transition-colors shadow-2xs flex items-center gap-1"
                             >
                               <UserCheck size={12} /> Check In
+                            </button>
+                          )}
+                          {apt.status === "checked_in" && (
+                            <button
+                              onClick={() => handleStatusChange(apt.id, "in_progress")}
+                              className="px-3 py-1 bg-teal-700 hover:bg-teal-800 text-white rounded-md text-xs font-semibold transition-colors shadow-2xs flex items-center gap-1"
+                            >
+                              <Play size={12} className="fill-white" /> Start Visit
                             </button>
                           )}
                           {apt.status === "completed" && (
@@ -301,13 +330,26 @@ export default function DoctorAppointmentsPage() {
                               <MoreVertical size={16} />
                             </button>
                             {openMenuId === apt.id && (
-                              <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-lg border border-slate-200 shadow-lg z-20 py-1 text-left">
+                              <div className="absolute right-0 top-full mt-1 w-44 bg-white rounded-lg border border-slate-200 shadow-lg z-20 py-1 text-left">
                                 <button
                                   onClick={() => { setSelectedAppointment(apt); setOpenMenuId(null); }}
                                   className="w-full px-3 py-1.5 text-left text-xs text-slate-700 hover:bg-slate-50 font-medium flex items-center gap-2"
                                 >
                                   <Eye size={14} /> View Details
                                 </button>
+                                {["pending", "confirmed", "checked_in"].includes(apt.status) && (
+                                  <button
+                                    onClick={() => {
+                                      if (window.confirm("Mark this patient as no-show?")) {
+                                        handleStatusChange(apt.id, "no_show");
+                                      }
+                                      setOpenMenuId(null);
+                                    }}
+                                    className="w-full px-3 py-1.5 text-left text-xs text-amber-700 hover:bg-amber-50 font-medium flex items-center gap-2"
+                                  >
+                                    <AlertTriangle size={14} /> Mark No-show
+                                  </button>
+                                )}
                                 {apt.status === "pending" && (
                                   <button
                                     onClick={() => handleStatusChange(apt.id, "cancelled")}
@@ -392,6 +434,7 @@ export default function DoctorAppointmentsPage() {
         appointment={selectedAppointment}
         onClose={() => setSelectedAppointment(null)}
         onStatusChange={handleStatusChange}
+        onMarkPaid={handleMarkPaid}
       />
     </>
   );

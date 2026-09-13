@@ -15,7 +15,8 @@ import {
   ChevronRight,
   Menu,
   X,
-  Bell
+  Bell,
+  CalendarClock,
 } from "lucide-react";
 import { partnerAuthApi } from "@/lib/api/index";
 import { useDoctorProfile } from "@/features/doctor-panel/hooks/useDoctorProfile";
@@ -42,6 +43,7 @@ export function DoctorSidebar({
   const menuItems = [
     { name: "Overview", href: routes.dashboard, icon: LayoutDashboard },
     { name: "Appointments", href: routes.appointments, icon: CalendarCheck },
+    { name: "Follow-ups", href: routes.followUps, icon: CalendarClock },
     { name: "Schedule", href: routes.schedule, icon: Clock },
     { name: "Patients", href: routes.patients, icon: Users },
     { name: "Settings", href: routes.settings, icon: Settings },

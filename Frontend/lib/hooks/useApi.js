@@ -12,6 +12,7 @@ import {
   prescriptionOrdersApi,
   usersApi,
   doctorsApi,
+  followUpsApi,
   hospitalsApi,
   labTestsApi,
   marketingApi,
@@ -853,6 +854,42 @@ export function useDoctorAppointments(options = {}) {
       return mapDoctorAppointmentsToFrontend(data.appointments || []);
     },
     ...options,
+  });
+}
+
+export function usePatientFollowUps(options = {}) {
+  const { status, ...queryOptions } = options;
+  return useQuery({
+    queryKey: ["patient-follow-ups", status || "all"],
+    queryFn: async () => {
+      const params = status ? { status } : {};
+      const data = await followUpsApi.list(params);
+      return data.followUps || data.follow_ups || [];
+    },
+    ...queryOptions,
+  });
+}
+
+export function useFollowUpAvailableSlots(followUpId, options = {}) {
+  const { enabled, ...queryOptions } = options;
+  return useQuery({
+    queryKey: ["follow-up-slots", followUpId],
+    enabled: enabled !== undefined ? Boolean(enabled) && Boolean(followUpId) : Boolean(followUpId),
+    queryFn: async () => followUpsApi.getAvailableSlots(followUpId),
+    ...queryOptions,
+  });
+}
+
+export function useBookFollowUp() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...payload }) => followUpsApi.book(id, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["patient-follow-ups"] });
+      queryClient.invalidateQueries({ queryKey: ["doctor-appointments"] });
+      queryClient.invalidateQueries({ queryKey: ["all-orders"] });
+      queryClient.invalidateQueries({ queryKey: ["follow-up-slots"] });
+    },
   });
 }
 

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { BrandLogo } from "@/shared/branding/BrandLogo";
+import { Phone, MapPin } from "@phosphor-icons/react";
 
 const YEAR = new Date().getFullYear();
 
@@ -41,12 +42,24 @@ export function Footer() {
     <footer className="border-t border-[#102A43]/08 bg-[#102A43] text-white">
       <div className="landing-container py-14 md:py-16">
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-5 lg:gap-8">
-          <div className="lg:col-span-2">
-            <BrandLogo href="#top" onDark />
-            <p className="mt-4 max-w-xs text-[14px] leading-relaxed text-white/65">
-              Connecting patients with healthcare services across Pakistan.
-            </p>
-            <p className="mt-5 text-[13px] font-medium text-[#7DD3C7]">
+          <div className="lg:col-span-2 flex flex-col gap-5">
+            <div>
+              <BrandLogo href="#top" onDark />
+              <p className="mt-4 max-w-xs text-[14px] leading-relaxed text-white/65">
+                Connecting patients with healthcare services across Pakistan.
+              </p>
+            </div>
+            <div className="flex flex-col gap-3 text-[14px] text-white/80">
+              <div className="flex items-center gap-3">
+                <Phone size={18} className="text-[#7DD3C7] shrink-0" />
+                <span>+92 303 5619717</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <MapPin size={18} className="mt-0.5 text-[#7DD3C7] shrink-0" />
+                <span>Near Trust Plaza, Model Town, Gujranwala</span>
+              </div>
+            </div>
+            <p className="text-[13px] font-medium text-[#7DD3C7]">
               Made for healthcare in Pakistan
             </p>
           </div>

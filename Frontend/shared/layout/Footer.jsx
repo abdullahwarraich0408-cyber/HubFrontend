@@ -33,13 +33,27 @@ export function Footer() {
     <footer className="bg-[#073B4C] text-white pt-14 pb-8 mt-auto border-t border-white/10 relative">
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
-          {/* Column 1: Brand & Social */}
-          <div className="flex flex-col gap-5">
+          {/* Column 1: Brand, Contact & Social */}
+          <div className="flex flex-col gap-5 lg:col-span-2">
             <BrandLogo href="/" onDark />
             <p className="text-slate-300 text-[14px] leading-relaxed max-w-[280px]">
               {settings.tagline ||
                 "Diabetes care and psychologist support — medicines, consults, and labs focused on what matters first."}
             </p>
+            <div className="flex flex-col gap-3 text-sm text-slate-300 my-1">
+              <div className="flex items-start gap-3">
+                <Phone size={18} className="text-[#2DD4BF] mt-0.5 shrink-0" />
+                <span>{settings.contact_phone || "+92 303 5619717"}</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <Envelope size={18} className="text-[#2DD4BF] mt-0.5 shrink-0" />
+                <span>{settings.contact_email || "support@medzoos.pk"}</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <MapPin size={18} className="text-[#2DD4BF] mt-0.5 shrink-0" />
+                <span>{settings.contact_address || "Near Trust Plaza, Model Town, Gujranwala"}</span>
+              </div>
+            </div>
             <div className="flex items-center gap-2.5">
               <Link
                 href={settings.social_facebook || "#"}
@@ -127,22 +141,7 @@ export function Footer() {
             </Link>
           </div>
 
-          {/* Column 4: Contact */}
-          <div className="flex flex-col gap-3 text-sm">
-            <h4 className="text-white font-bold text-[15px] mb-1">Get in Touch</h4>
-            <div className="flex items-start gap-3 text-slate-300">
-              <Phone size={18} className="text-[#2DD4BF] mt-0.5 shrink-0" />
-              <span>{settings.contact_phone || "+92 303 5619717"}</span>
-            </div>
-            <div className="flex items-start gap-3 text-slate-300">
-              <Envelope size={18} className="text-[#2DD4BF] mt-0.5 shrink-0" />
-              <span>{settings.contact_email || "support@medzoos.pk"}</span>
-            </div>
-            <div className="flex items-start gap-3 text-slate-300">
-              <MapPin size={18} className="text-[#2DD4BF] mt-0.5 shrink-0" />
-              <span>{settings.contact_address || "Near Trust Plaza, Model Town, Gujranwala"}</span>
-            </div>
-          </div>
+
         </div>
 
         {/* Bottom Bar */}

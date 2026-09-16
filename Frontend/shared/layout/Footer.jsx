@@ -132,7 +132,7 @@ export function Footer() {
             <h4 className="text-white font-bold text-[15px] mb-1">Get in Touch</h4>
             <div className="flex items-start gap-3 text-slate-300">
               <Phone size={18} className="text-[#2DD4BF] mt-0.5 shrink-0" />
-              <span>{settings.contact_phone || "+92 300 123 4567"}</span>
+              <span>{settings.contact_phone || "+92 303 5619717"}</span>
             </div>
             <div className="flex items-start gap-3 text-slate-300">
               <Envelope size={18} className="text-[#2DD4BF] mt-0.5 shrink-0" />
@@ -140,7 +140,7 @@ export function Footer() {
             </div>
             <div className="flex items-start gap-3 text-slate-300">
               <MapPin size={18} className="text-[#2DD4BF] mt-0.5 shrink-0" />
-              <span>{settings.contact_address || "DHA Phase 6, Karachi, Pakistan"}</span>
+              <span>{settings.contact_address || "Near Trust Plaza, Model Town, Gujranwala"}</span>
             </div>
           </div>
         </div>

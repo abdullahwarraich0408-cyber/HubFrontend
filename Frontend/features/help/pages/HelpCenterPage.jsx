@@ -440,7 +440,7 @@ export function HelpCenterPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-[14px] font-bold text-white">Call Helpline</p>
-                    <p className="text-[12px] text-white/70 font-normal">+92 300 123 4567</p>
+                    <p className="text-[12px] text-white/70 font-normal">+92 303 5619717</p>
                   </div>
                   <ArrowRight size={16} weight="bold" className="text-white/60 group-hover:text-white group-hover:translate-x-0.5 transition-transform" />
                 </a>

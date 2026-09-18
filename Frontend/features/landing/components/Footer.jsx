@@ -56,7 +56,7 @@ export function Footer() {
               </div>
               <div className="flex items-start gap-3">
                 <MapPin size={18} className="mt-0.5 text-[#7DD3C7] shrink-0" />
-                <span>Near Trust Plaza, Model Town, Gujranwala</span>
+                <span>Near Trust Plaza, Model Town, Gujranwala, Pakistan</span>
               </div>
             </div>
             <p className="text-[13px] font-medium text-[#7DD3C7]">

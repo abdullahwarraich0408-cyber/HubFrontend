@@ -456,7 +456,7 @@ export function FamilyHealthVaultPage() {
                   />
                   <Input
                     label="Emergency Contact"
-                    placeholder="e.g. +92 300 1234567 (Emergency)"
+                    placeholder="e.g. +92 303 5619717 (Emergency)"
                     value={settingsForm.emergency_contact}
                     onChange={(e) => setSettingsForm({ ...settingsForm, emergency_contact: e.target.value })}
                   />

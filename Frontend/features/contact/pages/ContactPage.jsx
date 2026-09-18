@@ -99,7 +99,7 @@ export function ContactPage() {
                     <div>
                       <h4 className="text-[16px] font-bold text-[var(--color-ink-headline)] mb-1">Call Us</h4>
                       <p className="text-[14px] text-[var(--color-neutral-500)] mb-1.5">Mon-Fri from 9am to 6pm.</p>
-                      <a href="tel:+923001234567" className="text-[15+92 303 5619717px] font-bold text-[var(--color-brand-primary)] hover:underline"></a>
+                      <a href="tel:+923035619717" className="text-[15px] font-bold text-[var(--color-brand-primary)] hover:underline">+92 303 5619717</a>
                     </div>
                   </div>
 

@@ -331,7 +331,7 @@ export default function AdminSettingsPage() {
                   type="text"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+92 300 1234567"
+                  placeholder="+92 303 5619717"
                   className="w-full px-4 py-2.5 pl-10 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#17618E]/20 focus:border-[#17618E] transition-all"
                 />
                 <Phone size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />

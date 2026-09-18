@@ -432,7 +432,7 @@ export function HelpCenterPage() {
                 </a>
 
                 <a
-                  href="tel:+923001234567"
+                  href="tel:+923035619717"
                   className="flex items-center gap-3 p-4 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-[14px] transition-all group"
                 >
                   <div className="w-10 h-10 rounded-xl bg-white/15 text-white flex items-center justify-center shrink-0">

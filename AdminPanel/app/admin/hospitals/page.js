@@ -362,7 +362,7 @@ export default function AdminHospitalsPage() {
     e.preventDefault();
 
     if (addFormData.phone && !isValidPakistaniPhone(addFormData.phone)) {
-      toast.error("Please enter a valid Pakistani phone number (e.g. +92 300 1234567 or 042 35789012)");
+      toast.error("Please enter a valid Pakistani phone number (e.g. +92 303 5619717 or 042 35789012)");
       return;
     }
 
@@ -381,7 +381,7 @@ export default function AdminHospitalsPage() {
     if (!viewHospital) return;
 
     if (editFormData.phone && !isValidPakistaniPhone(editFormData.phone)) {
-      toast.error("Please enter a valid Pakistani phone number (e.g. +92 300 1234567 or 042 35789012)");
+      toast.error("Please enter a valid Pakistani phone number (e.g. +92 303 5619717 or 042 35789012)");
       return;
     }
 
@@ -979,7 +979,7 @@ export default function AdminHospitalsPage() {
                       <input
                         type="text"
                         maxLength={16}
-                        placeholder="+92 300 1234567"
+                        placeholder="+92 303 5619717"
                         value={editFormData.phone}
                         onChange={(e) => setEditFormData({ ...editFormData, phone: formatPakistaniPhoneInput(e.target.value) })}
                         className="w-full h-10 px-3 rounded-xl border border-slate-200 outline-none focus:border-[#082B3F] text-xs font-medium"
@@ -1130,7 +1130,7 @@ export default function AdminHospitalsPage() {
                     value={addFormData.phone}
                     onChange={(e) => setAddFormData({ ...addFormData, phone: formatPakistaniPhoneInput(e.target.value) })}
                     className="w-full h-10 px-3 rounded-xl border border-slate-200 outline-none focus:border-[#082B3F] text-xs font-medium text-[#082B3F]"
-                    placeholder="+92 51 8463000 / 0300 1234567"
+                    placeholder="+92 51 8463000 / 0303 5619717"
                   />
                 </div>
 

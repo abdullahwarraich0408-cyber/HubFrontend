@@ -599,7 +599,7 @@ ${Object.entries(documents).map(([k, v]) => `- ${k}: ${v}`).join("\n") || "No di
                       type="tel" 
                       value={doctorForm.phone} 
                       onChange={(e) => setDoctorForm(p => ({ ...p, phone: e.target.value }))} 
-                      placeholder="+92 300 1234567"
+                      placeholder="+92 303 5619717"
                       required 
                     />
                     <Input 

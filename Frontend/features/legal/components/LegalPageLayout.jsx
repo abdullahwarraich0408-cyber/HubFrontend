@@ -386,7 +386,7 @@ export function LegalPageLayout({
                     <span>security@medzoos.pk</span>
                   </a>
                   <a
-                    href="tel:+923001234567"
+                    href="tel:+923035619717"
                     className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all border border-white/20"
                   >
                     <PhoneCall size={16} />

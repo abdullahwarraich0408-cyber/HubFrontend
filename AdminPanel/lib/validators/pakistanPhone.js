@@ -1,8 +1,8 @@
 /**
  * Utility functions for Pakistani Phone Numbers
  * Valid formats:
- * - +92 300 1234567 (Mobile)
- * - 0300 1234567 (Mobile)
+ * - +92 303 5619717 (Mobile)
+ * - 0303 5619717 (Mobile)
  * - +92 42 35789012 (Landline)
  * - 042 35789012 (Landline)
  */

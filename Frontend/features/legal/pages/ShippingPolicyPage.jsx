@@ -317,7 +317,7 @@ export function ShippingPolicyPage() {
             <ul className="list-disc list-inside space-y-1.5 text-xs sm:text-sm text-neutral-600">
               <li>The rider will make up to <strong>3 phone call attempts</strong> to the primary number listed on your account.</li>
               <li>If unreachable, the package will return to the local hub and a second delivery attempt will be scheduled automatically on the following business day.</li>
-              <li>To update your delivery address or instructions, contact our dispatch helpline at <a href="tel:+923001234567" className="text-brand-primary font-bold hover:underline">+92 303 5619717</a> or email <a href="mailto:support@medzoos.pk" className="text-brand-primary font-bold hover:underline">support@medzoos.pk</a>.</li>
+              <li>To update your delivery address or instructions, contact our dispatch helpline at <a href="tel:+923035619717" className="text-brand-primary font-bold hover:underline">+92 303 5619717</a> or email <a href="mailto:support@medzoos.pk" className="text-brand-primary font-bold hover:underline">support@medzoos.pk</a>.</li>
             </ul>
           </div>
         </section>

@@ -1,7 +1,7 @@
 export const USER_PROFILE = {
   name: "Ahmed Khan",
   email: "ahmed.khan@example.com",
-  phone: "+92 300 1234567",
+  phone: "+92 303 5619717",
   dob: "Mar 15, 1988",
   bloodGroup: "B+",
   memberSince: "Jan 2024",
@@ -14,8 +14,8 @@ export const FAMILY_MEMBERS = [
 ];
 
 export const SAVED_ADDRESSES = [
-  { id: "1", label: "Home", line: "House 42, Block 7, Clifton", city: "Karachi", phone: "+92 300 1234567", isDefault: true },
-  { id: "2", label: "Office", line: "Office 12B, I.I. Chundrigar Road", city: "Karachi", phone: "+92 300 1234567", isDefault: false },
+  { id: "1", label: "Home", line: "Near Trust Plaza, Model Town", city: "Gujranwala", phone: "+92 303 5619717", isDefault: true },
+  { id: "2", label: "Office", line: "Near Trust Plaza, Model Town", city: "Gujranwala", phone: "+92 303 5619717", isDefault: false },
   { id: "3", label: "Parents", line: "Street 5, Model Town", city: "Lahore", phone: "+92 321 9876543", isDefault: false },
 ];
 

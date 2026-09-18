@@ -406,7 +406,7 @@ export function PrivacyPolicyPage() {
             <div className="p-4 rounded-xl bg-surface-subtle border border-neutral-200 text-xs">
               <strong className="text-ink-headline font-bold block mb-1">Data Protection Officer (DPO) Contact:</strong>
               <div>Medzoos Digital Health Technologies</div>
-              <div>Near Trust Plaza, Model Town, Gujranwala</div>
+              <div>Near Trust Plaza, Model Town, Gujranwala, Pakistan</div>
               <div>Email: <a href="mailto:security@medzoos.pk" className="text-brand-primary hover:underline font-semibold">security@medzoos.pk</a></div>
               <div>Support Line: +92 303 5619717</div>
             </div>

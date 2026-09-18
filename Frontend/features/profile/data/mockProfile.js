@@ -14,8 +14,8 @@ export const FAMILY_MEMBERS = [
 ];
 
 export const SAVED_ADDRESSES = [
-  { id: "1", label: "Home", line: "Near Trust Plaza, Model Town", city: "Gujranwala", phone: "+92 303 5619717", isDefault: true },
-  { id: "2", label: "Office", line: "Near Trust Plaza, Model Town", city: "Gujranwala", phone: "+92 303 5619717", isDefault: false },
+  { id: "1", label: "Home", line: "Near Trust Plaza, Model Town", city: "Gujranwala, Pakistan", phone: "+92 303 5619717", isDefault: true },
+  { id: "2", label: "Office", line: "Near Trust Plaza, Model Town", city: "Gujranwala, Pakistan", phone: "+92 303 5619717", isDefault: false },
   { id: "3", label: "Parents", line: "Street 5, Model Town", city: "Lahore", phone: "+92 321 9876543", isDefault: false },
 ];
 

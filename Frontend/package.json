@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --webpack -p 3000",
+    "dev": "node api.js && next dev --webpack -p 3000",
     "dev:turbo": "next dev -p 3000",
     "dev:webpack": "next dev --webpack -p 3000",
-    "build": "next build",
-    "start": "next start",
+    "build": "node api.js && next build",
+    "start": "node api.js && next start",
     "lint": "eslint"
   },
   "dependencies": {

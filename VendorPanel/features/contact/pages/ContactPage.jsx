@@ -67,7 +67,7 @@ export function ContactPage() {
                     <div>
                       <h4 className="text-[16px] font-bold text-[var(--color-ink-headline)] mb-1">Office</h4>
                       <p className="text-[15px] text-[var(--color-neutral-500)] leading-relaxed">
-                        Near Trust Plaza, Model Town, Gujranwala<br />
+                        Near Trust Plaza, Model Town, Gujranwala, Pakistan<br />
                         Punjab, Pakistan
                       </p>
                     </div>

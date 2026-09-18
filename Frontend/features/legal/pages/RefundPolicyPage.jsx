@@ -321,7 +321,7 @@ export function RefundPolicyPage() {
               <div className="p-4 rounded-xl bg-neutral-50 border border-neutral-200 space-y-1">
                 <strong className="text-ink-headline font-bold block">Customer Operations Center:</strong>
                 <div>Medzoos Digital Health Technologies</div>
-                <div>Near Trust Plaza, Model Town, Gujranwala</div>
+                <div>Near Trust Plaza, Model Town, Gujranwala, Pakistan</div>
               </div>
             </div>
           </div>
